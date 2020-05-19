@@ -5,14 +5,14 @@
  * Software pour la radio Radial-V.
  ************************************************************************************************ */
 
-   typedef void (*voidFuncPtr)(void);
+//   typedef void (*voidFuncPtr)(void);
 
    // -----------------------------------------------------
    // Declaration des fonctions Interrupt forward 
    // -----------------------------------------------------
    void ISR_NextButton();
    void ISR_AgainButton();
-   void ISR_PromoteButton();
+//   void ISR_PromoteButton();
 
    // -----------------------------------------------------
    // Constantes
@@ -21,3 +21,10 @@
    #define _NEXT    1
    #define _AGAIN   2
    #define _PROMOTE 3
+
+   // -----------------------------------------------------
+   // Valeurs retournées par ROTARY BUTTON
+   // -----------------------------------------------------
+   #define RANDOM  3
+   #define GENRE   2
+   #define YEAR    1

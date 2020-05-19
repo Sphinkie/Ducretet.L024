@@ -28,14 +28,13 @@
 #include <SFEMP3Shield.h>
 */
 #include "Ducretet.h"
-/*
-#include "MusicPlayer.h"
 #include "RotaryButton.h"
 #include "CapButton.h"
 #include "SelfReturnButton.h"
 #include "Catalog.h"
-#include "RemoteDisplay.h"
-*/
+#include "MusicPlayer.h"
+//#include "RemoteDisplay.h"
+#include "Bouchon.h"
 
 // *******************************************************************************
 // Mapping du cablage
@@ -71,22 +70,22 @@
 // SPI_SCLK             // D52  output 
 // SPI_SS               // D53  input  (configuré en output car Master)
 
-#define TUNE_OUT   A12    // Analog output for bouton Tune (charge pin): Créneaux de 5v.
-#define TUNE_IN    A14    // Analog input for bouton Tune: Read value
+#define TUNE_OUT   A2    // Analog output for bouton Tune (charge pin): Créneaux de 5v.
+#define TUNE_IN    A4    // Analog input for bouton Tune: Read value
 
 
 
 // *******************************************************************************
 // variables globales
 // *******************************************************************************
-MusicPlayer        mp3shield(SD_CS);
+MusicPlayer        MP3Player(SD_CS);
 Catalog            Catalogue;
 Rotary             ModeButton(MODE_1,MODE_2,MODE_3,MODE_4); 
 CapButton          TuneButton(TUNE_OUT,TUNE_IN);
-/*SelfReturnButton   PromoteButton(PROMOTE, &ISR_PromoteButton);   */
+//SelfReturnButton   PromoteButton(PROMOTE, &ISR_PromoteButton); 
 SelfReturnButton   AgainButton(AGAIN,     &ISR_AgainButton);     
 SelfReturnButton   NextButton(NEXT,       &ISR_NextButton);    
-RemoteDisplay      RemoteTFT;
+Bouchon  RemoteTFT;  // RemoteDisplay      
 
 volatile int       Action = _IDLE;             // variable de type volatile, utilisable par les ISR
 String             MusicFile;                  // ID du clip MP3 en cours
@@ -112,12 +111,9 @@ void setup()
     Serial.println(F("================================="));
     Serial.print  (F("CPU Frequency: ")); Serial.print(F_CPU/1000000); Serial.println(F(" MHz"));
     Serial.print  (F("Free RAM: "));      Serial.print(FreeRam(),DEC); Serial.println(F(" bytes"));
-    // FreeRam is provided by SdFatUtil.h
 
     pinMode(LED_1, OUTPUT); // Led SPI BUSY (Catalog accede à la carte SD)
     pinMode(LED_2, OUTPUT);
-    pinMode(K1,    OUTPUT); // Commande relay K1
-    pinMode(K2,    OUTPUT); // Commande relay K2
   
 
 /*
@@ -129,10 +125,9 @@ void setup()
     // ------------------------------------------------------------
     // Initalise le Shield Sparkfun MP3 player
     // ------------------------------------------------------------
-    mp3shield.initialize();
+    MP3Player.initialize();
     // Listing des fichiers de la carte SD 
-    // mp3shield.dir();
-    mp3shield.setDiffmode();    // Enleve un echo acoustique désagréable
+    // MP3Player.dir();
     digitalWrite(LED_1,HIGH);   // Eteint la Led témoin SPI BUSY
 
     // ------------------------------------------------------------
@@ -143,7 +138,7 @@ void setup()
     NextMusicFile = "NOISE" ;   // ID du prochain clip MP3 à jouer ("STARTER")
     Action = _IDLE;
 
-/*    // -----------------------------------------------------------------------------
+/*  // -----------------------------------------------------------------------------
     // On attend que l'Arduino SLAVE soit prêt sur le bus I2C (status 0x01 = READY)
     // -----------------------------------------------------------------------------
     Serial.println(F("Waiting I2C Slave ready..."));
@@ -172,21 +167,21 @@ void loop()
     {
         // On a détecté un changement de tuning. delta significatif + not still moving
         Serial.print(F(">>Tuning has changed: ")); Serial.println(tuning); 
-        // Si le bouton TUNE a bougé, on est peut-être sur une autre année, ou un autre genre, ou autre rating.
-        // On redétermine donc l'année/genre/rating correspondant à ce réglage.
+        // Si le bouton TUNE a bougé, on est peut-être sur une autre année ou un autre genre
+        // On détermine donc l'année/genre correspondant à ce réglage.
         Catalogue.setNewRequestedValues(tuning);
         // On relance la recherche du clip suivant
         initClipSearch();
     }
 
     // --------------------------------------------------------------
-    // Gestion du bouton MODE (RATING/YEAR/GENRE/RANDOM)
+    // Gestion du bouton MODE (YEAR/GENRE/RANDOM)
     // --------------------------------------------------------------
     ModeButton.readPosition();
     if (ModeButton.hasChanged())  
     {
         // On a détecté un changement de Mode. On met à jour la valeur de l'année et du genre.
-        Serial.print("Mode is now "); Serial.print(ModeButton.getValue()); Serial.println(F(" [1:fav 2:year 3:genre 4:random]"));
+        Serial.print("Mode is now "); Serial.print(ModeButton.getValue()); Serial.println(F(" [1:year 2:genre 3:random]"));
         Catalogue.setNewRequestedValues(tuning); 
         // On relance la recherche du clip suivant
         initClipSearch();
@@ -198,18 +193,18 @@ void loop()
     // --------------------------------------------------------------
     // Gestion du clip MP3
     // --------------------------------------------------------------
-    if (!mp3shield.isPlaying())      // S'il n'y a pas de morceau en cours, on en joue un.
+    if (!MP3Player.isPlaying())      // S'il n'y a pas de morceau en cours, on en joue un.
     {
         Serial.println(F("No clip playing. Taking the next one."));
         Catalogue.takeClip();             // On prend ce qu'on a pu trouver. Le Next devient le Courant.
         MusicFile = Catalogue.getSelectedClipID();
-        mp3shield.playTrack(MusicFile);   // Et on le joue (eventuellement, cela peut être Noise).
+        MP3Player.playTrack(MusicFile);   // Et on le joue (eventuellement, cela peut être Noise).
     }
 
     // --------------------------------------------------------------
     // Etapes que l'on fait lorsque l'on commence à jouer un MP3:
     // --------------------------------------------------------------
-    int Step = mp3shield.getStep();
+    int Step = MP3Player.getStep();
     switch (Step)
     {
       case 2: // On affiche le mode en cours.
@@ -234,9 +229,9 @@ void loop()
             }
             else
             {
-               RemoteTFT.printTitle(mp3shield.getTitle());
-               RemoteTFT.printArtist(mp3shield.getArtist());
-               RemoteTFT.printAlbum(mp3shield.getAlbum());
+               RemoteTFT.printTitle(MP3Player.getTitle());
+               RemoteTFT.printArtist(MP3Player.getArtist());
+               RemoteTFT.printAlbum(MP3Player.getAlbum());
             }
             break;
     case 4: // On affiche la suite des infos du clip issues du fichier Catalog
@@ -276,7 +271,7 @@ void loop()
                         Action=_IDLE; 
                         NextButton.wasPushed();   
                         Serial.println("NEXT !");    
-                        mp3shield.stopTrack();    
+                        MP3Player.stopTrack();    
                         Catalogue.removeStar(); // On édite le catalog pendant que le clip est stoppé.
                         RemoteTFT.printStars(Catalogue.getSelectedClipRating());
                         break; 
@@ -285,25 +280,27 @@ void loop()
                         AgainButton.wasPushed();  
                         Serial.println("AGAIN !");   
                         digitalWrite(LED_1,LOW); // Allume la Led témoin SPI BUSY
-                        mp3shield.pauseDataStream();
+                        MP3Player.pauseDataStream();
                         Catalogue.addStar();
-                        mp3shield.resumeDataStream();
+                        MP3Player.resumeDataStream();
                         digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
-                        mp3shield.restartTrack();
+                        MP3Player.restartTrack();
                         RemoteTFT.printStars(Catalogue.getSelectedClipRating());
                         break;
-       case _PROMOTE: // On ajoute une étoile
+      /*       
+      case _PROMOTE: // On ajoute une étoile
                         Action=_IDLE; 
                         PromoteButton.wasPushed();
                         Serial.println("PROMOTE !"); 
                         digitalWrite(LED_1,LOW); // Allume la Led témoin SPI BUSY
-                        mp3shield.pauseDataStream();
+                        MP3Player.pauseDataStream();
                         Catalogue.addStar();    
-                        mp3shield.resumeDataStream();
+                        MP3Player.resumeDataStream();
                         digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
                         Serial.println(F(" display: Stars"));
                         RemoteTFT.printStars(Catalogue.getSelectedClipRating());
                         break; 
+      */                       
   }
   // --------------------------------------------------------------
   // Temporisation de la boucle
@@ -319,11 +316,11 @@ void loop()
 void initClipSearch()
 {
       digitalWrite(LED_1,LOW); // Allume la Led témoin SPI BUSY
-      mp3shield.pauseDataStream();
+      MP3Player.pauseDataStream();
       if (ModeButton.getValue()==YEAR)   Catalogue.initSearchForRequestedYear();
       if (ModeButton.getValue()==GENRE)  Catalogue.initSearchForRequestedGenre();
-      if (ModeButton.getValue()==RATING) Catalogue.initSearchForRequestedRating();
-      mp3shield.resumeDataStream();
+/*      if (ModeButton.getValue()==RATING) Catalogue.initSearchForRequestedRating(); */
+      MP3Player.resumeDataStream();
       digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
 }
 
@@ -337,15 +334,15 @@ void searchNextClip()
     // Serial.print(F("  searchNextClip for mode ")); Serial.println(ModeButton.getValue()); 
 
     digitalWrite(LED_1,LOW); // Allume la Led témoin SPI BUSY
-    mp3shield.pauseDataStream();
+    MP3Player.pauseDataStream();
     switch (ModeButton.getValue())
     {
         case YEAR  : Catalogue.searchClipForRequestedYear();         break;
         case GENRE : Catalogue.searchClipForRequestedGenre();        break;
-        case RATING: Catalogue.searchClipForRequestedRating();       break;
+/*        case RATING: Catalogue.searchClipForRequestedRating();       break; */
         case RANDOM: Catalogue.selectRandomClip();                   break;
     }
-    mp3shield.resumeDataStream();
+    MP3Player.resumeDataStream();
     digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
 }
 
@@ -396,6 +393,7 @@ void ISR_AgainButton()
     AgainButton.setStatus(true);
 }
 
+/*
 // *******************************************************************************
 // Interruption appellée si le bouton est poussé
 // Note: le Serial ne fonctionne pas durant les ISR!
@@ -404,4 +402,29 @@ void ISR_PromoteButton()
 {
     Action = _PROMOTE;
     PromoteButton.setStatus(true);
+}
+*/
+
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+#ifdef __arm__
+   // should use uinstd.h to define sbrk but Due causes a conflict
+   extern "C" char* sbrk(int incr);
+else  // __ARM__
+   extern char *__brkval;
+   extern char __bss_end;
+#endif  // __arm__
+//------------------------------------------------------------------------------
+/** Amount of free RAM : returns The number of free bytes.
+ */
+int FreeRam() 
+{
+  char top;
+#ifdef __arm__
+  return &top - reinterpret_cast<char*>(sbrk(0));
+#else  // __arm__
+  // return __brkval ? &top - __brkval : &top - &__bss_end;
+#endif  // __arm__
 }
