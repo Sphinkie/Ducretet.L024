@@ -25,7 +25,6 @@
 #include <SPI.h>
 #include <SdFat.h>
 #include <SdFatUtil.h> 
-#include <SFEMP3Shield.h>
 */
 #include "Ducretet.h"
 #include "RotaryButton.h"
@@ -39,14 +38,16 @@
 // *******************************************************************************
 // Mapping du cablage
 // *******************************************************************************
-// MP3 data request     // D2 DataRequest   (MP3 shield) avec hardware interrupt 0
 #define AGAIN      3    // D3   Digital In avec hardware interrupt 1
-// Midi-In              // D3   NOT USED    (MP3 shield) avec hardware interrupt 1
-// GPIO                 // D4   GPIO        (MP3 shield)
-// MP3-reset            // D8   MP3 reset   (MP3 shield)
-#define MP3_CS     6    // D6   MP3 CS      (MP3 shield)
-#define MP3_DCS    7    // D7   MP3 data CS (MP3 shield)
-#define SD_CS      9    // D9   SD CS       (MP3 shield)
+
+// ------------------ Pour MP3 Shield
+// Midi_In              //      NOT USED    (MP3 shield) avec hardware interrupt
+// GPIO                 //      GPIO        (MP3 shield)
+#define MP3_RESET -1    //      NOT USED    (MP3 shield) VS1053 reset pin (unused!)
+#define MP3_DREQ   2    // D2   DataRequest (MP3 shield) avec hardware interrupt 0. VS1053 Data REQuest, ideally an Interrupt pin.
+#define MP3_DCS    6    // D6   MP3 data CS (MP3 shield) VS1053 Data/Command S  elect pin (output)
+#define MP3_CS     7    // D7   MP3 CS      (MP3 shield) VS1053 Chip Select pin (output)
+#define SD_CS      4    // D4   SD CS       (MP3 shield) SD-Card chip select pin
 
 #define NEXT       18   // D18  Digital In     avec hardware interrupt 5
 #define PROMOTE    19   // D19  Digital In     avec hardware interrupt 4
@@ -78,7 +79,7 @@
 // *******************************************************************************
 // variables globales
 // *******************************************************************************
-MusicPlayer        MP3Player(SD_CS);
+MusicPlayer        MP3Player(MP3_RESET, MP3_CS, MP3_DCS, MP3_DREQ, SD_CS);
 Catalog            Catalogue;
 Rotary             ModeButton(MODE_1,MODE_2,MODE_3,MODE_4); 
 CapButton          TuneButton(TUNE_OUT,TUNE_IN);
@@ -406,7 +407,7 @@ void ISR_PromoteButton()
 */
 
 
-
+/*
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 #ifdef __arm__
@@ -417,9 +418,9 @@ else  // __ARM__
    extern char __bss_end;
 #endif  // __arm__
 //------------------------------------------------------------------------------
-/** Amount of free RAM : returns The number of free bytes.
- */
-int FreeRam() 
+// Amount of free RAM : returns The number of free bytes.
+
+int getFreeRam() 
 {
   char top;
 #ifdef __arm__
@@ -428,3 +429,4 @@ int FreeRam()
   // return __brkval ? &top - __brkval : &top - &__bss_end;
 #endif  // __arm__
 }
+*/

@@ -9,14 +9,27 @@
  * Note: Les tags Titre/Artist/Album dans le MP3 sont limités à 128.
  *       Au dela, le programme peut se planter (cf Buffer ci-dessous) 
  ************************************************************* */
-
 #ifndef MUSICPLAYERCLASS_H_INCLUDED
 #define MUSICPLAYERCLASS_H_INCLUDED
 
-class MusicPlayer
+#include "Adafruit_VS1053.h"
+
+/*
+ * ID3 Tag location offsets
+ * warning This may not be available on all source music files.
+ */
+// The offset from the begining of the ID3 tag for the location containing the track's Title of the mp3 file being read from the SdCard.
+// The offset from the begining of the ID3 tag for the location containing the track's Artist of the mp3 file being read from the SdCard.
+// The offset from the begining of the ID3 tag for the location containing the track's Album of the mp3 file being read from the SdCard.
+#define TRACK_TITLE              3
+#define TRACK_ARTIST            33
+#define TRACK_ALBUM             63
+
+
+class MusicPlayer : public Adafruit_VS1053_FilePlayer
 {
     public:
-        MusicPlayer(byte pinSD_CS);
+        MusicPlayer(byte pinMP3_RESET, byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte pinSD_CS);
         void   initialize();
         void   playTrack(String filename);
         void   setVolume(int volume);
@@ -25,11 +38,7 @@ class MusicPlayer
         void   displayMediaInfo();
         void   restartTrack();
         void   resetBoard();
-        // void   changeSurroundMode();
-        // void   setDiffmode();
-        void   setStereo(bool ON);
-        void   printStatus();
-        void   dir();
+        void   printDirectory();
         int    getStep();
         String getTitle();
         String getArtist();
@@ -38,10 +47,13 @@ class MusicPlayer
         void   resumeDataStream();
 
     private:
-        String getErrorMsg(int errCode);
+        void   getTrackInfo(uint8_t offset, char* infobuffer);
 
     // variables:
+        //Adafruit_VS1053_FilePlayer AdafruitShield(5, MP3_CS, MP3_DCS, MP3_DREQ, SD_CS);
+        //Adafruit_VS1053_FilePlayer AdafruitShield;
         int  Step;
+        byte pinCard_CS;
         char Buffer[128];   // buffer to contain the extracted Tag from the current MP3 filehandle
 };
 

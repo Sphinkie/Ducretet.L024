@@ -1,15 +1,18 @@
 /* ***********************************************************
  *  MUSIC PLAYER
  *  
- *  Gestion de la carte Sparkfun MP3 player, en utilisant la 
- *  librairie "SFE-MP3-Shield" de William Greiman et le bus SPI.
+ *  Gestion de la carte Adafruit MP3 player, en utilisant la 
+ *  librairie Adafruit_VS1053 et le bus SPI.
  *  
+ *  Cette carte utilise les pins suivantes:
+ *  - SPI (MISO MOSI SCLK) 
+ *  - SPI SlaveSelect : MP3_CS MP3_DCS SD_CS
+ *  - Ainsi que : DataRequest 
  ************************************************************* */
 
 #include <SPI.h>
-#include <SdFat.h>
-#include <SdFatUtil.h> 
-#include <SFEMP3Shield.h>
+#include <SD.h>
+
 #include "MusicPlayer.h"
 
 // ******************************************************************************
@@ -21,18 +24,23 @@ SdFat        sd;
 SFEMP3Shield SparkfunShield;
 */
 
+
+/*
 // Mode simulé
 #include "Bouchon.h"
        Bouchon      SparkfunSD;
        Bouchon      SparkfunShield;
+*/
 
 // ******************************************************************************
-// Constructor
+// Constructor : aussi  Adafruit_VS1053_FilePlayer 
 // ******************************************************************************
-MusicPlayer::MusicPlayer(byte pinSD_CS)
+MusicPlayer::MusicPlayer(byte pinMP3_RESET, byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte pinSD_CS) : Adafruit_VS1053_FilePlayer(pinMP3_RESET, pinMP3_CS, pinMP3_DCS, pinMP3_DREQ, pinSD_CS)
 {
   // Initialisations
     Step=0;   // no step
+    pinCard_CS=pinSD_CS;
+
   /********************* Patch ***********************************/
   // On a souvent l'erreur:  Can't access SD card. Do not reformat. No card, wrong chip select pin, or SPI problem
   // La solution qui semble marcher est de mettre les pins SS à HIGH( inactif) dès le début. 
@@ -45,41 +53,44 @@ MusicPlayer::MusicPlayer(byte pinSD_CS)
 
 // ******************************************************************************
 // Initialise la carte MP3 et la carte SD incluse.
-// Cette carte utilise les pins suivantes:
-// - SPI (MISO MOSI SCLK) 
-// - SPI SlaveSelect :
-//    6 = MP3 CS 
-//    7 = MP3 data CS
-//    9 = SD CS
-// - 2+3+4+8 : DataRequest + Midi-In + GPIO + MP3-reset
 // ******************************************************************************
 void MusicPlayer::initialize()
 {
+  boolean ok;
   Serial.println(F("MP3+SD initialization."));
 
-  //Initialize the SD card. 
-  // Par defaut, SD_SEL vaut 9  (Slave Select)
-  if(!SparkfunSD.begin(9, SPI_FULL_SPEED)) SparkfunSD.initErrorHalt();   // SD_SEL,SPI_FULL_SPEED
-  Serial.println(F(" SD initialized."));
-  
-  if(!SparkfunSD.chdir("/")) SparkfunSD.errorHalt("sd.chdir");
-  Serial.println(F(" directory changed to root"));
-
   //Initialize the MP3 Player Shield
-  uint8_t result; //result code from some function as to be tested at later time.
-  result = SparkfunShield.begin();
-  
+  ok=Adafruit_VS1053_FilePlayer::begin();
   //check result, see readme for error codes.
-  if(result == 0) 
-    Serial.println(F(" MP3 player initialized."));
+  if(ok) 
+  {
+    Serial.println(F(" MP3 shield initialized."));
+    Adafruit_VS1053_FilePlayer::sineTest(0x44, 500);    // Make a tone to indicate VS1053 is working
+  }
   else
   {
-    Serial.print(F("Error when trying to start MP3 player. Code "));
-    Serial.println(result);
-    Serial.println(getErrorMsg(BEGIN+result));
+    Serial.print(F("Error when initializing MP3 shield. Couldn't find VS1053, do you have the right pins defined?"));
   }
-  // Enleve une sorte d'écho acoustique désagréable
-  SparkfunShield.setDifferentialOutput(1);
+
+  //Initialize the SD card.
+  byte errcode=SD.begin(pinCard_CS);
+  if (errcode!=0) 
+  {
+    Serial.println(F("SD failed, or not present: Program Stopped"));
+    while (1);  // don't do anything more
+  }
+  Serial.println(F(" SD initialized."));
+  // list files
+  printDirectory();
+
+  // Set volume for left, right channels. lower numbers == louder volume!
+  Adafruit_VS1053_FilePlayer::setVolume(20,20);
+
+  // Using MP3_DREQ interrupt pin, we can do background audio playing.
+  ok=Adafruit_VS1053_FilePlayer::useInterrupt(VS1053_FILEPLAYER_PIN_INT);
+  if (!ok)
+    Serial.println(F("MP3_DREQ pin is not an interrupt pin"));
+
 }
 
 // ******************************************************************************
@@ -88,24 +99,23 @@ void MusicPlayer::initialize()
 // ******************************************************************************
 void MusicPlayer::playTrack(String filename)
 {
-    uint8_t result; 
+    boolean ok; 
     char    trackName[30];
 
     // Tell the MP3 Shield to play a track
     filename = String ("/Music/"+filename+".mp3");
     filename.toCharArray(trackName,30);
     
-    result = SparkfunShield.playMP3(trackName);
-    //check result, see readme for error codes.
-    if(result != 0) {
-      Serial.print(F("Error code: "));
-      Serial.print(result);
-      Serial.print(F(" when trying to play track "));
-      Serial.println(filename);
-      Serial.println(getErrorMsg(PLAY+result));
-    } else {
+    ok = Adafruit_VS1053_FilePlayer::startPlayingFile(trackName);
+    if (ok) 
+    {
       Serial.println("Playing: "+filename);
       Step=1;   // first step
+    }
+    else
+    { 
+      Serial.print(F("Error when trying to play track "));
+      Serial.println(filename);
     }
 }
 
@@ -115,18 +125,18 @@ void MusicPlayer::playTrack(String filename)
 // ******************************************************************************
 bool MusicPlayer::isPlaying()
 {
-   return (SparkfunShield.isPlaying());
+   return (Adafruit_VS1053_FilePlayer::playingMusic);
 }
 
 
 // ******************************************************************************
-// Reglage du volume audio.
+// Reglage du volume audio (0 à 255). Valeur haute = volume faible.
 // input values are -1/2dB. e.g. 40 results in -20dB.  ( 0dB = max volume)
 // ******************************************************************************
 void MusicPlayer::setVolume(int volume)
 {
     // push byte into both left and right assuming equal balance.
-    SparkfunShield.setVolume(volume,volume);
+    Adafruit_VS1053_FilePlayer::setVolume(volume,volume);
 }
 
 
@@ -137,7 +147,7 @@ void MusicPlayer::stopTrack()
 {
    // Stop the current track
    Serial.println(F("  Stopping mp3"));
-   SparkfunShield.stopTrack();
+   Adafruit_VS1053_FilePlayer::stopPlaying();
    Step=0;   // step number
 }
 
@@ -148,7 +158,7 @@ void MusicPlayer::restartTrack()
 {
    // Restart the current track
    Serial.println(F("  Restarting mp3"));
-   SparkfunShield.skipTo(0);
+   Adafruit_VS1053_FilePlayer::startPlayingFile(0);  // TODO
    Step=0;   // step number
 }
 
@@ -167,13 +177,13 @@ void MusicPlayer::displayMediaInfo()
   strcpy(artist,"Current artist");
   strcpy(album, "Current album");
 
-  if (!SparkfunShield.isPlaying()) return;
+  if (!Adafruit_VS1053_FilePlayer::playingMusic) return;
 
   //we can get track info by using the following functions and arguments
   //the functions will extract the requested information, and put it in the array we pass in
-  SparkfunShield.trackTitle((char*)&title);
-  SparkfunShield.trackArtist((char*)&artist);
-  SparkfunShield.trackAlbum((char*)&album);
+  // trackTitle((char*)&title);
+  // trackArtist((char*)&artist);
+  // trackAlbum((char*)&album);
 
   //print out the arrays of track information
   // Serial.print(F(" title:  "));   Serial.write((byte*)&title, 30);  Serial.println();
@@ -191,11 +201,13 @@ void MusicPlayer::displayMediaInfo()
 String MusicPlayer::getTitle()
 {
   String retour;
+  char* infobuffer;
 
   // S'il n'y a pas de clip en cours, on revoie un blanc.
-  if (!SparkfunShield.isPlaying()) return " ";
+  if (!Adafruit_VS1053_FilePlayer::playingMusic) return " ";
   // On lit le tag TITLE, et on le met dans le Buffer
-  SparkfunShield.trackTitle((char*)&Buffer);
+  // AdafruitShield.trackTitle((char*)&Buffer);
+  getTrackInfo(TRACK_TITLE, infobuffer);
   // S'il est vide, on renvoie un blanc.
   if (strlen(Buffer)==0) return " ";
   retour = String(Buffer);
@@ -209,11 +221,13 @@ String MusicPlayer::getTitle()
 String MusicPlayer::getArtist()
 {
   String retour;
+  char* infobuffer;
 
   // S'il n'y a pas de clip en cours, on revoie un blanc.
-  if (!SparkfunShield.isPlaying()) return " ";
+  if (!Adafruit_VS1053_FilePlayer::playingMusic) return " ";
   // On lit le tag ARTIST, et on le met dans le Buffer
-  SparkfunShield.trackArtist((char*)&Buffer);
+  //AdafruitShield.trackArtist((char*)&Buffer);
+  getTrackInfo(TRACK_ARTIST, infobuffer);
   // S'il est vide, on renvoie un blanc.
   if (strlen(Buffer)==0) return " ";
   retour = String(Buffer);
@@ -227,11 +241,15 @@ String MusicPlayer::getArtist()
 String MusicPlayer::getAlbum()
 {
   String retour;
+  char* infobuffer;
   
   // S'il n'y a pas de clip en cours, on revoie un blanc.
-  if (!SparkfunShield.isPlaying()) return " ";
+  if (!Adafruit_VS1053_FilePlayer::playingMusic) return " ";
   // On lit le tag ALBUM, et on le met dans le Buffer
-  SparkfunShield.trackAlbum((char*)&Buffer);
+  //AdafruitShield.trackAlbum((char*)&Buffer);
+  //void SFEMP3Shield::trackArtist(char* infobuffer)
+  getTrackInfo(TRACK_ALBUM, infobuffer);
+  
   // S'il est vide, on renvoie un blanc.
   if (strlen(Buffer)==0) return " ";
   // Sinon, on le convertit en String, on tronque à 32 et on le renvoie
@@ -242,122 +260,14 @@ String MusicPlayer::getAlbum()
 
 
 // ******************************************************************************
-// Cette fonction fait un reset sur le chip de la carte MP3
+// Cette fonction fait un reset sur le chipset de la carte MP3
 // ******************************************************************************
 void MusicPlayer::resetBoard()
 {
-    SparkfunShield.stopTrack();
-    SparkfunShield.vs_init();
-    Serial.println(F(" Reseting VS10xx chip"));
+    Adafruit_VS1053_FilePlayer::stopPlaying();
+    Adafruit_VS1053_FilePlayer::reset();
+    Serial.println(F(" Reseting VS1053 chipset"));
     Step=0;   // numero de step
-}
-
-/*
-// ******************************************************************************
-// Cette fonction cercle entre les 4 modes de "surround" pour oreillettes
-// ******************************************************************************
-void MusicPlayer::changeSurroundMode()
-{
-    uint8_t earspeaker = SparkfunShield.getEarSpeaker();
-    if(earspeaker >= 3)
-    {
-      earspeaker = 0;
-    } else 
-    {
-      earspeaker++;
-    }
-    SparkfunShield.setEarSpeaker(earspeaker); // commit new earspeaker
-    Serial.print(F(" earspeaker set to "));
-    Serial.println(earspeaker, DEC);
-}
-*/
-
-
-
-// ******************************************************************************
-// Passe de mode MONO a STEREO
-// ******************************************************************************
-void MusicPlayer::setStereo(bool ON)
-{
-    if (ON)  SparkfunShield.setMonoMode(1);
-    else     SparkfunShield.setMonoMode(0);
-
-    uint16_t monostate = SparkfunShield.getMonoMode();
-    if (monostate==1) Serial.println(F(" mode stereo."));
-    else Serial.println(F(" mode mono."));
-}
-
-
-// ******************************************************************************
-// Affiche le status du player MP3 sur le port Série.
-// Note: on pourrait ajouter sur l'écran LCD.
-// Note: on pourrait déclencher par un bouton arrière
-// ******************************************************************************
-void MusicPlayer::printStatus()
-{
-    Serial.println(F("Current State of VS10xx is."));
-    Serial.print(F("isPlaying() = "));
-    Serial.println(SparkfunShield.isPlaying());
-
-    Serial.print(F("getState() = "));
-    switch (SparkfunShield.getState()) {
-    case uninitialized:
-      Serial.print(F("uninitialized"));
-      break;
-    case initialized:
-      Serial.print(F("initialized"));
-      break;
-    case deactivated:
-      Serial.print(F("deactivated"));
-      break;
-    case loading:
-      Serial.print(F("loading"));
-      break;
-    case ready:
-      Serial.print(F("ready"));
-      break;
-    case playback:
-      Serial.print(F("playback"));
-      break;
-    case paused_playback:
-      Serial.print(F("paused_playback"));
-      break;
-    case testing_memory:
-      Serial.print(F("testing_memory"));
-      break;
-    case testing_sinewave:
-      Serial.print(F("testing_sinewave"));
-      break;
-    }
-    Serial.println();
-}
-
-
-// *********************************************************************
-// Display error signification
-// *********************************************************************
-String MusicPlayer::getErrorMsg(int errCode)
-{
-  switch (errCode)
-  {
-    // Begin errors
-    case BEGIN+0: return F("OK");
-    case BEGIN+1: return F("Failure of SdFat to initialize physical contact with the SdCard.");
-    case BEGIN+2: return F("Failure of SdFat to start the SdCard's volume.");
-    case BEGIN+3: return F("Failure of SdFat to mount the root directory on the volume of the SdCard.");
-    case BEGIN+4: return F("Other than default values were found in the SCI_MODE register.");
-    case BEGIN+5: return F("SCI_CLOCKF did not read back and verify the configured value.");
-    case BEGIN+6: return F("Warning: Patch was not loaded successfully, this may result in playTrack errors.");
-    // Playing errors:
-    case PLAY+0: return F("OK");
-    case PLAY+1: return F("Already playing track.");
-    case PLAY+2: return F("File not found.");
-    case PLAY+3: return F("indicates that the VSdsp is in reset.");
-    // Skip errors:
-    case SKIP+0: return F("OK");
-    case SKIP+1: return F("Not Playing track.");
-    case SKIP+2: return F("Failed to skip to new file location.");
-  }
 }
 
 
@@ -365,19 +275,45 @@ String MusicPlayer::getErrorMsg(int errCode)
 // ******************************************************************************
 // Liste le contenu de la carte SD sur le port série
 // ******************************************************************************
-void MusicPlayer::dir()
+void MusicPlayer::printDirectory()
 {
+  File dir = SD.open("/");
+  int numTabs=0;
   // Display the files on the SdCard 
-  // (prevent root.ls when playing, something locks the dump, but keeps playing).
-  if(!SparkfunShield.isPlaying()) 
+  if(!Adafruit_VS1053_FilePlayer::playingMusic) 
   {
      Serial.println(F("Files found (name date size):"));
-     SparkfunSD.ls(LS_R | LS_DATE | LS_SIZE);
-     
+     while(true) 
+     {
+         File entry =  dir.openNextFile();
+         if (!entry) 
+         {
+            // no more files
+            // Serial.println("**nomorefiles**");
+            break;
+         }
+         for (uint8_t i=0; i<numTabs; i++) 
+         {
+            Serial.print('\t');
+         }
+         Serial.print(entry.name());
+         if (entry.isDirectory()) 
+         {
+            Serial.println("/");
+            //printDirectory(entry, numTabs+1);
+         }
+         else 
+         {
+            // files have sizes, directories do not
+            Serial.print("\t\t");
+            Serial.println(entry.size(), DEC);
+         }
+         entry.close();
+      }
   } 
   else 
   {
-     Serial.println(F("Busy Playing Files, try again later."));
+      Serial.println(F("Busy Playing Files, try again later."));
   }
 }
 
@@ -398,14 +334,14 @@ int MusicPlayer::getStep()
 
 // ******************************************************************************
 // Disable interrupts to avoid collisions on the SPI bus between this code 
-// and the SparkfunShield library.
-// These  functions make sure there will be no data collisions on the SPI bus 
+// and the AdafruitShield library.
+// These functions make sure there will be no data collisions on the SPI bus 
 // caused by the MP3 decoder asking for more data at the wrong time. 
 // You need to wrap any SPI code you add to your project with these two functions.
 // ******************************************************************************
 void MusicPlayer::pauseDataStream()
 {
-  SparkfunShield.pauseDataStream();
+  Adafruit_VS1053_FilePlayer::pausePlaying(true);
 }
 
 
@@ -417,6 +353,59 @@ void MusicPlayer::pauseDataStream()
 // ******************************************************************************
 void MusicPlayer::resumeDataStream()
 {
-  SparkfunShield.resumeDataStream();
+  Adafruit_VS1053_FilePlayer::pausePlaying(false);
 }
+
+
+//------------------------------------------------------------------------------
+/**
+ * \brief Fetch ID3 Tag information
+ *
+ * \param[in] offset for the desired information desired.
+ * \param[out] infobuffer pointer char array of filename to be read.
+ *
+ * Read current filehandles offset of track ID3 tag information. Then strip all non readible (ascii) characters.
+ *
+ * \note this suspends currently playing streams and returns afterwards.
+ * Restoring the file position to where it left off, before resuming.
+ */
+//------------------------------------------------------------------------------
+/*
+ * Elle consiste en un espace de 128 octets placés à la fin du fichier. 
+ * Les 3 premiers octets commencent par la chaîne « TAG », cela permet de trouver le début des informations par les lecteurs MP3. 
+ * Le reste des octets est partagé entre les différents champs d'informations. 
+ * Les chaînes de caractères doivent être codées en ISO/CEI 8859-1, seuls les caractères de l'alphabet latin peuvent donc être utilisés. 
+ * 
+ * Offset (en partant du début de la structure)  Taille (en octets)   Description
+    0   3   Identifiant "TAG"
+    3   30  Titre de la chanson
+    33  30  Nom de l'interprète
+    63  30  Nom de l'album
+    93  4   Année de parution
+    97  30  Commentaire sur la chanson
+    127 1   Genre musical (code sur 1 octet)
+ */
+void MusicPlayer::getTrackInfo(uint8_t offset, char* infobuffer)
+{
+  /*
+  //disable interupts
+  if(playing_state == playback) disableRefill();
   
+  //record current file position
+  uint32_t currentPos = track.curPosition();
+
+  //skip to end
+  track.seekEnd((-128 + offset));
+
+  //read 30 bytes of tag information at -128 + offset
+  track.read(infobuffer, 30);
+  infobuffer = strip_nonalpha_inplace(infobuffer);
+
+  //seek back to saved file position
+  track.seekSet(currentPos);
+
+  //renable interupt
+  if(playing_state == playback) enableRefill();
+  
+  */
+}
