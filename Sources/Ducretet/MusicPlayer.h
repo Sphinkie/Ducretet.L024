@@ -48,13 +48,23 @@ class MusicPlayer : public Adafruit_VS1053_FilePlayer
 
     private:
         void   getTrackInfo(uint8_t offset, char* infobuffer);
+        void   readID3tags();
 
-    // variables:
-        //Adafruit_VS1053_FilePlayer AdafruitShield(5, MP3_CS, MP3_DCS, MP3_DREQ, SD_CS);
-        //Adafruit_VS1053_FilePlayer AdafruitShield;
+    // Private Member Variables:
         int  Step;
         byte pinCard_CS;
-        char Buffer[128];   // buffer to contain the extracted Tag from the current MP3 filehandle
+        char Buffer[128];   // Buffer to contain the extracted Tag from the current MP3 file
+
+        typedef struct {
+          char  tag[3];   // "TAG"
+          char  title[30];
+          char  artist[30];
+          char  album[30];
+          char  year[4];
+          char  comment[30];
+          char  genre;
+          }ID3tag;
+        
 };
 
     // ---------------------------------------------------------------------------------

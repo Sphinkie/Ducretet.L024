@@ -9,19 +9,14 @@
  *  - SPI SlaveSelect : MP3_CS MP3_DCS SD_CS
  *  - Ainsi que : DataRequest 
  ************************************************************* */
-
-#include <SPI.h>
-#include <SD.h>
+//#include <SPI.h>
+//#include <SD.h>
 
 #include "MusicPlayer.h"
 
-// ******************************************************************************
-// Déclaration des objets (en dehors de la classe)
-// ******************************************************************************
 /*
 // Mode réel        
 SdFat        sd;    
-SFEMP3Shield SparkfunShield;
 */
 
 
@@ -196,7 +191,7 @@ void MusicPlayer::displayMediaInfo()
 }
 
 // *******************************************************************************
-// Récupère le titre (tag) du clip en cours. On tronque à 52
+// Récupère le titre (tag) du clip en cours. On tronque à 32
 // *******************************************************************************
 String MusicPlayer::getTitle()
 {
@@ -211,7 +206,7 @@ String MusicPlayer::getTitle()
   // S'il est vide, on renvoie un blanc.
   if (strlen(Buffer)==0) return " ";
   retour = String(Buffer);
-  retour.remove(52);
+  retour.remove(32);
   return (retour);
 }
 
@@ -344,8 +339,6 @@ void MusicPlayer::pauseDataStream()
   Adafruit_VS1053_FilePlayer::pausePlaying(true);
 }
 
-
-
 // ******************************************************************************
 // Enable interrupts.
 // Note: you can not stop the data stream to the MP3 Shield for too long 
@@ -357,55 +350,85 @@ void MusicPlayer::resumeDataStream()
 }
 
 
-//------------------------------------------------------------------------------
-/**
- * \brief Fetch ID3 Tag information
- *
- * \param[in] offset for the desired information desired.
- * \param[out] infobuffer pointer char array of filename to be read.
+/* *****************************************************************************************************************
+ * Fetch ID3 Tag information
+ *    offset : offset for the desired information desired.
+ *    infobuffer (output): pointer char array of filename to be read.
  *
  * Read current filehandles offset of track ID3 tag information. Then strip all non readible (ascii) characters.
- *
- * \note this suspends currently playing streams and returns afterwards.
- * Restoring the file position to where it left off, before resuming.
- */
-//------------------------------------------------------------------------------
-/*
+ * ***************************************************************************************************************** */
+void MusicPlayer::getTrackInfo(uint8_t offset, char* infobuffer)
+{
+ strncpy (infobuffer, Buffer, 30);   // on retourne 30 caracteres à partir de offset : TODO
+ // TODO : Ajouter un /0 à la fin
+ // Remove the non-alpha characters
+// infobuffer = strip_nonalpha_inplace(infobuffer);
+ ID3tag* pointeur;
+ // on le fait pointer sur le buffer de 128 chars contenant les tags
+ pointeur = *Buffer;
+ strncpy (infobuffer, pointeur->title, 30);   // on retourne 30 caracteres à partir de offset : TODO
+}
+
+/* *****************************************************************************************************************
  * Elle consiste en un espace de 128 octets placés à la fin du fichier. 
  * Les 3 premiers octets commencent par la chaîne « TAG », cela permet de trouver le début des informations par les lecteurs MP3. 
  * Le reste des octets est partagé entre les différents champs d'informations. 
  * Les chaînes de caractères doivent être codées en ISO/CEI 8859-1, seuls les caractères de l'alphabet latin peuvent donc être utilisés. 
  * 
  * Offset (en partant du début de la structure)  Taille (en octets)   Description
-    0   3   Identifiant "TAG"
-    3   30  Titre de la chanson
-    33  30  Nom de l'interprète
-    63  30  Nom de l'album
-    93  4   Année de parution
-    97  30  Commentaire sur la chanson
-    127 1   Genre musical (code sur 1 octet)
+    0       3       Identifiant "TAG"
+    3       30      Titre de la chanson
+    33      30      Nom de l'interprète
+    63      30      Nom de l'album
+    93      4       Année de parution
+    97      30      Commentaire sur la chanson
+    127     1       Genre musical (code sur 1 octet)
+ * \note this suspends currently playing streams and returns afterwards.
+ * Restoring the file position to where it left off, before resuming.
  */
-void MusicPlayer::getTrackInfo(uint8_t offset, char* infobuffer)
+void MusicPlayer::readID3tags()
 {
-  /*
+  unsigned long currentPos;
+  unsigned long fileSize;
+  strcpy (Buffer,"TAGRailroad boy  - - - - - - - --Joan Baez x x x x x x x x x xxIn Concert X X X X X X X X X X1964Commentaires..................1");
+
   //disable interupts
-  if(playing_state == playback) disableRefill();
+  // if(playingMusic) disableRefill();
   
-  //record current file position
-  uint32_t currentPos = track.curPosition();
+  // save the current position in the file
+  currentPos = currentTrack.position();
+  fileSize = currentTrack.size();
 
   //skip to end
-  track.seekEnd((-128 + offset));
+  // currentTrack.seekEnd((-128 + offset));
+  currentTrack.seek(fileSize-128);
 
   //read 30 bytes of tag information at -128 + offset
-  track.read(infobuffer, 30);
-  infobuffer = strip_nonalpha_inplace(infobuffer);
+  // currentTrack.read(infobuffer, 30);
+  // infobuffer = strip_nonalpha_inplace(infobuffer);
+  currentTrack.read(Buffer, 128);
 
   //seek back to saved file position
-  track.seekSet(currentPos);
+  currentTrack.seek(currentPos);
 
   //renable interupt
-  if(playing_state == playback) enableRefill();
+  // if(playingMusic) enableRefill();
   
-  */
 }
+
+/*
+//chomp non printable characters out of string. 
+char* strip_nonalpha_inplace(char *s) 
+{
+   for ( ; *s && !isalpha(*s); ++s)
+     ; // skip leading non-alpha chars
+   if(*s == '\0')
+     return s; // there are no alpha characters
+ 
+   char *tail = s + strlen(s);
+   for ( ; !isalpha(*tail); --tail)
+     ; // skip trailing non-alpha chars
+   *++tail = '\0'; // truncate after the last alpha
+   return s;
+ }
+ */

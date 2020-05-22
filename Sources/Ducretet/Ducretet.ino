@@ -256,7 +256,7 @@ void loop()
               RemoteTFT.printStars(Catalogue.getSelectedClipRating());
             break;
     case 12: // on surveille la RAM consommée
-            Serial.print(F("Free RAM (bytes)= ")); Serial.println(FreeRam(), DEC);
+            Serial.print(F("Free RAM (bytes)= ")); Serial.println(getFreeRam(), DEC);
             // On baisse l'intensité de l'affichage
             RemoteTFT.setBacklight(false);
             break;
@@ -407,6 +407,7 @@ void ISR_PromoteButton()
 */
 
 
+int getFreeRam() {}
 /*
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------

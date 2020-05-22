@@ -1,4 +1,4 @@
-/***************************************************
+/******************************************************************************
   This is a library for the Adafruit VS1053 Codec Breakout
 
   Designed specifically to work with the Adafruit VS1053 Codec Breakout
@@ -10,54 +10,58 @@
 
   Written by Limor Fried/Ladyada for Adafruit Industries.
   BSD license, all text above must be included in any redistribution
- ****************************************************/
+ *******************************************************************************/
 #ifndef ADAFRUIT_VS1053_H
 #define ADAFRUIT_VS1053_H
 
+// #define PREFER_SDFAT_LIBRARY
+
 #if (ARDUINO >= 100)
- #include <Arduino.h>
+   #include <Arduino.h>
 #else
- #include <WProgram.h>
- #include <pins_arduino.h>
+   #include <WProgram.h>
+   #include <pins_arduino.h>
 #endif
 
 #if !defined(ARDUINO_STM32_FEATHER)
-#include "pins_arduino.h"
-#include "wiring_private.h"
+   #include "pins_arduino.h"
+   #include "wiring_private.h"
 #endif
 
 #include <SPI.h>
 #if defined(PREFER_SDFAT_LIBRARY)
- #include <SdFat.h>
- extern SdFat SD;
+   #include <SdFat.h>
+   extern SdFat SD;
 #else
- #include <SD.h>
+   #include <SD.h>
 #endif
 
-// define here the size of a register!
+/* ***************************************** */
+/* define here the size of a register!       */
+/* ***************************************** */
 #if defined(ARDUINO_STM32_FEATHER)
-  typedef volatile uint32 RwReg;
-  typedef uint32_t PortMask;
+   typedef volatile uint32 RwReg;
+   typedef uint32_t PortMask;
 #elif defined(ARDUINO_ARCH_AVR)
-  typedef volatile uint8_t RwReg;
-  typedef uint8_t PortMask;
+   typedef volatile uint8_t RwReg;
+   typedef uint8_t PortMask;
 #elif defined (__arm__)
-  #if defined(TEENSYDUINO)
-  typedef volatile uint8_t RwReg;
-  typedef uint8_t PortMask;
-  #else
-  typedef volatile uint32_t RwReg;
-  typedef uint32_t PortMask;
-  #endif
+   #if defined(TEENSYDUINO)
+      typedef volatile uint8_t RwReg;
+      typedef uint8_t PortMask;
+   #else
+      typedef volatile uint32_t RwReg;
+      typedef uint32_t PortMask;
+   #endif
 #elif defined (ESP8266) || defined (ESP32)
-  typedef volatile uint32_t RwReg;
-  typedef uint32_t PortMask;
+   typedef volatile uint32_t RwReg;
+   typedef uint32_t PortMask;
 #elif defined (__ARDUINO_ARC__)
-  typedef volatile uint32_t RwReg;
-  typedef uint32_t PortMask;
+   typedef volatile uint32_t RwReg;
+   typedef uint32_t PortMask;
 #else
-  typedef volatile uint8_t RwReg;
-  typedef uint8_t PortMask;
+   typedef volatile uint8_t RwReg;
+   typedef uint8_t PortMask;
 #endif
 
 typedef volatile RwReg PortReg;
@@ -98,7 +102,6 @@ typedef volatile RwReg PortReg;
 #define VS1053_MODE_SM_LINE1 0x4000
 #define VS1053_MODE_SM_CLKRANGE 0x8000
 
-
 #define VS1053_SCI_AIADDR 0x0A
 #define VS1053_SCI_AICTRL0 0x0C
 #define VS1053_SCI_AICTRL1 0x0D
@@ -108,6 +111,9 @@ typedef volatile RwReg PortReg;
 #define VS1053_DATABUFFERLEN 32
 
 
+/* ***************************************** */
+/* CLASS    Adafruit_VS1053                  */
+/* ***************************************** */
 class Adafruit_VS1053 
 {
    public:
@@ -162,20 +168,18 @@ class Adafruit_VS1053
 };
 
 
+/* ***************************************** */
+/* CLASS    Adafruit_VS1053_FilePlayer       */
+/* ***************************************** */
 class Adafruit_VS1053_FilePlayer : public Adafruit_VS1053 
 {
   public:
-      Adafruit_VS1053_FilePlayer (int8_t mosi, int8_t miso, int8_t clk,
-			      int8_t rst, int8_t cs, int8_t dcs, int8_t dreq,
-			      int8_t cardCS);
-      Adafruit_VS1053_FilePlayer (int8_t rst, int8_t cs, int8_t dcs, int8_t dreq,
-			      int8_t cardCS);
+      Adafruit_VS1053_FilePlayer (int8_t mosi, int8_t miso, int8_t clk, int8_t rst, int8_t cs, int8_t dcs, int8_t dreq, int8_t cardCS);
+      Adafruit_VS1053_FilePlayer (int8_t rst, int8_t cs, int8_t dcs, int8_t dreq, int8_t cardCS);
       Adafruit_VS1053_FilePlayer (int8_t cs, int8_t dcs, int8_t dreq, int8_t cardCS);
 
       boolean  begin(void);
       boolean  useInterrupt(uint8_t type);
-      File     currentTrack;
-      volatile boolean playingMusic;
       void     feedBuffer(void);
       static boolean isMP3File(const char* fileName);
       unsigned long mp3_ID3Jumper(File mp3);
@@ -185,6 +189,10 @@ class Adafruit_VS1053_FilePlayer : public Adafruit_VS1053
       boolean  paused(void);
       boolean  stopped(void);
       void     pausePlaying(boolean pause);
+
+      // Public member variables:
+      File     currentTrack;             // File currently being played
+      volatile boolean playingMusic;     // True if playback in progress 
 
   private:
       void     feedBuffer_noLock(void);
