@@ -1,7 +1,7 @@
 /* *******************************************************************************
  *  Gestion du fichier catalogue des MP3 : Primitives d'accès Lecture/Ecriture
  ********************************************************************************/
-#include <SdFat.h>
+//#include <SdFat.h>
 #include "CatalogFile.h"
 
 
@@ -15,11 +15,18 @@ void CatalogFile::begin()
    randomSeed(analogRead(0));
 
    // On cherche le nombre maximum, correspondant à la taille du fichier index.
-   if (!FichierIndex.open("/Catalog.ndx")) Serial.println(F("Catalog: Cannot open Catalog.ndx"));
-
-   RandomMax = FichierIndex.fileSize();
-   FichierIndex.close();
-   Serial.print(" taille Catalog.ndx: "); Serial.println(RandomMax);
+   FichierIndex = SD.open("/Catalog.ndx");
+   if (!FichierIndex) 
+   {
+      RandomMax = 0;
+      Serial.println(F("Catalog: Cannot open Catalog.ndx"));
+   }
+   else
+   {
+      RandomMax = FichierIndex.size();
+      FichierIndex.close();
+      Serial.print(" taille Catalog.ndx: "); Serial.println(RandomMax);
+   }
 }
 
 
@@ -32,8 +39,8 @@ bool CatalogFile::openCatalogAtPosition(long pos=5)
   bool FileAccessOK;
   if (pos<5) pos=5;
   
-  FileAccessOK = FichierIndex.open("/Catalog.ndx");      // on ouvre le fichier Catalog
-  if (!FileAccessOK)
+  FichierIndex = SD.open("/Catalog.ndx");      // on ouvre le fichier Catalog
+  if (!FichierIndex)
   {
     // en cas d'erreur d'ouverture du fichier, on renvoie "NOISE.MP3"
     Serial.println (F("Cannot open Catalog.ndx"));
@@ -42,7 +49,7 @@ bool CatalogFile::openCatalogAtPosition(long pos=5)
   
   // On se positionne dans l'index à la position demandée
   // Serial.print(F("  Catalog.ndx: going to position ")); Serial.println(pos);
-  FileAccessOK = FichierIndex.seekSet(pos);
+  FileAccessOK = FichierIndex.seek(pos);
   if (!FileAccessOK)
   {
     Serial.print(F("Catalog.ndx: Cannot go to position ")); Serial.println(pos);
@@ -68,7 +75,8 @@ bool CatalogFile::openCatalogAtRandomPosition()
   FileAccessOK = openCatalogAtPosition(pos);
   // Comme on est à une position aleatoire, on est possiblement au milieu d'une ligne.
   // On lit la fin de cette ligne, de façon à se positionner en début de ligne suivante.
-  if (FileAccessOK) FichierIndex.fgets(Line,MAX_LG_LINE);;
+  /* if (FileAccessOK) FichierIndex.read(Line,MAX_LG_LINE);   */
+  FichierIndex.readStringUntil('\n');
   return FileAccessOK;
 }
 
@@ -88,8 +96,8 @@ long CatalogFile::getRandomPosition()
 {
     // On ouvre le catalogue au hasard, de façon à trouver une position initiale viable.
     this->openCatalogAtRandomPosition();
-    long pos = this->getCurrentPosition();
-    this->closeCatalog();
+    long pos = FichierIndex.position();
+    FichierIndex.close();
     return pos;
 }
 
@@ -99,18 +107,21 @@ long CatalogFile::getRandomPosition()
 // *******************************************************************************
 String CatalogFile::readNextLine()
 {
-  char   Line[MAX_LG_LINE];   // ligne lue dans le fichier
+  /* char   Line[MAX_LG_LINE];   // ligne lue dans le fichier */
   String Medialine;
+  int Lg = 0;
    
   // On lit la ligne suivante
-  int Lg = FichierIndex.fgets(Line,MAX_LG_LINE);
-
+  Medialine = FichierIndex.readStringUntil('\n');
+  /* Lg = FichierIndex.fgets(Line,MAX_LG_LINE);   NO_SDFAT */
+  /* Medialine=String(Line); */
+  Lg = Medialine.length();
+  Medialine.trim();
+  
   if (Lg==-1) {Serial.println (F("Cannot read Catalog.ndx")); return ("ERROR");}     // Erreur de lecture
   if (Lg==0 ) {Serial.println (F("End of Catalog"));          return ("EOF");}       // la ligne lue est vide ou EOF
-  if (Lg <10) {Serial.print(F("line too short [")); Serial.print(Lg); Serial.print(F(" chars]: ")); Serial.print(Line); return ("ERROR");}     // ligne trop courte
+  if (Lg <10) {Serial.print(F("line too short [")); Serial.print(Lg); Serial.print(F(" chars]: ")); Serial.print(Medialine); return ("ERROR");}     // ligne trop courte
 
-  Medialine=String(Line);
-  Medialine.trim();
   return Medialine;
 }
 
@@ -119,7 +130,8 @@ String CatalogFile::readNextLine()
 // *******************************************************************************
 long CatalogFile::getCurrentPosition()
 {
-  return FichierIndex.curPosition();
+  /* return FichierIndex.curPosition(); NO_SDFAT  */
+  return FichierIndex.position();
 }
 
 // *******************************************************************************
@@ -132,32 +144,29 @@ String CatalogFile::readRandomLine()
    char         line[MAX_LG_LINE];  // ligne lue dans le fichier
    unsigned int RandomNb;           // Numéro aléatoire entre 1 et taille
    int          Lg=0;
-   String       medialine;
+   String       Medialine;
 
   RandomNb   = random(RandomMax)+1;   // random(Max) renvoie un nombre aléatoire entre 0 et Max-1
   Serial.print("  read random line, number "); Serial.print (RandomNb); Serial.print (" out of "); Serial.println (RandomMax); 
    
   // On se positionne sur un octet au hasard dans l'index
-  if (!FichierIndex.seekSet(RandomNb))
+  if (!FichierIndex.seek(RandomNb)) 
   {
     Serial.println (F("Ratings.txt: Cannot go to position ")); Serial.println(RandomNb);
     return ("ERROR");
   }
   
   // On lit la fin de la ligne en cours (généralement tronquée, puisqu'on s'est placé au hasard dans le fichier)
-  Lg = FichierIndex.fgets(line,MAX_LG_LINE);
-  if (Lg==-1) return ("ERROR");      // Erreur de lecture
-  if (Lg==0)  return ("EOF");      // la ligne lue est vide ou EOF
-  // Serial.print (" positioned at : "); Serial.println (line);
+  FichierIndex.readStringUntil('\n');
   
   // On lit la ligne suivante
-  Lg = FichierIndex.fgets(line,MAX_LG_LINE);
-  if (Lg==-1) return ("ERROR");      // Erreur de lecture
+  Medialine = FichierIndex.readStringUntil('\n');
+  Lg = Medialine.length();
+  if (Lg==-1) return ("ERROR");    // Erreur de lecture
   if (Lg==0)  return ("EOF");      // la ligne lue est vide ou EOF
 
-  medialine=String(line);
-  medialine.trim();
-  return medialine;
+  Medialine.trim();
+  return Medialine;
 }
 
 
@@ -166,14 +175,15 @@ String CatalogFile::readRandomLine()
 // *******************************************************************************
 int CatalogFile::writeAddStar(long RatingPosition)
 {
-  SdFile FichierIndex;
+  File FichierIndex;
   char   Stars='A';
   
   Serial.print (F("ADDING a Star at ")); Serial.println (RatingPosition);
   if (RatingPosition==NULL) return;
   
   // On ouvre le fichier (renvoie false si error)
-  if (!FichierIndex.open("/Catalog.ndx", O_RDWR))      // renvoie False en cas d'erreur
+  FichierIndex = SD.open("/Catalog.ndx", FILE_WRITE);
+  if (!FichierIndex)
   {
     // En cas d'erreur d'ouverture du fichier, on sort.
     Serial.println (F("Cannot open Catalog.ndx"));
@@ -181,7 +191,7 @@ int CatalogFile::writeAddStar(long RatingPosition)
   }
   
   // On se positionne sur la ligne du clip
-  FichierIndex.seekSet(RatingPosition);
+  FichierIndex.seek(RatingPosition);
   
   // On lit le nombre d'etoiles (1 octet)
   Stars = FichierIndex.read();
@@ -190,12 +200,12 @@ int CatalogFile::writeAddStar(long RatingPosition)
   if (++Stars >'5') Stars='5'; 
   if (Stars   <'0') Stars='0';
   // On ecrit le nouveau nombre d'étoiles
-  FichierIndex.seekSet(RatingPosition);
+  FichierIndex.seek(RatingPosition);
   FichierIndex.print(Stars);
   Serial.print (F(" and replaced with ")); Serial.println(Stars);
 
   // On vérifie (pour le debug)
-  FichierIndex.seekSet(RatingPosition-12);
+  FichierIndex.seek(RatingPosition-12);
   Serial.print (F(" End of line after update: "));
   for (int i=0; i<14; i++) 
     {
@@ -216,14 +226,15 @@ int CatalogFile::writeAddStar(long RatingPosition)
 // *******************************************************************************
 int CatalogFile::writeRemoveStar(long RatingPosition)
 {
-  SdFile FichierIndex;
+  File FichierIndex;
   char   Stars='A';
   
   Serial.print (F("REMOVING a Star at ")); Serial.println (RatingPosition);
   if (RatingPosition==NULL) return;
 
   // On ouvre le fichier
-  if (!FichierIndex.open("/Catalog.ndx", O_RDWR))      // renvoie false si error
+  FichierIndex = SD.open("/Catalog.ndx", FILE_WRITE);
+  if (!FichierIndex)
   {
     // En cas d'erreur d'ouverture du fichier, on sort
     Serial.println (F("Cannot open Catalog.ndx"));
@@ -231,7 +242,7 @@ int CatalogFile::writeRemoveStar(long RatingPosition)
   }
 
   // On se positionne sur la ligne du clip
-  FichierIndex.seekSet(RatingPosition);
+  FichierIndex.seek(RatingPosition);
   
   // On lit le nombre d'etoiles
   Stars = FichierIndex.read();
@@ -240,12 +251,12 @@ int CatalogFile::writeRemoveStar(long RatingPosition)
   if (--Stars < '0') Stars='0';
   if (Stars   >'5') Stars='5';
   // On ecrit le nouveau nombre d'étoiles
-  FichierIndex.seekSet(RatingPosition);
+  FichierIndex.seek(RatingPosition);
   FichierIndex.print(Stars);
   Serial.print (F(" and replaced with ")); Serial.println(Stars);
   
   // On vérifie (pour le debug)
-  FichierIndex.seekSet(RatingPosition-12);
+  FichierIndex.seek(RatingPosition-12);
   Serial.print (F(" End of line after update: "));
   for (int i=0; i<14; i++) 
     {
@@ -266,27 +277,28 @@ int CatalogFile::writeRemoveStar(long RatingPosition)
 // *******************************************************************************
 int CatalogFile::readRating(long RatingPosition)
 {
-  SdFile FichierIndex;
+  File FichierIndex;
   char   Stars='A';
   
   Serial.print (F("reading Rating at ")); Serial.println (RatingPosition);
   if (RatingPosition==NULL) return;
   
   // On ouvre le fichier (renvoie false si error)
-  if (!FichierIndex.open("/Catalog.ndx", O_RDWR))      // renvoie False en cas d'erreur
+  FichierIndex = SD.open("/Catalog.ndx", FILE_READ);
+  if (!FichierIndex)
   {
     // En cas d'erreur d'ouverture du fichier, on sort.
     Serial.println (F("Cannot open Catalog.ndx"));
     return 0;
-  }
+  } 
   
   // On se positionne sur la ligne du clip
-  FichierIndex.seekSet(RatingPosition);
+  FichierIndex.seek(RatingPosition);
   // On lit 1 octet
   Stars = FichierIndex.read();
 
   // On vérifie (pour le debug)
-  FichierIndex.seekSet(RatingPosition-12);
+  FichierIndex.seek(RatingPosition-12);
   Serial.print (F(" End of line: "));
   for (int i=0; i<14; i++) 
     {
@@ -306,13 +318,14 @@ int CatalogFile::readRating(long RatingPosition)
 // *******************************************************************************
 void CatalogFile::writeRating(int rating, long RatingPosition)
 {
-  SdFile FichierIndex;
+  File FichierIndex;
   
   Serial.print (F("writing Rating at ")); Serial.println (RatingPosition);
   if (RatingPosition==NULL) return;
   
   // On ouvre le fichier (renvoie false si error)
-  if (!FichierIndex.open("/Catalog.ndx", O_RDWR))      // renvoie False en cas d'erreur
+  FichierIndex = SD.open("/Catalog.ndx", FILE_WRITE);
+  if (!FichierIndex)
   {
     // En cas d'erreur d'ouverture du fichier, on sort.
     Serial.println (F("Cannot open Catalog.ndx"));
@@ -320,13 +333,13 @@ void CatalogFile::writeRating(int rating, long RatingPosition)
   }
   
   // On se positionne sur la ligne du clip
-  FichierIndex.seekSet(RatingPosition);
+  FichierIndex.seek(RatingPosition);
   // On ecrit 1 octet
   char stars = char(rating +'0');
   FichierIndex.print(stars);
 
   // On vérifie (pour le debug)
-  FichierIndex.seekSet(RatingPosition-12);
+  FichierIndex.seek(RatingPosition-12);
   Serial.print (F(" End of line after update: "));
   for (int i=0; i<14; i++) 
     {

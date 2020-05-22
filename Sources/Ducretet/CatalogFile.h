@@ -4,7 +4,7 @@
 #ifndef CATALOGFILE_H_INCLUDED
 #define CATALOGFILE_H_INCLUDED
 
-#include <SdFat.h>
+#include <SD.h>
 
 #define MAX_LG_LINE   40          // longueur maximale prévisionelle des lignes du catalogue
 
@@ -33,7 +33,7 @@ class CatalogFile
         // ------------------------------------------
       private:
         unsigned int  RandomMax=10;         
-        SdFile        FichierIndex;
+        File        FichierIndex;
 
 };
 
