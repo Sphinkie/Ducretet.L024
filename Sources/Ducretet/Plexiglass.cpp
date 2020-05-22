@@ -55,9 +55,8 @@ int Plexiglass::getStarsValue(int tuning)
   if (tuning < 580)  {return 2; }   /* 450..580  : 2 étoiles */
   if (tuning < 680)  {return 3; }   /* 580..680  : 3 étoiles */
   if (tuning < 780)  {return 4; }   /* 680..780  : 4 étoiles */
-  else  {return 5; }               /* 780..1023 : 5 étoiles */
+  else  {return 5; }                /* 780..1023 : 5 étoiles */
 }
-
 
 
 // *********************************************************************
@@ -74,19 +73,17 @@ int Plexiglass::getYearValue(int tuning)
      toLow   : the lower bound of the value’s target range.
      toHigh  : the upper bound of the value’s target range.
   */
-//if (tuning < 270)       {RangeStart=0;    RangeEnd=1700; return map(tuning,   0, 270,RangeStart,RangeEnd);    } // 0000...1700
-//if (tuning < 360)       {RangeStart=1700; RangeEnd=1800; return map(tuning, 270, 360,RangeStart,RangeEnd);    } // 1700...1800
-//if (tuning < 410)       {RangeStart=1800; RangeEnd=1900; return map(tuning, 360, 410,RangeStart,RangeEnd);    } // 1800...1900
-
-  if (tuning < 410)       {RangeStart=0;    RangeEnd=1900; return map(tuning,   0, 410,RangeStart,RangeEnd);    } // 0000...1900
-  if (tuning < 460)       {RangeStart=1900; RangeEnd=1940; return map(tuning, 410, 460,RangeStart,RangeEnd);    } // 1900...1940
-  if (tuning < 540)       {RangeStart=1940; RangeEnd=1950; return map(tuning, 460, 530,RangeStart,RangeEnd);    } // 40's
-  if (tuning < 600)       {RangeStart=1950; RangeEnd=1960; return map(tuning, 530, 600,RangeStart,RangeEnd);    } // 50's
-  if (tuning < 700)       {RangeStart=1960; RangeEnd=1970; return map(tuning, 600, 700,RangeStart,RangeEnd);    } // 60's
-  if (tuning < 790)       {RangeStart=1970; RangeEnd=1980; return map(tuning, 700, 790,RangeStart,RangeEnd);    } // 70's
-  if (tuning < 840)       {RangeStart=1980; RangeEnd=1990; return map(tuning, 790, 840,RangeStart,RangeEnd);    } // 80's
-  if (tuning < 860)       {RangeStart=1990; RangeEnd=2000; return map(tuning, 840, 860,RangeStart,RangeEnd);    } // 1990...2000
-  if (tuning < 1023)      {RangeStart=2000; RangeEnd=2050; return map(tuning, 860,1023,RangeStart,RangeEnd);    } // 2000...2050
+  if (tuning < 270)       {RangeStart=0;    RangeEnd=1700; return map(tuning,   0, 270,RangeStart,RangeEnd); }   // 0000...1700
+  if (tuning < 360)       {RangeStart=1700; RangeEnd=1800; return map(tuning, 270, 360,RangeStart,RangeEnd); }   // 1700...1800
+  if (tuning < 410)       {RangeStart=1800; RangeEnd=1900; return map(tuning, 360, 410,RangeStart,RangeEnd); }   // 1800...1900
+  if (tuning < 460)       {RangeStart=1900; RangeEnd=1940; return map(tuning, 410, 460,RangeStart,RangeEnd); }   // 1900...1940
+  if (tuning < 540)       {RangeStart=1940; RangeEnd=1950; return map(tuning, 460, 530,RangeStart,RangeEnd); }   // 40's
+  if (tuning < 600)       {RangeStart=1950; RangeEnd=1960; return map(tuning, 530, 600,RangeStart,RangeEnd); }   // 50's
+  if (tuning < 700)       {RangeStart=1960; RangeEnd=1970; return map(tuning, 600, 700,RangeStart,RangeEnd); }   // 60's
+  if (tuning < 790)       {RangeStart=1970; RangeEnd=1980; return map(tuning, 700, 790,RangeStart,RangeEnd); }   // 70's
+  if (tuning < 840)       {RangeStart=1980; RangeEnd=1990; return map(tuning, 790, 840,RangeStart,RangeEnd); }   // 80's
+  if (tuning < 860)       {RangeStart=1990; RangeEnd=2000; return map(tuning, 840, 860,RangeStart,RangeEnd); }   // 1990...2000
+  if (tuning < 1023)      {RangeStart=2000; RangeEnd=2050; return map(tuning, 860,1023,RangeStart,RangeEnd); }   // 2000...2050
 }
 
 

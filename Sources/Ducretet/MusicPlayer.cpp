@@ -9,16 +9,7 @@
  *  - SPI SlaveSelect : MP3_CS MP3_DCS SD_CS
  *  - Ainsi que : DataRequest 
  ************************************************************* */
-//#include <SPI.h>
-//#include <SD.h>
-
 #include "MusicPlayer.h"
-
-/*
-// Mode réel        
-SdFat        sd;    
-*/
-
 
 /*
 // Mode simulé
@@ -51,13 +42,13 @@ MusicPlayer::MusicPlayer(byte pinMP3_RESET, byte pinMP3_CS, byte pinMP3_DCS, byt
 // ******************************************************************************
 void MusicPlayer::initialize()
 {
-  boolean ok;
+  boolean initOk;
   Serial.println(F("MP3+SD initialization."));
 
   //Initialize the MP3 Player Shield
-  ok=Adafruit_VS1053_FilePlayer::begin();
+  initOk = Adafruit_VS1053_FilePlayer::begin();
   //check result, see readme for error codes.
-  if(ok) 
+  if (initOk) 
   {
     Serial.println(F(" MP3 shield initialized."));
     Adafruit_VS1053_FilePlayer::sineTest(0x44, 500);    // Make a tone to indicate VS1053 is working
@@ -68,7 +59,7 @@ void MusicPlayer::initialize()
   }
 
   //Initialize the SD card.
-  byte errcode=SD.begin(pinCard_CS);
+  byte errcode = SD.begin(pinCard_CS);
   if (errcode!=0) 
   {
     Serial.println(F("SD failed, or not present: Program Stopped"));
@@ -82,8 +73,8 @@ void MusicPlayer::initialize()
   Adafruit_VS1053_FilePlayer::setVolume(20,20);
 
   // Using MP3_DREQ interrupt pin, we can do background audio playing.
-  ok=Adafruit_VS1053_FilePlayer::useInterrupt(VS1053_FILEPLAYER_PIN_INT);
-  if (!ok)
+  initOk=Adafruit_VS1053_FilePlayer::useInterrupt(VS1053_FILEPLAYER_PIN_INT);
+  if (!initOk)
     Serial.println(F("MP3_DREQ pin is not an interrupt pin"));
 
 }
@@ -94,17 +85,20 @@ void MusicPlayer::initialize()
 // ******************************************************************************
 void MusicPlayer::playTrack(String filename)
 {
-    boolean ok; 
-    char    trackName[30];
+    boolean initOk; 
+    char    trackName[30]; // Le chemin complet ne doit pas depasser 30 char
 
     // Tell the MP3 Shield to play a track
     filename = String ("/Music/"+filename+".mp3");
     filename.toCharArray(trackName,30);
-    
-    ok = Adafruit_VS1053_FilePlayer::startPlayingFile(trackName);
-    if (ok) 
+
+    initOk = Adafruit_VS1053_FilePlayer::startPlayingFile(trackName);
+    if (initOk) 
     {
       Serial.println("Playing: "+filename);
+      // On les tags ID3 du ficheir MP3.
+      Serial.println(F("Read ID3 tags"));
+      this->readID3tags();
       Step=1;   // first step
     }
     else
@@ -197,15 +191,21 @@ String MusicPlayer::getTitle()
 {
   String retour;
   char* infobuffer;
+  ID3tag* pointeur;
 
   // S'il n'y a pas de clip en cours, on revoie un blanc.
   if (!Adafruit_VS1053_FilePlayer::playingMusic) return " ";
+  // on le fait pointer sur le buffer de 128 chars contenant les tags
+  pointeur = *Buffer;
+  strncpy (infobuffer, pointeur->title, 30);   // on retourne 30 caracteres à partir de offset : TODO
+  /*
   // On lit le tag TITLE, et on le met dans le Buffer
   // AdafruitShield.trackTitle((char*)&Buffer);
   getTrackInfo(TRACK_TITLE, infobuffer);
+  */
   // S'il est vide, on renvoie un blanc.
-  if (strlen(Buffer)==0) return " ";
-  retour = String(Buffer);
+  if (strlen(infobuffer)==0) return " ";
+  retour = String(infobuffer);
   retour.remove(32);
   return (retour);
 }
@@ -215,17 +215,24 @@ String MusicPlayer::getTitle()
 // *******************************************************************************
 String MusicPlayer::getArtist()
 {
-  String retour;
+  String retour = " ";
   char* infobuffer;
+  ID3tag* pointeur;
 
   // S'il n'y a pas de clip en cours, on revoie un blanc.
   if (!Adafruit_VS1053_FilePlayer::playingMusic) return " ";
+  // on le fait pointer sur le buffer de 128 chars contenant les tags
+  pointeur = *Buffer;
+  /* strncpy (infobuffer, pointeur->artist, 30);   // on retourne 30 caracteres à partir de offset : TODO*/
+  retour = String(pointeur->artist);
+  /*
   // On lit le tag ARTIST, et on le met dans le Buffer
   //AdafruitShield.trackArtist((char*)&Buffer);
   getTrackInfo(TRACK_ARTIST, infobuffer);
   // S'il est vide, on renvoie un blanc.
   if (strlen(Buffer)==0) return " ";
   retour = String(Buffer);
+  */
   retour.remove(32);
   return (retour);
 }
@@ -383,14 +390,14 @@ void MusicPlayer::getTrackInfo(uint8_t offset, char* infobuffer)
     93      4       Année de parution
     97      30      Commentaire sur la chanson
     127     1       Genre musical (code sur 1 octet)
- * \note this suspends currently playing streams and returns afterwards.
+ * Note: this suspends currently playing streams and returns afterwards.
  * Restoring the file position to where it left off, before resuming.
- */
+ ******************************************************************************************************************* */
 void MusicPlayer::readID3tags()
 {
   unsigned long currentPos;
   unsigned long fileSize;
-  strcpy (Buffer,"TAGRailroad boy  - - - - - - - --Joan Baez x x x x x x x x x xxIn Concert X X X X X X X X X X1964Commentaires..................1");
+  // strcpy (Buffer,"TAGRailroad boy  - - - - - - - --Joan Baez x x x x x x x x x xxIn Concert X X X X X X X X X X1964Commentaires..................1");
 
   //disable interupts
   // if(playingMusic) disableRefill();

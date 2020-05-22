@@ -21,8 +21,7 @@ class Rotary
       bool   hasChanged();
         
     private:
-
-    //variables:
+      // Private member variables:
       int   Value;
       int   LastValue;
       bool  Changed;

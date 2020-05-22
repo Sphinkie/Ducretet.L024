@@ -1,7 +1,6 @@
 /* *******************************************************************************
  *  Gestion du fichier catalogue des MP3 : Primitives d'accès Lecture/Ecriture
  ********************************************************************************/
-//#include <SdFat.h>
 #include "CatalogFile.h"
 
 

@@ -21,11 +21,6 @@
   *************************************************************************************************** 
 */
 
-/*
-#include <SPI.h>
-#include <SdFat.h>
-#include <SdFatUtil.h> 
-*/
 #include "Ducretet.h"
 #include "RotaryButton.h"
 #include "CapButton.h"

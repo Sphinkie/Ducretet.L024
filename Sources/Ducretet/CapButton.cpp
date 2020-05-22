@@ -8,7 +8,7 @@
  *   Capacitance between Pin_In and Ground.
  *   Stray capacitance is always present. 
  *   Extra capacitance can be added to allow higher capacitance to be measured.
- ******************************************************************************* */
+ ********************************************************************************* */
 #include "Arduino.h"
 #include "CapButton.h"
 
@@ -41,7 +41,6 @@ void CapButton::begin()
   this->dischargeCapacitor();
   // On dépoussière en lisant quelques premières valeurs
   this->captureMeanValue();
-
 }
 
 // *******************************************************************************
@@ -205,7 +204,7 @@ int CapButton::normalizeValue(float value)
   value = max(0,value);
   value = min(value,1023);
 
- return (int(value));
+  return (int(value));
 }
 
 

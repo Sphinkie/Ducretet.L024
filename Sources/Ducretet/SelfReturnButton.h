@@ -5,7 +5,6 @@
 #ifndef SELFRETURNCLASS_H_INCLUDED
 #define SELFRETURNCLASS_H_INCLUDED
 
-#include "Arduino.h"
 
 typedef void (*voidFuncPtr)(void);    // callback des ISR Arduino
 
@@ -17,10 +16,9 @@ class SelfReturnButton
         void    setStatus(bool pushed);
         
     private:
-
-    // Variables:
-    // Ce qui est lié aux interruptions doit etre déclaré en volatile (cad en RAM, et non en Registre)
-      volatile bool  Pushed = 0; 
+        // Private Member Variables:
+        // Ce qui est lié aux interruptions doit etre déclaré en volatile (cad en RAM, et non en Registre)
+        volatile bool  Pushed = 0; 
  
 };
 

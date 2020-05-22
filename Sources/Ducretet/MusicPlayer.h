@@ -2,12 +2,9 @@
  *  Gestion de la carte MP3 player
  *  
  *  Utilise les Pins:
- *    50-51-52 pour le SPI
+ *    50-51-52 pour le SPI pour un Arduino MEGA
  *    53 du SPI est réservé
  *    Digital = 2-3-4 6-7-8-9
- *    
- * Note: Les tags Titre/Artist/Album dans le MP3 sont limités à 128.
- *       Au dela, le programme peut se planter (cf Buffer ci-dessous) 
  ************************************************************* */
 #ifndef MUSICPLAYERCLASS_H_INCLUDED
 #define MUSICPLAYERCLASS_H_INCLUDED
@@ -15,12 +12,9 @@
 #include "Adafruit_VS1053.h"
 
 /*
- * ID3 Tag location offsets
+ * ID3 Tag location offsets (The offset from the begining of the ID3 tag)
  * warning This may not be available on all source music files.
  */
-// The offset from the begining of the ID3 tag for the location containing the track's Title of the mp3 file being read from the SdCard.
-// The offset from the begining of the ID3 tag for the location containing the track's Artist of the mp3 file being read from the SdCard.
-// The offset from the begining of the ID3 tag for the location containing the track's Album of the mp3 file being read from the SdCard.
 #define TRACK_TITLE              3
 #define TRACK_ARTIST            33
 #define TRACK_ALBUM             63
