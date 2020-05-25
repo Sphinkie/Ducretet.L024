@@ -1,0 +1,3 @@
+$filename(catalog.txt,utf-8)
+$loop(%_path%)$if(%year%,%year%,0000);%_crc%;%genre%;$if(%rating wmp%,%rating wmp%,0);
+$loopend()
