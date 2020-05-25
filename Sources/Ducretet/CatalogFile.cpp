@@ -41,7 +41,7 @@ bool CatalogFile::openCatalogAtPosition(long pos=5)
   FichierIndex = SD.open("/Catalog.ndx");      // on ouvre le fichier Catalog
   if (!FichierIndex)
   {
-    // en cas d'erreur d'ouverture du fichier, on renvoie "NOISE.MP3"
+    // en cas d'erreur d'ouverture du fichier, on renvoie false
     Serial.println (F("Cannot open Catalog.ndx"));
     return (false);
   }
@@ -129,7 +129,7 @@ String CatalogFile::readNextLine()
 // *******************************************************************************
 long CatalogFile::getCurrentPosition()
 {
-  /* return FichierIndex.curPosition(); NO_SDFAT  */
+  /* return FichierIndex.curPosition(); // SDFAT  */
   return FichierIndex.position();
 }
 

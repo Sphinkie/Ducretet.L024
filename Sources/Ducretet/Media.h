@@ -34,9 +34,11 @@ class Media
         String        Field2;       // media_id
         String        Field3;       // genre
         String        Field4;       // rating
+        String        Field5;       // BeatPerMinute
         bool          Valid=true;   // Set pour savoir si un FirstMedia est à jour ou non
+        bool          WhiteListed;  // True si le genre fait partie de la Whitelist
         long          NextMediaPosition=0;
-        // Infos sur les genres apparaissant sur la face avant (White List)
+        // Liste des genres apparaissant sur la face avant (White List)
         const String  GenreWhiteList="Classique;Blues;Jazz;Folk;Rock n'Roll;Rock;Chanson;Musiques du monde;";  // Ne pas oublier le ; final
 
 };

@@ -14,13 +14,14 @@ Media::Media()
     this->Field2 = "NOISE";
     this->Field3 = "-";
     this->Field4 = "-";
+    this->Field5 = "-";
     this->Valid  = true;
     this->NextMediaPosition=0;
 }
 
  
 // *******************************************************************************
-// Parsing des 4 champs d'une ligne de catalogue  (ex: 1956;E76E79B1;Calipso;0; )
+// Parsing des champs d'une ligne de catalogue (ex: 1956;E76E79B1;Calipso;4;93 )
 // *******************************************************************************
 void Media::fillWith(String medialine, long nextmediaposition)
 {
@@ -32,6 +33,7 @@ void Media::fillWith(String medialine, long nextmediaposition)
     this->Field2 = "NOISE";
     this->Field3 = "-";
     this->Field4 = "-";
+    this->Field5 = "-";
     this->NextMediaPosition=0;
   }
   else
@@ -42,10 +44,12 @@ void Media::fillWith(String medialine, long nextmediaposition)
     int    Separ2   = medialine.indexOf(';',Separ1+1);     // pointeur sur le second séparateur
     int    Separ3   = medialine.indexOf(';',Separ2+1);     // pointeur sur le troisième séparateur
     int    Separ4   = medialine.indexOf(';',Separ3+1);     // pointeur sur le quatrième séparateur
+    int    Separ5   = medialine.indexOf(';',Separ4+1);     // pointeur sur le cinquième séparateur
     this->Field1 = medialine.substring(0       ,Separ1);
     this->Field2 = medialine.substring(Separ1+1,Separ2);
     this->Field3 = medialine.substring(Separ2+1,Separ3);          
     this->Field4 = medialine.substring(Separ3+1,Separ4);
+    this->Field5 = medialine.substring(Separ4+1,Separ5);
   }
 
   // Si après le parsing, un des champs est vide, on met la valeur par défaut
@@ -53,6 +57,9 @@ void Media::fillWith(String medialine, long nextmediaposition)
   if (this->Field2.length()==0) this->Field2="NOISE";
   if (this->Field3.length()==0) this->Field3="-";
   if (this->Field4.length()==0) this->Field4="-";
+
+  // On positionne à TRUE si le Field3 est dans la WhiteList
+  this->WhiteListed = (GenreWhiteList.indexOf(this->Field3)>=0); 
 }
 
 // *******************************************************************************
@@ -88,14 +95,13 @@ bool Media::hasGenre(String genre)
 {
   //  Serial.println ("hasGenre "+genre);
   if (genre=="*") 
-    // si le genre attendu est Others, alors on regarde si le genre lu est dans la Whitelist
-    // Si il est dedans : on renvoie FALSE.
+    // Si le genre attendu est AUTRES, alors on regarde si le genre du média est dans la Whitelist.
+    // S'il est dans la Whitelist: on renvoie FALSE, si absent TRUE.
     {
-      Serial.print (" others:"+Field3+":"); Serial.println (GenreWhiteList.indexOf(Field3));
-      return (GenreWhiteList.indexOf(this->Field3)==-1); // -1=>on n'a pas trouvé=> on renvoie VRAI
+      return (!this->WhiteListed);
     }
   else 
-    // si le genre attendu est defini, on le compare au genre lu
+    // si le genre attendu est défini, on le compare au genre du média
     return (this->Field3.equalsIgnoreCase(genre));
 }
 
