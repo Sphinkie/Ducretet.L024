@@ -170,105 +170,29 @@ String CatalogFile::readRandomLine()
 
 
 // *******************************************************************************
-// Ajoute +1 (max=5) au Rating du clip demandé, dans le fichier Catalog.ndx
+// Modifie (max=5) le Rating du clip demandé, dans le fichier Catalog.ndx
+// Le paramètre 'increment' accepte usuellement -1 ou +1
 // *******************************************************************************
-int CatalogFile::writeAddStar(long RatingPosition)
+int CatalogFile::updateRating(long RatingPosition,int increment)
 {
-  File FichierIndex;
-  char   Stars='A';
+  int  Rating;
   
-  Serial.print (F("ADDING a Star at ")); Serial.println (RatingPosition);
+  Serial.print (F("Adding {increment} Star at ")); Serial.println (RatingPosition);
   if (RatingPosition==NULL) return;
-  
-  // On ouvre le fichier (renvoie false si error)
-  FichierIndex = SD.open("/Catalog.ndx", FILE_WRITE);
-  if (!FichierIndex)
-  {
-    // En cas d'erreur d'ouverture du fichier, on sort.
-    Serial.println (F("Cannot open Catalog.ndx"));
-    return;
-  }
-  
-  // On se positionne sur la ligne du clip
-  FichierIndex.seek(RatingPosition);
-  
-  // On lit le nombre d'etoiles (1 octet)
-  Stars = FichierIndex.read();
-  Serial.print (F(" I have read a byte:")); Serial.print(Stars);
+
+  // On lit le nombre d'étoiles actuel
+  Rating=readRating(RatingPosition);
+  Serial.print (F(" value ")); Serial.print(Rating);
   // On incrémente
-  if (++Stars >'5') Stars='5'; 
-  if (Stars   <'0') Stars='0';
+  Rating+=increment;
+  if (Rating > 5) Rating=5; 
+  if (Rating < 0) Rating=0;
+  Serial.print (F(" is replaced with ")); Serial.println(Rating);
   // On ecrit le nouveau nombre d'étoiles
-  FichierIndex.seek(RatingPosition);
-  FichierIndex.print(Stars);
-  Serial.print (F(" and replaced with ")); Serial.println(Stars);
+  writeRating(increment, RatingPosition);
 
-  // On vérifie (pour le debug)
-  FichierIndex.seek(RatingPosition-12);
-  Serial.print (F(" End of line after update: "));
-  for (int i=0; i<14; i++) 
-    {
-      char Debug = FichierIndex.read(); 
-      Serial.print(Debug);
-    }
-  Serial.println(); 
-  
-  // On ferme le fichier
-  FichierIndex.close();
-  
-  return Stars;
+  return Rating;
 }
-
-
-// *******************************************************************************
-// Soustrait 1 (min=0) au Rating du clip demandé, dans le fichier Catalog.ndx
-// *******************************************************************************
-int CatalogFile::writeRemoveStar(long RatingPosition)
-{
-  File FichierIndex;
-  char   Stars='A';
-  
-  Serial.print (F("REMOVING a Star at ")); Serial.println (RatingPosition);
-  if (RatingPosition==NULL) return;
-
-  // On ouvre le fichier
-  FichierIndex = SD.open("/Catalog.ndx", FILE_WRITE);
-  if (!FichierIndex)
-  {
-    // En cas d'erreur d'ouverture du fichier, on sort
-    Serial.println (F("Cannot open Catalog.ndx"));
-    return;
-  }
-
-  // On se positionne sur la ligne du clip
-  FichierIndex.seek(RatingPosition);
-  
-  // On lit le nombre d'etoiles
-  Stars = FichierIndex.read();
-  Serial.print (F(" I have read byte ")); Serial.print(Stars);
-  // On décrémente
-  if (--Stars < '0') Stars='0';
-  if (Stars   >'5') Stars='5';
-  // On ecrit le nouveau nombre d'étoiles
-  FichierIndex.seek(RatingPosition);
-  FichierIndex.print(Stars);
-  Serial.print (F(" and replaced with ")); Serial.println(Stars);
-  
-  // On vérifie (pour le debug)
-  FichierIndex.seek(RatingPosition-12);
-  Serial.print (F(" End of line after update: "));
-  for (int i=0; i<14; i++) 
-    {
-      char Debug = FichierIndex.read(); 
-      Serial.print(Debug);
-    }
-  Serial.println(); 
-  
-  // On ferme le fichier
-  FichierIndex.close();
-  return Stars;
-}
-
 
 
 // *******************************************************************************
@@ -296,19 +220,15 @@ int CatalogFile::readRating(long RatingPosition)
   // On lit 1 octet
   Stars = FichierIndex.read();
 
-  // On vérifie (pour le debug)
-  FichierIndex.seek(RatingPosition-12);
-  Serial.print (F(" End of line: "));
-  for (int i=0; i<14; i++) 
-    {
-      char Debug = FichierIndex.read(); 
-      Serial.print(Debug);
-    }
-  Serial.println(); 
+  // DEBUG: on affiche la fin de la ligne lue
+     FichierIndex.seek(RatingPosition-12);
+     Serial.print (F(" End of line: "));
+     for (int i=0; i<14; i++) Serial.print(FichierIndex.read());
+     Serial.println(); 
   
   // On ferme le fichier
   FichierIndex.close();
-  return (Stars-'0');  // renvoie un entier
+  return (Stars-'0');  // renvoie une valeur numérique
 }
 
 // *******************************************************************************
@@ -337,15 +257,11 @@ void CatalogFile::writeRating(int rating, long RatingPosition)
   char stars = char(rating +'0');
   FichierIndex.print(stars);
 
-  // On vérifie (pour le debug)
-  FichierIndex.seek(RatingPosition-12);
-  Serial.print (F(" End of line after update: "));
-  for (int i=0; i<14; i++) 
-    {
-      char Debug = FichierIndex.read(); 
-      Serial.print(Debug);
-    }
-  Serial.println(); 
+  // DEBUG: on affiche la fin de la ligne lue
+     FichierIndex.seek(RatingPosition-12);
+     Serial.print (F(" End of line after write: "));
+     for (int i=0; i<14; i++) Serial.print(FichierIndex.read());
+     Serial.println(); 
   
   // On ferme le fichier
   FichierIndex.close();

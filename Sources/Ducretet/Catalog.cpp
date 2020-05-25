@@ -333,7 +333,7 @@ void Catalog::removeStar()
 {
   int newRatingValue; // valeur du rating apres décrementation
   // décremente le Rating dans le fichier.
-  newRatingValue = writeRemoveStar(CurrentMedia.getRatingPosition());
+  newRatingValue = updateRating(CurrentMedia.getRatingPosition(), -1);
   // Positionne le Rating du Clip En Cours.
   CurrentMedia.setRating(newRatingValue);
 }
@@ -345,7 +345,7 @@ void Catalog::addStar()
 {
   int newRatingValue; // valeur du rating apres décrementation
   // décremente le Rating dans le fichier.
-  newRatingValue = writeAddStar(CurrentMedia.getRatingPosition());
+  newRatingValue = updateRating(CurrentMedia.getRatingPosition(), +1);
   // Positionne le Rating du Clip En Cours.
   CurrentMedia.setRating(newRatingValue);
 }

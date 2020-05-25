@@ -23,17 +23,14 @@ class CatalogFile
         String readNextLine();
               
         // Lecture/Ecriture du Rating
-        int    writeAddStar(long clipPosition);
-        int    writeRemoveStar(long clipPosition);
+        int    updateRating(long clipPosition, int increment);
+
+      private:
         int    readRating(long clipPosition);
         void   writeRating(int rating, long clipPosition);
-
-        // ------------------------------------------
-        // Variables
-        // ------------------------------------------
-      private:
+        // Private Member Variables
         unsigned int  RandomMax=10;         
-        File        FichierIndex;
+        File          FichierIndex;
 
 };
 
