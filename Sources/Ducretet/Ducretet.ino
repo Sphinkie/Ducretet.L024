@@ -33,24 +33,24 @@
 // *******************************************************************************
 // Mapping du cablage
 // *******************************************************************************
-#define AGAIN      3    // D3   Digital In avec hardware interrupt 1
 
 // ------------------ Pour MP3 Shield
 // Midi_In              //      NOT USED    (MP3 shield) avec hardware interrupt
 // GPIO                 //      GPIO        (MP3 shield)
 #define MP3_RESET -1    //      NOT USED    (MP3 shield) VS1053 reset pin (unused!)
-#define MP3_DREQ   2    // D2   DataRequest (MP3 shield) avec hardware interrupt 0. VS1053 Data REQuest, ideally an Interrupt pin.
-#define MP3_DCS    6    // D6   MP3 data CS (MP3 shield) VS1053 Data/Command S  elect pin (output)
+#define MP3_DREQ   3    // D3   DataRequest (MP3 shield) avec hardware interrupt 1. VS1053 Data REQuest, ideally an Interrupt pin.
+#define MP3_DCS    6    // D6   MP3 Data CS (MP3 shield) VS1053 Data/Command S  elect pin (output)
 #define MP3_CS     7    // D7   MP3 CS      (MP3 shield) VS1053 Chip Select pin (output)
 #define SD_CS      4    // D4   SD CS       (MP3 shield) SD-Card chip select pin
 
+#define AGAIN      2    // D3   Digital In avec hardware interrupt 0
 #define NEXT       18   // D18  Digital In     avec hardware interrupt 5
 #define PROMOTE    19   // D19  Digital In     avec hardware interrupt 4
 
 // ------------------ Pour I2C
-#define FM_SDIO    20 // D20 I2C Bus - Digital In/out avec hardware interrupt 3
-#define FM_SCLK    21 // D21 I2C Bus - Digital In/out avec hardware interrupt 2
-#define FM_GPIO2   23 // D23 input  : FM shield pulse received then Seek/Tune completed. (pin GPI02 du shield FM Si7403)
+#define FM_SDIO    20   // D20 I2C Bus - Digital In/out avec hardware interrupt 3
+#define FM_SCLK    21   // D21 I2C Bus - Digital In/out avec hardware interrupt 2
+#define FM_GPIO2   23   // D23 input  : FM shield pulse received then Seek/Tune completed. (pin GPI02 du shield FM Si7403)
 
 #define MODE_4     25   // D25  input   C-MODE-5    bouton Mode
 #define MODE_3     27   // D27  input   C-MODE-4    bouton Mode
@@ -61,10 +61,12 @@
 #define LED_1      45   // D45  output  LED
 #define LED_2      47   // D47  output  LED
 #define SPARE2     49   // D49  Spare2 Connector
-// SPI_MISO             // D50  input  
-// SPI_MOSI             // D51  output 
-// SPI_SCLK             // D52  output 
-// SPI_SS               // D53  input  (configuré en output car Master)
+
+// ------------------ Pour SPI
+#define SPI_MISO   50    // D50  input  
+#define SPI_MOSI   51    // D51  output 
+#define SPI_SCLK   52    // D52  output 
+#define SPI_SS     53    // D53  input  (configuré en output car Master)
 
 #define TUNE_OUT   A2    // Analog output for bouton Tune (charge pin): Créneaux de 5v.
 #define TUNE_IN    A4    // Analog input for bouton Tune: Read value
@@ -78,15 +80,15 @@ MusicPlayer        MP3Player(MP3_RESET, MP3_CS, MP3_DCS, MP3_DREQ, SD_CS);
 Catalog            Catalogue;
 Rotary             ModeButton(MODE_1,MODE_2,MODE_3,MODE_4); 
 CapButton          TuneButton(TUNE_OUT,TUNE_IN);
-//SelfReturnButton   PromoteButton(PROMOTE, &ISR_PromoteButton); 
-SelfReturnButton   AgainButton(AGAIN,     &ISR_AgainButton);     
-SelfReturnButton   NextButton(NEXT,       &ISR_NextButton);    
+//SelfReturnButton   PromoteButton(PROMOTE, &ISR_PromoteButton);
+//SelfReturnButton   AgainButton(AGAIN,     &ISR_AgainButton);
+//SelfReturnButton   NextButton(NEXT,       &ISR_NextButton);
 Bouchon  RemoteTFT;  // RemoteDisplay      
 
 volatile int       Action = _IDLE;             // variable de type volatile, utilisable par les ISR
 String             MusicFile;                  // ID du clip MP3 en cours
 String             NextMusicFile;              // ID du prochain clip MP3 à jouer
-/*char               SlaveArduinoStatus=0;       // Status de l'Arduino Slave I2C (1=ready)                */
+
 
 // *******************************************************************************
 // The setup function runs once when you press reset or power the board
@@ -122,8 +124,6 @@ void setup()
     // Initalise le Shield Sparkfun MP3 player
     // ------------------------------------------------------------
     MP3Player.initialize();
-    // Listing des fichiers de la carte SD 
-    // MP3Player.dir();
     digitalWrite(LED_1,HIGH);   // Eteint la Led témoin SPI BUSY
 
     // ------------------------------------------------------------
@@ -251,7 +251,7 @@ void loop()
               RemoteTFT.printStars(Catalogue.getSelectedClipRating());
             break;
     case 12: // on surveille la RAM consommée
-            Serial.print(F("Free RAM (bytes)= ")); Serial.println(getFreeRam(), DEC);
+            Serial.print(F("Free RAM (bytes)= ")); Serial.println(FreeRam(), DEC);
             // On baisse l'intensité de l'affichage
             RemoteTFT.setBacklight(false);
             break;
@@ -263,6 +263,7 @@ void loop()
   switch (Action)
   {
        case _IDLE: break;
+/*       
        case _NEXT: // On enlève une étoile et on stoppe le clip.
                         Action=_IDLE; 
                         NextButton.wasPushed();   
@@ -282,8 +283,7 @@ void loop()
                         digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
                         MP3Player.restartTrack();
                         RemoteTFT.printStars(Catalogue.getSelectedClipRating());
-                        break;
-      /*       
+                        break;    
       case _PROMOTE: // On ajoute une étoile
                         Action=_IDLE; 
                         PromoteButton.wasPushed();
@@ -301,7 +301,7 @@ void loop()
   // --------------------------------------------------------------
   // Temporisation de la boucle
   // --------------------------------------------------------------
-  delay(1000);
+  delay(100000);
 }
 
 
@@ -368,7 +368,7 @@ void displayRequestedMode()
             RemoteTFT.printLog(ModeMessage);
 }
 
-
+/*
 // *******************************************************************************
 // Interruption appellée si le bouton est tourné CW
 // Note: le Serial ne fonctionne pas durant les ISR!
@@ -389,7 +389,6 @@ void ISR_AgainButton()
     AgainButton.setStatus(true);
 }
 
-/*
 // *******************************************************************************
 // Interruption appellée si le bouton est poussé
 // Note: le Serial ne fonctionne pas durant les ISR!
@@ -398,31 +397,5 @@ void ISR_PromoteButton()
 {
     Action = _PROMOTE;
     PromoteButton.setStatus(true);
-}
-*/
-
-
-int getFreeRam() {}
-/*
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-#ifdef __arm__
-   // should use uinstd.h to define sbrk but Due causes a conflict
-   extern "C" char* sbrk(int incr);
-else  // __ARM__
-   extern char *__brkval;
-   extern char __bss_end;
-#endif  // __arm__
-//------------------------------------------------------------------------------
-// Amount of free RAM : returns The number of free bytes.
-
-int getFreeRam() 
-{
-  char top;
-#ifdef __arm__
-  return &top - reinterpret_cast<char*>(sbrk(0));
-#else  // __arm__
-  // return __brkval ? &top - __brkval : &top - &__bss_end;
-#endif  // __arm__
 }
 */

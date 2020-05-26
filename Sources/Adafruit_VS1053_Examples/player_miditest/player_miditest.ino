@@ -51,7 +51,7 @@
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("VS1053 MIDI test");
   
   VS1053_MIDI.begin(31250); // MIDI uses a 'strange baud rate'
@@ -67,17 +67,19 @@ void setup() {
   midiSetChannelVolume(0, 127);
 }
 
-void loop() {  
+void loop() 
+{  
   for (uint8_t i=60; i<69; i++) {
     midiNoteOn(0, i, 127);
     delay(100);
     midiNoteOff(0, i, 127);
   }
-  
+
   delay(1000);
 }
 
-void midiSetInstrument(uint8_t chan, uint8_t inst) {
+void midiSetInstrument(uint8_t chan, uint8_t inst) 
+{
   if (chan > 15) return;
   inst --; // page 32 has instruments starting with 1 not 0 :(
   if (inst > 127) return;
@@ -87,7 +89,8 @@ void midiSetInstrument(uint8_t chan, uint8_t inst) {
 }
 
 
-void midiSetChannelVolume(uint8_t chan, uint8_t vol) {
+void midiSetChannelVolume(uint8_t chan, uint8_t vol) 
+{
   if (chan > 15) return;
   if (vol > 127) return;
   
@@ -96,7 +99,8 @@ void midiSetChannelVolume(uint8_t chan, uint8_t vol) {
   VS1053_MIDI.write(vol);
 }
 
-void midiSetChannelBank(uint8_t chan, uint8_t bank) {
+void midiSetChannelBank(uint8_t chan, uint8_t bank) 
+{
   if (chan > 15) return;
   if (bank > 127) return;
   
@@ -105,7 +109,8 @@ void midiSetChannelBank(uint8_t chan, uint8_t bank) {
   VS1053_MIDI.write(bank);
 }
 
-void midiNoteOn(uint8_t chan, uint8_t n, uint8_t vel) {
+void midiNoteOn(uint8_t chan, uint8_t n, uint8_t vel) 
+{
   if (chan > 15) return;
   if (n > 127) return;
   if (vel > 127) return;

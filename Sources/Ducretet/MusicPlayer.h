@@ -61,16 +61,12 @@ class MusicPlayer : public Adafruit_VS1053_FilePlayer
         
 };
 
-    // ---------------------------------------------------------------------------------
-    // Pour l'affichage des messages d'erreur (selon la fonction appelante)
-    // ---------------------------------------------------------------------------------
-    #define  BEGIN 100
-    #define  PLAY  200
-    #define  SKIP  300
+// ------------------ Pour SPI
+	#define SPI_MISO   50     // D50  input  
+	#define SPI_MOSI   51     // D51  output 
+	#define SPI_SCLK   52     // D52  output 
+	#define SPI_SS     53     // D53  input  (configuré en output car Master)
 
-    // ---------------------------------------------------------------------------------
-    #define  MIN_VOLUME 66    // Volume bas (-40 db) pour MP3.SetVolume 
-    #define  MAX_VOLUME 0     // Volume fort  (0 db) pour MP3.SetVolume 
     #define  MAX_STEP  20     // Nombre d'étapes gérées par le mini-séquenceur
 
 #endif // MUSICPLAYERCLASS_H_INCLUDED
