@@ -19,7 +19,8 @@
 */
 
 // ******************************************************************************
-// Constructor : aussi  Adafruit_VS1053_FilePlayer 
+// Constructor : aussi  Adafruit_VS1053_FilePlayer
+// On précise les Pins du bus SPI, qui sont particulières sur les Arduino Mega.
 // ******************************************************************************
 MusicPlayer::MusicPlayer(byte pinMP3_RESET, byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte pinSD_CS) : Adafruit_VS1053_FilePlayer(SPI_MOSI, SPI_MISO, SPI_SCLK, pinMP3_RESET, pinMP3_CS, pinMP3_DCS, pinMP3_DREQ, pinSD_CS)
 {
@@ -96,14 +97,14 @@ void MusicPlayer::playTrack(String filename)
     Serial.println("PlayTrack: "+filename);
 
     // initOk = Adafruit_VS1053_FilePlayer::startPlayingFile("/track001.mp3");
-    // initOk = Adafruit_VS1053_FilePlayer::startPlayingFile(trackName);
-    initOk = Adafruit_VS1053_FilePlayer::currentTrack = SD.open(trackName);
-    Adafruit_VS1053_FilePlayer::currentTrack.seek(mp3_ID3Jumper(currentTrack));
+    initOk = Adafruit_VS1053_FilePlayer::startPlayingFile(trackName);
+    /*initOk = Adafruit_VS1053_FilePlayer::currentTrack = SD.open(trackName);
+    Adafruit_VS1053_FilePlayer::currentTrack.seek(mp3_ID3Jumper(currentTrack));*/
     
     if (initOk) 
     {
       Serial.println(" Playing "+filename);
-      // On les tags ID3 du fichier MP3.
+      // On lit les tags ID3 du fichier MP3.
       Serial.println(F("Read ID3 tags"));
       this->readID3tags();
       Step=1;   // first step
@@ -113,7 +114,9 @@ void MusicPlayer::playTrack(String filename)
       Serial.print(F("Error when trying to play track "));
       Serial.println(filename);
     }
-    this->displayMediaInfo();
+    String T = getTitle();    Serial.println(T);
+    String A = getArtist();   Serial.println(A);
+    String B = getAlbum();    Serial.println(B);
 }
 
 
@@ -161,113 +164,63 @@ void MusicPlayer::restartTrack()
 
 
 // *******************************************************************************
-// Affiche les informations (tags) sur le clip en cours
-// *******************************************************************************
-void MusicPlayer::displayMediaInfo()
-{
-  // Note these buffer may be desired to exist globably. but do take much space if only needed temporarily, hence they are here.
-  char title[30];   // buffer to contain the extract the Title from the current filehandles
-  char album[30];   // buffer to contain the extract the album name from the current filehandles
-  char artist[30];  // buffer to contain the extract the artist name from the current filehandles
-
-  strcpy(title, "Current title");
-  strcpy(artist,"Current artist");
-  strcpy(album, "Current album");
-
-  if (!Adafruit_VS1053_FilePlayer::playingMusic) return;
-
-  //we can get track info by using the following functions and arguments
-  //the functions will extract the requested information, and put it in the array we pass in
-  // trackTitle((char*)&title);
-  // trackArtist((char*)&artist);
-  // trackAlbum((char*)&album);
-
-  //print out the arrays of track information
-  // Serial.print(F(" title:  "));   Serial.write((byte*)&title, 30);  Serial.println();
-  // Serial.print(F(" by:     "));   Serial.write((byte*)&artist,30);  Serial.println();
-  // Serial.print(F(" album:  "));   Serial.write((byte*)&album, 30);  Serial.println();
-
-  Serial.print(F(" title:  "));   Serial.println(title);
-  Serial.print(F(" by:     "));   Serial.println(artist);
-  Serial.print(F(" album:  "));   Serial.println(album);
-}
-
-// *******************************************************************************
-// Récupère le titre (tag) du clip en cours. On tronque à 32
+// Récupère le tag TITLE du clip en cours. Taille=30.
+// Il faut avoir appelé auparavant: readID3tags()
 // *******************************************************************************
 String MusicPlayer::getTitle()
 {
-  String retour;
-  char* infobuffer;
-  ID3tag* pointeur;
+  char infobuffer[32];
+  const byte OFFSET = 3;
+  Serial.println("getTitle");
 
-  // S'il n'y a pas de clip en cours, on revoie un blanc.
-  if (!Adafruit_VS1053_FilePlayer::playingMusic) return " ";
-  // on le fait pointer sur le buffer de 128 chars contenant les tags
-  pointeur = *Buffer;
-  strncpy (infobuffer, pointeur->title, 30);   // on retourne 30 caracteres à partir de offset : TODO
-  /*
-  // On lit le tag TITLE, et on le met dans le Buffer
-  // AdafruitShield.trackTitle((char*)&Buffer);
-  getTrackInfo(TRACK_TITLE, infobuffer);
-  */
+  for (int i=0; i<30;i++) infobuffer[i]=Buffer[i+OFFSET];
+
+  infobuffer[30]=0;
+  //Serial.print('"');Serial.print(infobuffer);Serial.println('"');
   // S'il est vide, on renvoie un blanc.
   if (strlen(infobuffer)==0) return " ";
-  retour = String(infobuffer);
-  retour.remove(32);
+  String retour = String(infobuffer);
+  retour.trim();
   return (retour);
 }
 
 // *******************************************************************************
-// Récupère le nom de l'artiste (tag) du clip en cours
+// Récupère le tag ARTIST du clip en cours. Taille = 30.
+// Il faut avoir appelé auparavant: readID3tags()
 // *******************************************************************************
 String MusicPlayer::getArtist()
 {
-  String retour = " ";
-  char* infobuffer;
-  ID3tag* pointeur;
+  char infobuffer[32];
+  const byte OFFSET = 33;
 
-  // S'il n'y a pas de clip en cours, on revoie un blanc.
-  if (!Adafruit_VS1053_FilePlayer::playingMusic) return " ";
-  // on le fait pointer sur le buffer de 128 chars contenant les tags
-  pointeur = *Buffer;
-  /* strncpy (infobuffer, pointeur->artist, 30);   // on retourne 30 caracteres à partir de offset : TODO*/
-  retour = String(pointeur->artist);
-  /*
-  // On lit le tag ARTIST, et on le met dans le Buffer
-  //AdafruitShield.trackArtist((char*)&Buffer);
-  getTrackInfo(TRACK_ARTIST, infobuffer);
+  for (int i=0; i<30;i++) infobuffer[i]=Buffer[i+OFFSET];
+  infobuffer[30]=0;
+
   // S'il est vide, on renvoie un blanc.
-  if (strlen(Buffer)==0) return " ";
-  retour = String(Buffer);
-  */
-  retour.remove(32);
+  if (strlen(infobuffer)==0) return " ";
+  String retour = String(infobuffer);
+  retour.trim();
   return (retour);
 }
 
 // *******************************************************************************
-// Récupère le nom de l'album (tag) du clip en cours
+// Récupère le tag ALBUM du clip en cours. Taille=30.
+// Il faut avoir appelé auparavant: readID3tags()
 // *******************************************************************************
 String MusicPlayer::getAlbum()
 {
-  String retour;
-  char* infobuffer;
-  
-  // S'il n'y a pas de clip en cours, on revoie un blanc.
-  if (!Adafruit_VS1053_FilePlayer::playingMusic) return " ";
-  // On lit le tag ALBUM, et on le met dans le Buffer
-  //AdafruitShield.trackAlbum((char*)&Buffer);
-  //void SFEMP3Shield::trackArtist(char* infobuffer)
-  getTrackInfo(TRACK_ALBUM, infobuffer);
-  
+  char infobuffer[32];
+  const byte OFFSET = 63;
+
+  for (int i=0; i<30;i++) infobuffer[i]=Buffer[i+OFFSET];
+  infobuffer[30]=0;
+
   // S'il est vide, on renvoie un blanc.
-  if (strlen(Buffer)==0) return " ";
-  // Sinon, on le convertit en String, on tronque à 32 et on le renvoie
-  retour = String(Buffer);
-  retour.remove(32);
+  if (strlen(infobuffer)==0) return " ";
+  String retour = String(infobuffer);
+  retour.trim();
   return (retour);
 }
-
 
 // ******************************************************************************
 // Cette fonction fait un reset sur le chipset de la carte MP3
@@ -279,8 +232,6 @@ void MusicPlayer::resetBoard()
     Serial.println(F(" Reseting VS1053 chipset"));
     Step=0;   // numero de step
 }
-
-
 
 // ******************************************************************************
 // Liste le contenu de la carte SD sur le port série
@@ -328,7 +279,6 @@ void MusicPlayer::printDirectory()
   }
 }
 
-
 // ******************************************************************************
 // Un petit séquenceur d'étapes (de 1 à MAX_STEP). 0 si inactif.
 // Il part de 1 chaque fois qu'un nouveau clip commence à être joué (etat transitoire).
@@ -341,7 +291,6 @@ int MusicPlayer::getStep()
   // Serial.print(F("  Step ")); Serial.print(CurrentStep); Serial.print(F("-->")); Serial.println(Step);
   return Step;
 }
-
 
 // ******************************************************************************
 // Disable interrupts to avoid collisions on the SPI bus between this code 
@@ -367,46 +316,32 @@ void MusicPlayer::resumeDataStream()
 
 
 /* *****************************************************************************************************************
- * Fetch ID3 Tag information
- *    offset : offset for the desired information desired.
- *    infobuffer (output): pointer char array of filename to be read.
- *
- * Read current filehandles offset of track ID3 tag information. Then strip all non readible (ascii) characters.
- * ***************************************************************************************************************** */
-void MusicPlayer::getTrackInfo(uint8_t offset, char* infobuffer)
-{
- strncpy (infobuffer, Buffer, 30);   // on retourne 30 caracteres à partir de offset : TODO
- // TODO : Ajouter un /0 à la fin
- // Remove the non-alpha characters
-// infobuffer = strip_nonalpha_inplace(infobuffer);
- ID3tag* pointeur;
- // on le fait pointer sur le buffer de 128 chars contenant les tags
- pointeur = *Buffer;
- strncpy (infobuffer, pointeur->title, 30);   // on retourne 30 caracteres à partir de offset : TODO
-}
-
-/* *****************************************************************************************************************
- * Elle consiste en un espace de 128 octets placés à la fin du fichier. 
+ *  Lit la zone ID3 du fichier MP3 et la stocke dans un Buffer.
+ * ****************************************************************************************************************** 
+ * La zone destags ID3 est un espace de 128 octets placés à la fin du fichier. 
  * Les 3 premiers octets commencent par la chaîne « TAG », cela permet de trouver le début des informations par les lecteurs MP3. 
  * Le reste des octets est partagé entre les différents champs d'informations. 
- * Les chaînes de caractères doivent être codées en ISO/CEI 8859-1, seuls les caractères de l'alphabet latin peuvent donc être utilisés. 
- * 
- * Offset (en partant du début de la structure)  Taille (en octets)   Description
-    0       3       Identifiant "TAG"
-    3       30      Titre de la chanson
-    33      30      Nom de l'interprète
-    63      30      Nom de l'album
-    93      4       Année de parution
-    97      30      Commentaire sur la chanson
-    127     1       Genre musical (code sur 1 octet)
+ * Les chaînes de caractères doivent être codées en ISO/CEI 8859-1 (alphabet latin). 
+ * En partant du début de la structure:
+ * Offset   Taille (octets)   Description
+      0        3              Identifiant "TAG"
+      3       30              Titre de la chanson
+     33       30              Nom de l'interprète
+     63       30              Nom de l'album
+     93        4              Année de parution
+     97       30              Commentaire sur la chanson
+    127        1              Genre musical (code sur 1 octet)
+ * ****************************************************************************************************************** 
  * Note: this suspends currently playing streams and returns afterwards.
  * Restoring the file position to where it left off, before resuming.
- ******************************************************************************************************************* */
+ * ****************************************************************************************************************** */
 void MusicPlayer::readID3tags()
 {
   unsigned long currentPos;
   unsigned long fileSize;
-  // strcpy (Buffer,"TAGRailroad boy  - - - - - - - --Joan Baez x x x x x x x x x xxIn Concert X X X X X X X X X X1964Commentaires..................1");
+  // strcpy (Buffer,"TAGRailroad boy  - - - - - - - Joan Baez x x x x x x x x x In Concert X X X X X X X X X 1964Commentaires..............1");
+  //                "TAGVariable white noise          David de lorenzo              R⸮alisation & Software        2020                              2"
+
 
   //disable interupts
   // if(playingMusic) disableRefill();
@@ -416,31 +351,34 @@ void MusicPlayer::readID3tags()
   fileSize = Adafruit_VS1053_FilePlayer::currentTrack.size();
   Serial.print("fileSize ");  Serial.println(fileSize);  // Noise.mp3 = (118 634 bytes)
   Serial.print("currentPos ");  Serial.println(currentPos);
-  //skip to end
-  // currentTrack.seekEnd((-128 + offset));
+  // skip to 128 bytes before the end
   currentTrack.seek(fileSize-128);
-  Serial.print("end-128 ");  Serial.println(currentTrack.position());
 
-  //read 30 bytes of tag information at -128 + offset
-  // currentTrack.read(infobuffer, 30);
-  // infobuffer = strip_nonalpha_inplace(infobuffer);
+  // Read 128 bytes of tag information
   currentTrack.read(Buffer, 128);
-  Serial.println("Buffer "); 
-  for (int i=0; i<128;i++){  Serial.print(Buffer[i]); Serial.print(" ");}
-  Serial.println();
+  // Display ID3 tag values:
+  {
+     Serial.println("ID3 tag:"); 
+     for (int i=0; i<127;i++){  Serial.print(Buffer[i]);}
+     Serial.print('[');Serial.print(int(Buffer[127]));Serial.print(']'); // le dernier octet est un code de Genre
+     Serial.println();
+  }
+  // On supprime les éventuels caratères non-latins
+  *Buffer = strip_nonalpha_inplace(*Buffer);
 
   //seek back to saved file position
   currentTrack.seek(currentPos);
 
   //renable interupt
   // if(playingMusic) enableRefill();
-Serial.println("done");
   
 }
 
-/*
-//chomp non printable characters out of string. 
-char* strip_nonalpha_inplace(char *s) 
+/* ********************************************************
+ * Chomp non printable characters out of the string. 
+ * (from VLSI library)
+ * ******************************************************** */
+char* MusicPlayer::strip_nonalpha_inplace(char *s) 
 {
    for ( ; *s && !isalpha(*s); ++s)
      ; // skip leading non-alpha chars
@@ -453,4 +391,4 @@ char* strip_nonalpha_inplace(char *s)
    *++tail = '\0'; // truncate after the last alpha
    return s;
  }
- */
+ 
