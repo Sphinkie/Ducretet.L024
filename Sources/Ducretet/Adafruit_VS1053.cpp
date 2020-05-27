@@ -278,9 +278,10 @@ boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname)
   // resync
   sciWrite(VS1053_REG_WRAMADDR, 0x1e29);
   sciWrite(VS1053_REG_WRAM, 0);
-
+  
   currentTrack = SD.open(trackname);
-  if (!currentTrack) {
+  if (!currentTrack) 
+  {
     return false;
   }
 
@@ -304,19 +305,16 @@ boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname)
   while (! readyForData() ) 
   {
 #if defined(ESP8266)
-	yield();
+	yield();  // Passes control to other tasks when called
 #endif
   }
-
   // fill it up!
   while (playingMusic && readyForData()) 
   {
     feedBuffer();
   }
-
   // ok going forward, we can use the IRQ
   interrupts();
-
   return true;
 }
 

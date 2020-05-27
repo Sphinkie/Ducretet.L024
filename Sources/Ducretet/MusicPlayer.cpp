@@ -18,24 +18,27 @@
        Bouchon      SparkfunShield;
 */
 
-// ******************************************************************************
+// *********************************************************************************
 // Constructor : aussi  Adafruit_VS1053_FilePlayer
-// On précise les Pins du bus SPI, qui sont particulières sur les Arduino Mega.
-// ******************************************************************************
-MusicPlayer::MusicPlayer(byte pinMP3_RESET, byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte pinSD_CS) : Adafruit_VS1053_FilePlayer(SPI_MOSI, SPI_MISO, SPI_SCLK, pinMP3_RESET, pinMP3_CS, pinMP3_DCS, pinMP3_DREQ, pinSD_CS)
+// On précise pas les Pins du bus SPI, car on passe par le connecteur standard ICSP
+// *********************************************************************************
+MusicPlayer::MusicPlayer(byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte pinSD_CS) : Adafruit_VS1053_FilePlayer(-1, 7, 6, 3, 4)
+//    Adafruit_VS1053_FilePlayer(-1, pinMP3_CS, pinMP3_DCS, pinMP3_DREQ, pinSD_CS)
 {
-  // Initialisations
-    Step=0;   // no step
-    pinCard_CS=pinSD_CS;
+    pinCard_CS = pinSD_CS;  // On le mémorise pour plus tard
+    Step       = 0;         // no step
 
-  /********************* Patch ***********************************/
+
+  /*
+  // ******************** Patch ***********************************
   // On a souvent l'erreur:  Can't access SD card. Do not reformat. No card, wrong chip select pin, or SPI problem
   // La solution qui semble marcher est de mettre les pins SS à HIGH( inactif) dès le début. 
   // Sinon les lecteurs SD peuvent recevoir des parasites sur la ligne SPI, et se bloquer...
-/*  pinMode(pinSD_CS, OUTPUT);  digitalWrite(pinSD_CS, HIGH);   
-  pinMode(53, OUTPUT);        digitalWrite(53, HIGH);   // SPI_SS = 53
   */
-  /***************************************************************/
+  pinMode(pinSD_CS, OUTPUT);  digitalWrite(pinSD_CS, HIGH);   
+  pinMode(53, OUTPUT);        digitalWrite(53, HIGH);   // SPI_SS = 53
+  // **************************************************************
+  
 }
 
 
@@ -47,9 +50,8 @@ void MusicPlayer::initialize()
   boolean initOk;
   Serial.println(F("MP3+SD initialization."));
 
-  //Initialize the MP3 Player Shield
+  // Initialize the MP3 Player Shield
   initOk = Adafruit_VS1053_FilePlayer::begin();
-  //check result, see readme for error codes.
   if (initOk) 
   {
     Serial.println(F(" MP3 shield initialized."));
@@ -70,7 +72,7 @@ void MusicPlayer::initialize()
   }
   Serial.println(F(" SD initialized."));
   // list files
-  printDirectory();
+  // printDirectory();
 
   // Set volume for left, right channels. lower numbers == louder volume!
   Adafruit_VS1053_FilePlayer::setVolume(20,20);
@@ -86,24 +88,22 @@ void MusicPlayer::initialize()
 // Cette fonction joue le fichier MP3 demandé (ID sans extension).
 // Le fichier MP3 doit être dans le repertoire /Music.
 // ******************************************************************************
-void MusicPlayer::playTrack(String filename)
+void MusicPlayer::playTrack(String trackName)
 {
     boolean initOk;
-    char    trackName[30]; // Le chemin complet ne doit pas depasser 30 char
+    char    filename[30]; // Le chemin complet ne doit pas depasser 30 char
 
     // Tell the MP3 Shield to play a track
-    filename = String ("/Music/"+filename+".mp3");
-    filename.toCharArray(trackName,30);
-    Serial.println("PlayTrack: "+filename);
+    trackName = String ("/Music/"+trackName+".mp3");
+    trackName = String ("/track002.mp3");       // debug
+    trackName.toCharArray(filename,30);
+    Serial.println("PlayTrack: "+trackName);
 
-    // initOk = Adafruit_VS1053_FilePlayer::startPlayingFile("/track001.mp3");
-    initOk = Adafruit_VS1053_FilePlayer::startPlayingFile(trackName);
-    /*initOk = Adafruit_VS1053_FilePlayer::currentTrack = SD.open(trackName);
-    Adafruit_VS1053_FilePlayer::currentTrack.seek(mp3_ID3Jumper(currentTrack));*/
+    initOk = Adafruit_VS1053_FilePlayer::startPlayingFile(filename);
     
     if (initOk) 
     {
-      Serial.println(" Playing "+filename);
+      Serial.println(" Playing "+trackName);
       // On lit les tags ID3 du fichier MP3.
       Serial.println(F("Read ID3 tags"));
       this->readID3tags();
@@ -111,12 +111,8 @@ void MusicPlayer::playTrack(String filename)
     }
     else
     { 
-      Serial.print(F("Error when trying to play track "));
-      Serial.println(filename);
+      Serial.println("Error when trying to play track "+trackName);
     }
-    String T = getTitle();    Serial.println(T);
-    String A = getArtist();   Serial.println(A);
-    String B = getAlbum();    Serial.println(B);
 }
 
 
@@ -262,6 +258,7 @@ void MusicPlayer::printDirectory()
          {
             // Affiche le contenu des sous-répertoires
             Serial.println("/");
+            Serial.println(F("  **skipping subdir content**"));
             //printDirectory(entry, numTabs+1);
          }
          else 
@@ -277,6 +274,7 @@ void MusicPlayer::printDirectory()
   {
       Serial.println(F("Busy Playing Files, try again later."));
   }
+  dir.close();
 }
 
 // ******************************************************************************
@@ -339,8 +337,8 @@ void MusicPlayer::readID3tags()
 {
   unsigned long currentPos;
   unsigned long fileSize;
-  // strcpy (Buffer,"TAGRailroad boy  - - - - - - - Joan Baez x x x x x x x x x In Concert X X X X X X X X X 1964Commentaires..............1");
-  //                "TAGVariable white noise          David de lorenzo              R⸮alisation & Software        2020                              2"
+  // "TAGRailroad Boy                  Joan Baez                     In Concert                    1961                             [12]"
+  // "TAGVariable white noise          David de lorenzo              R⸮alisation & Software        2020                              [39]"
 
 
   //disable interupts
@@ -349,7 +347,7 @@ void MusicPlayer::readID3tags()
   // save the current position in the file
   currentPos = Adafruit_VS1053_FilePlayer::currentTrack.position();
   fileSize = Adafruit_VS1053_FilePlayer::currentTrack.size();
-  Serial.print("fileSize ");  Serial.println(fileSize);  // Noise.mp3 = (118 634 bytes)
+  Serial.print("fileSize ");  Serial.println(fileSize);            // Noise.mp3 = (118 634 bytes)
   Serial.print("currentPos ");  Serial.println(currentPos);
   // skip to 128 bytes before the end
   currentTrack.seek(fileSize-128);

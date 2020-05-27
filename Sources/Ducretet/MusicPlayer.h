@@ -19,7 +19,7 @@
 class MusicPlayer : public Adafruit_VS1053_FilePlayer
 {
     public:
-        MusicPlayer(byte pinMP3_RESET, byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte pinSD_CS);
+        MusicPlayer(byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte pinSD_CS);
         void   initialize();
         void   playTrack(String filename);
         void   setVolume(int volume);

@@ -26,15 +26,12 @@
 #define MISO 50      // Input data, from VS1053/SD card .. UNO=12  MEGA=50
 #define MOSI 51      // Output data, to VS1053/SD card ... UNO=11  MEGA=51
 
-// These are the pins used for the breakout example
-// DREQ should be an Int pin, see http://arduino.cc/en/Reference/attachInterrupt
 #define SHIELD_RESET    -1     // VS1053 reset pin (output)
 #define SHIELD_CS       7      // VS1053 chip select pin (output) 
 #define SHIELD_DCS      6      // VS1053 Data/command select pin (output) 
 #define CARDCS          4      // Card chip select pin
 #define DREQ            3      // VS1053 Data request, ideally an Interrupt pin
 
-// create breakout-example object
 Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
 
 

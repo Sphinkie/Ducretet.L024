@@ -1,49 +1,48 @@
-/*************************************************** 
-  This is an example for the Adafruit VS1053 Codec Breakout
-
-  Designed specifically to work with the Adafruit VS1053 Codec Breakout 
-  ----> https://www.adafruit.com/products/1381
-
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada for Adafruit Industries.  
-  BSD license, all text above must be included in any redistribution
- ****************************************************/
+/* ************************************************************************************* 
+ * This is an example for the Adafruit VS1053 Codec Breakout
+ *
+ * Designed specifically to work with the Adafruit VS1053 Codec Breakout 
+ * ----> https://www.adafruit.com/products/1381
+ *
+ * Adafruit invests time and resources providing this open source code, 
+ * please support Adafruit and open-source hardware by purchasing 
+ * products from Adafruit!
+ *
+ * Written by Limor Fried/Ladyada for Adafruit Industries.  
+ * BSD license, all text above must be included in any redistribution
+ * *************************************************************************************/
 
 // include SPI, MP3 and SD libraries
 #include <SPI.h>
-#include <Adafruit_VS1053.h>
+#include "Adafruit_VS1053.h"
 #include <SD.h>
 
+// ------------------------------------------------------------------------------
 // define the pins used
-//#define CLK 13       // SPI Clock, shared with SD card
-//#define MISO 12      // Input data, from VS1053/SD card
-//#define MOSI 11      // Output data, to VS1053/SD card
+// ------------------------------------------------------------------------------
 // Connect CLK, MISO and MOSI to hardware SPI pins. 
 // See http://arduino.cc/en/Reference/SPI "Connections"
-
+// ------------------------------------------------------------------------------
+#define CLK           52      // SPI Clock, shared with SD card ... UNO=13  MEGA=52
+#define MISO          50      // Input data, from VS1053/SD card .. UNO=12  MEGA=50
+#define MOSI          51      // Output data, to VS1053/SD card ... UNO=11  MEGA=51
 // These are the pins used for the music maker shield
-#define SHIELD_RESET  -1     // VS1053 reset pin (unused!)
-#define SHIELD_CS     7      // VS1053 chip select pin (output)
-#define SHIELD_DCS    6      // VS1053 Data/command select pin (output)
+#define SHIELD_RESET  -1      // VS1053 reset pin (unused!)
+#define SHIELD_CS      7      // VS1053 chip select pin (output)
+#define SHIELD_DCS     6      // VS1053 Data/command select pin (output)
+#define CARDCS         4      // Card chip select pin
+#define DREQ           3      // VS1053 Data request, ideally an Interrupt pin
 
-// These are common pins between breakout and shield
-#define CARDCS 4     // Card chip select pin
-// DREQ should be an Int pin, see http://arduino.cc/en/Reference/attachInterrupt
-#define DREQ 3       // VS1053 Data request, ideally an Interrupt pin
-
-// create shield-example object!
-Adafruit_VS1053_FilePlayer musicPlayer = 
-  Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
+// create shield object
+Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
 
 
-////
-
+// ------------------------------------------------------------------------------
+// Setup
+// ------------------------------------------------------------------------------
 void setup() 
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("Adafruit VS1053 Library Test");
 
   // initialise the music player
@@ -57,7 +56,8 @@ void setup()
 
   musicPlayer.sineTest(0x44, 500);    // Make a tone to indicate VS1053 is working
  
-  if (!SD.begin(CARDCS)) {
+  if (!SD.begin(CARDCS)) 
+  {
     Serial.println(F("SD failed, or not present"));
     while (1);  // don't do anything more
   }
@@ -71,23 +71,27 @@ void setup()
 
   /***** Two interrupt options! *******/ 
 
-  // Timer int:
+  // Timer interrupt :
   // This option uses timer0, this means timer1 & timer2 are not required
   // (so you can use 'em for Servos, etc) BUT millis() can lose time
   // since we're hitchhiking on top of the millis() tracker.
   // Timer interrupts are not suggested, better to use DREQ interrupt!
   //musicPlayer.useInterrupt(VS1053_FILEPLAYER_TIMER0_INT);
   
-  // DREQ int:
+  // DREQ interrupt :
   // This option uses a pin interrupt. No timers required! But DREQ
   // must be on an interrupt pin. For Uno, that's Digital #2 or #3
   // If DREQ is on an interrupt pin, we can do background audio playing.
   // See http://arduino.cc/en/Reference/attachInterrupt for other pins
   // *** This method is preferred.
+  
   if (! musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT))
     Serial.println(F("DREQ pin is not an interrupt pin"));
 }
 
+// ------------------------------------------------------------------------------
+// Loop
+// ------------------------------------------------------------------------------
 void loop() 
 {  
   // Alternately, we can just play an entire file at once
@@ -114,7 +118,9 @@ void loop()
 }
 
 
-/// File listing helper
+// ------------------------------------------------------------------------------
+// File listing 
+// ------------------------------------------------------------------------------
 void printDirectory(File dir, int numTabs) 
 {
    while(true) 
@@ -145,4 +151,3 @@ void printDirectory(File dir, int numTabs)
      entry.close();
    }
 }
-

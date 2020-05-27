@@ -10,21 +10,22 @@
 // *******************************************************************************
 void CatalogFile::begin()
 {
+  
    // On initialise le Seed du générateur aléatoire avec une valeur chaque fois différente.
    randomSeed(analogRead(0));
 
-   // On cherche le nombre maximum, correspondant à la taille du fichier index.
-   FichierIndex = SD.open("/Catalog.ndx");
-   if (!FichierIndex) 
+   File Cat = SD.open("/Catalog.ndx",FILE_READ);
+   if (!Cat) 
    {
       RandomMax = 0;
-      Serial.println(F("Catalog: Cannot open Catalog.ndx"));
+      Serial.println(F("CatalogFile: Cannot open Catalog.ndx"));
    }
    else
    {
-      RandomMax = FichierIndex.size();
-      FichierIndex.close();
-      Serial.print(" taille Catalog.ndx: "); Serial.println(RandomMax);
+   // On définit le nombre maximum, correspondant à la taille du fichier Catalog.
+      RandomMax = Cat.size();
+      Cat.close();
+      Serial.print(F(" taille Catalog.ndx: ")); Serial.println(RandomMax);
    }
 }
 
