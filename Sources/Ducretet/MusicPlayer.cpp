@@ -11,33 +11,23 @@
  ************************************************************* */
 #include "MusicPlayer.h"
 
-/*
-// Mode simulé
-#include "Bouchon.h"
-       Bouchon      SparkfunSD;
-       Bouchon      SparkfunShield;
-*/
 
 // *********************************************************************************
 // Constructor : aussi  Adafruit_VS1053_FilePlayer
 // On précise pas les Pins du bus SPI, car on passe par le connecteur standard ICSP
+// Appel standard = Adafruit_VS1053_FilePlayer(-1, 7, 6, 3, 4)
 // *********************************************************************************
-MusicPlayer::MusicPlayer(byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte pinSD_CS) : Adafruit_VS1053_FilePlayer(-1, 7, 6, 3, 4)
-//    Adafruit_VS1053_FilePlayer(-1, pinMP3_CS, pinMP3_DCS, pinMP3_DREQ, pinSD_CS)
+MusicPlayer::MusicPlayer(byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte pinSD_CS) : Adafruit_VS1053_FilePlayer(-1, pinMP3_CS, pinMP3_DCS, pinMP3_DREQ, pinSD_CS)
 {
     pinCard_CS = pinSD_CS;  // On le mémorise pour plus tard
     Step       = 0;         // no step
 
-
-  /*
-  // ******************** Patch ***********************************
-  // On a souvent l'erreur:  Can't access SD card. Do not reformat. No card, wrong chip select pin, or SPI problem
-  // La solution qui semble marcher est de mettre les pins SS à HIGH( inactif) dès le début. 
-  // Sinon les lecteurs SD peuvent recevoir des parasites sur la ligne SPI, et se bloquer...
-  */
+  /* Avec la carte Sparkfun, on a souvent l'erreur "Can't access SD card. Do not reformat. No card, wrong chip select pin, or SPI problem."
+   * La solution qui semble marcher est de mettre les pins SS à HIGH (inactif) dès le début. 
+   * Sinon les lecteurs SD peuvent recevoir des parasites sur la ligne SPI, et se bloquer...
+   */
   pinMode(pinSD_CS, OUTPUT);  digitalWrite(pinSD_CS, HIGH);   
-  pinMode(53, OUTPUT);        digitalWrite(53, HIGH);   // SPI_SS = 53
-  // **************************************************************
+  pinMode(53, OUTPUT);        digitalWrite(53, HIGH);          // SPI_SS
   
 }
 
@@ -93,25 +83,29 @@ void MusicPlayer::playTrack(String trackName)
     boolean initOk;
     char    filename[30]; // Le chemin complet ne doit pas depasser 30 char
 
-    // Tell the MP3 Shield to play a track
+    // On convertit de String en char[30], avec chemin complet et extension.
     trackName = String ("/Music/"+trackName+".mp3");
     trackName = String ("/track002.mp3");       // debug
     trackName.toCharArray(filename,30);
-    Serial.println("PlayTrack: "+trackName);
 
+    // on lit les tag avant de jouer le fichier
+    File mp3file = SD.open(filename);
+    Serial.println(F("Read ID3 tags"));
+    this->readID3tags(mp3file);
+    mp3file.close();
+
+    // Tell the MP3 Shield to play a track
     initOk = Adafruit_VS1053_FilePlayer::startPlayingFile(filename);
     
     if (initOk) 
     {
       Serial.println(" Playing "+trackName);
-      // On lit les tags ID3 du fichier MP3.
-      Serial.println(F("Read ID3 tags"));
-      //this->readID3tags();
       Step=1;   // first step
     }
     else
     { 
       Serial.println("Error when trying to play track "+trackName);
+      Step=0;
     }
 }
 
@@ -144,6 +138,7 @@ void MusicPlayer::stopTrack()
    // Stop the current track
    Serial.println(F("  Stopping mp3"));
    Adafruit_VS1053_FilePlayer::stopPlaying();
+   Buffer.fill(0);    // On vide le buffer des tags ID3
    Step=0;   // step number
 }
 
@@ -333,7 +328,7 @@ void MusicPlayer::resumeDataStream()
  * Note: this suspends currently playing streams and returns afterwards.
  * Restoring the file position to where it left off, before resuming.
  * ****************************************************************************************************************** */
-void MusicPlayer::readID3tags()
+void MusicPlayer::readID3tags(File mp3file)
 {
   unsigned long currentPos;
   unsigned long fileSize;
@@ -345,15 +340,15 @@ void MusicPlayer::readID3tags()
   if (Adafruit_VS1053_FilePlayer::playingMusic) noInterrupts();
   
   // save the current position in the file
-  currentPos = Adafruit_VS1053_FilePlayer::currentTrack.position();
-  fileSize = Adafruit_VS1053_FilePlayer::currentTrack.size();
+  currentPos = mp3file.position();
+  fileSize = mp3file.size();
   Serial.print("fileSize ");  Serial.println(fileSize);            // Noise.mp3 = (118 634 bytes)
   Serial.print("currentPos ");  Serial.println(currentPos);
   // skip to 128 bytes before the end
-  currentTrack.seek(fileSize-128);
+  mp3file.seek(fileSize-128);
 
   // Read 128 bytes of tag information
-  currentTrack.read(Buffer, 128);
+  mp3file.read(Buffer, 128);
   // Display ID3 tag values:
   {
      Serial.println("ID3 tag:"); 
@@ -365,11 +360,10 @@ void MusicPlayer::readID3tags()
   *Buffer = strip_nonalpha_inplace(*Buffer);
 
   //seek back to saved file position
-  currentTrack.seek(currentPos);
+  mp3file.seek(currentPos);
 
   // renable interrupts
   if (Adafruit_VS1053_FilePlayer::playingMusic) interrupts();
-  
 }
 
 /* ********************************************************

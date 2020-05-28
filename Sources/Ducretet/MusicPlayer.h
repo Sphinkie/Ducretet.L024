@@ -7,13 +7,13 @@
 #define MUSICPLAYERCLASS_H_INCLUDED
 
 #include "Adafruit_VS1053.h"
-
+/*
 // ------------------ Pour SPI
   #define SPI_MISO   50     // D50  input  
   #define SPI_MOSI   51     // D51  output 
   #define SPI_SCLK   52     // D52  output 
   #define SPI_SS     53     // D53  input  (configuré en output car Master)
-
+*/
   #define  MAX_STEP  20     // Nombre d'étapes gérées par le mini-séquenceur
 
 class MusicPlayer : public Adafruit_VS1053_FilePlayer
@@ -36,13 +36,13 @@ class MusicPlayer : public Adafruit_VS1053_FilePlayer
         void   resumeDataStream();
 
     private:
-        void   readID3tags();
+        void   readID3tags(File mp3file);
         char*  strip_nonalpha_inplace(char *s);
 
     // Private Member Variables:
         int    Step;
         byte   pinCard_CS;
-        char   Buffer[128];   // Buffer to contain the extracted Tag from the current MP3 file
+        char   Buffer[128] = {0};   // Buffer to contain the extracted Tag from the current MP3 file. Inizialized with zeros.
 };
 
 
