@@ -106,7 +106,7 @@ void MusicPlayer::playTrack(String trackName)
       Serial.println(" Playing "+trackName);
       // On lit les tags ID3 du fichier MP3.
       Serial.println(F("Read ID3 tags"));
-      this->readID3tags();
+      //this->readID3tags();
       Step=1;   // first step
     }
     else
@@ -341,8 +341,8 @@ void MusicPlayer::readID3tags()
   // "TAGVariable white noise          David de lorenzo              R⸮alisation & Software        2020                              [39]"
 
 
-  //disable interupts
-  // if(playingMusic) disableRefill();
+  // disable interrupts
+  if (Adafruit_VS1053_FilePlayer::playingMusic) noInterrupts();
   
   // save the current position in the file
   currentPos = Adafruit_VS1053_FilePlayer::currentTrack.position();
@@ -367,8 +367,8 @@ void MusicPlayer::readID3tags()
   //seek back to saved file position
   currentTrack.seek(currentPos);
 
-  //renable interupt
-  // if(playingMusic) enableRefill();
+  // renable interrupts
+  if (Adafruit_VS1053_FilePlayer::playingMusic) interrupts();
   
 }
 
