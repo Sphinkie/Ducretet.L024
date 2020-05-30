@@ -11,6 +11,7 @@
  ************************************************************* */
 #include "MusicPlayer.h"
 
+#define DEBUG
 
 // *********************************************************************************
 // Constructor : aussi  Adafruit_VS1053_FilePlayer
@@ -28,7 +29,6 @@ MusicPlayer::MusicPlayer(byte pinMP3_CS, byte pinMP3_DCS, byte pinMP3_DREQ, byte
    */
   pinMode(pinSD_CS, OUTPUT);  digitalWrite(pinSD_CS, HIGH);   
   pinMode(53, OUTPUT);        digitalWrite(53, HIGH);          // SPI_SS
-  
 }
 
 
@@ -71,7 +71,16 @@ void MusicPlayer::initialize()
   initOk=Adafruit_VS1053_FilePlayer::useInterrupt(VS1053_FILEPLAYER_PIN_INT);
   if (!initOk)
     Serial.println(F("MP3_DREQ pin is not an interrupt pin"));
+}
 
+// ******************************************************************************
+// Reglage du volume audio (0 à 255). Valeur haute = volume faible.
+// input values are -1/2dB. e.g. 40 results in -20dB.  ( 0dB = max volume)
+// ******************************************************************************
+void MusicPlayer::setVolume(int volume)
+{
+    // push byte into both left and right assuming equal balance.
+    Adafruit_VS1053_FilePlayer::setVolume(volume,volume);
 }
 
 // ******************************************************************************
@@ -81,21 +90,18 @@ void MusicPlayer::initialize()
 void MusicPlayer::playTrack(String trackName)
 {
     boolean initOk;
-    char    filename[30]; // Le chemin complet ne doit pas depasser 30 char
 
     // On convertit de String en char[30], avec chemin complet et extension.
     trackName = String ("/Music/"+trackName+".mp3");
-    trackName = String ("/track002.mp3");       // debug
-    trackName.toCharArray(filename,30);
+    trackName.toCharArray(this->filename,30);
 
     // on lit les tag avant de jouer le fichier
-    File mp3file = SD.open(filename);
-    Serial.println(F("Read ID3 tags"));
+    File mp3file = SD.open(this->filename);
     this->readID3tags(mp3file);
     mp3file.close();
 
     // Tell the MP3 Shield to play a track
-    initOk = Adafruit_VS1053_FilePlayer::startPlayingFile(filename);
+    initOk = Adafruit_VS1053_FilePlayer::startPlayingFile(this->filename);
     
     if (initOk) 
     {
@@ -111,26 +117,6 @@ void MusicPlayer::playTrack(String trackName)
 
 
 // ******************************************************************************
-// Renvoie TRUE si la carte est en train de jouer. FALSE sinon.
-// ******************************************************************************
-bool MusicPlayer::isPlaying()
-{
-   return (Adafruit_VS1053_FilePlayer::playingMusic);
-}
-
-
-// ******************************************************************************
-// Reglage du volume audio (0 à 255). Valeur haute = volume faible.
-// input values are -1/2dB. e.g. 40 results in -20dB.  ( 0dB = max volume)
-// ******************************************************************************
-void MusicPlayer::setVolume(int volume)
-{
-    // push byte into both left and right assuming equal balance.
-    Adafruit_VS1053_FilePlayer::setVolume(volume,volume);
-}
-
-
-// ******************************************************************************
 // Stoppe la lecture du fichier mp3
 // ******************************************************************************
 void MusicPlayer::stopTrack()
@@ -138,8 +124,8 @@ void MusicPlayer::stopTrack()
    // Stop the current track
    Serial.println(F("  Stopping mp3"));
    Adafruit_VS1053_FilePlayer::stopPlaying();
-   Buffer.fill(0);    // On vide le buffer des tags ID3
-   Step=0;   // step number
+   memset(Buffer, '\0', 128);    // On vide le buffer des tags ID3
+   Step=0;                       // step number
 }
 
 // ******************************************************************************
@@ -149,8 +135,18 @@ void MusicPlayer::restartTrack()
 {
    // Restart the current track
    Serial.println(F("  Restarting mp3"));
-   Adafruit_VS1053_FilePlayer::startPlayingFile(0);  // TODO
+   Adafruit_VS1053_FilePlayer::stopPlaying();
+   Adafruit_VS1053_FilePlayer::startPlayingFile(this->filename);
    Step=0;   // step number
+}
+
+
+// ******************************************************************************
+// Renvoie TRUE si la carte est en train de jouer. FALSE sinon.
+// ******************************************************************************
+bool MusicPlayer::isPlaying()
+{
+   return (Adafruit_VS1053_FilePlayer::playingMusic);
 }
 
 
@@ -162,7 +158,6 @@ String MusicPlayer::getTitle()
 {
   char infobuffer[32];
   const byte OFFSET = 3;
-  Serial.println("getTitle");
 
   for (int i=0; i<30;i++) infobuffer[i]=Buffer[i+OFFSET];
 
@@ -224,7 +219,129 @@ void MusicPlayer::resetBoard()
     Step=0;   // numero de step
 }
 
+
 // ******************************************************************************
+// Un petit séquenceur d'étapes (de 1 à MAX_STEP). 0 si inactif.
+// Il part de 1 chaque fois qu'un nouveau clip commence à être joué (etat transitoire).
+// ******************************************************************************
+int MusicPlayer::getStep()
+{
+   int CurrentStep = Step;
+   if (CurrentStep > 0) Step++;
+   if (Step > MAX_STEP) Step=0;
+#ifdef DEBUG   
+   if (CurrentStep!=0) {Serial.print(F("Step ")); Serial.print(CurrentStep); Serial.print(F("-->")); Serial.println(Step);}
+#endif
+   return Step;
+}
+
+// ******************************************************************************
+// Disable interrupts to avoid collisions on the SPI bus between this code 
+// and the AdafruitShield library.
+// These functions make sure there will be no data collisions on the SPI bus 
+// caused by the MP3 decoder asking for more data at the wrong time. 
+// You need to wrap any SPI code you add to your project with these two functions.
+// ******************************************************************************
+void MusicPlayer::pauseDataStream()
+{
+  noInterrupts();
+  // Adafruit_VS1053_FilePlayer::feedBufferLock=false;
+}
+
+// ******************************************************************************
+// Enable interrupts.
+// Note: you can not stop the data stream to the MP3 Shield for too long 
+//       before it runs out of data so be careful and try not to do too much stuff in between the functions.
+// ******************************************************************************
+void MusicPlayer::resumeDataStream()
+{
+  interrupts();
+  // Adafruit_VS1053_FilePlayer::feedBufferLock=true;
+}
+
+
+/* *****************************************************************************************************************
+ *  Lit la zone ID3v1 du fichier MP3 et la stocke dans un Buffer.
+ *  l'alimentation du stream audio est inhibé pendant cette phase.
+ * ****************************************************************************************************************** 
+ * https://id3.org/id3v1
+ * https://id3.org/d3v2.3.0
+ * ****************************************************************************************************************** 
+ * La zone des tags ID3v1 est un espace de 128 octets placés à la fin du fichier. 
+ * Les 3 premiers octets commencent par la chaîne « TAG ». 
+ * Le reste des octets constitue des champs d'informations de taille fixe. 
+ * Les chaînes de caractères doivent être codées en ISO/CEI 8859-1 (alphabet latin). 
+ * Offset   Taille (octets)   Description
+      0        3              Identifiant "TAG"
+      3       30              Titre de la chanson
+     33       30              Nom de l'interprète
+     63       30              Nom de l'album
+     93        4              Année de parution
+     97       30              Commentaire sur la chanson
+    127        1              Genre musical (code sur 1 octet)
+ * ****************************************************************************************************************** */
+void MusicPlayer::readID3tags(File mp3file)
+{
+  unsigned long currentPos;
+  unsigned long fileSize;
+  // "TAGRailroad Boy                  Joan Baez                     In Concert                    1961                             [12]"
+  // "TAGVariable white noise          David de lorenzo              R⸮alisation & Software        2020                              [39]"
+  Serial.println(F("Read ID3v1 tags"));
+
+  // Disable interrupts
+  if (Adafruit_VS1053_FilePlayer::playingMusic) noInterrupts();
+  
+  // Save the current position in the file
+  currentPos = mp3file.position();
+  fileSize   = mp3file.size();
+  mp3file.seek(fileSize-128);    // Go to 128 bytes before the end
+  mp3file.read(Buffer, 128);     // Read 128 bytes of tag information
+#ifdef DEBUG
+  {
+     // Display ID3 tag values:
+     Serial.println("ID3 tag:"); 
+     for (int i=0; i<127;i++){  Serial.print(Buffer[i]);}
+     Serial.print('[');Serial.print(int(Buffer[127]));Serial.print(']'); // le dernier octet est un code de Genre
+     Serial.println();
+     for (int i=0; i<128;i++){  Serial.print(int(Buffer[i]),HEX); ;Serial.print(' '); }
+     Serial.println();
+  }
+#endif
+
+  // Restore previous saved file position
+  mp3file.seek(currentPos);
+  // Re-enable interrupts
+  if (Adafruit_VS1053_FilePlayer::playingMusic) interrupts();
+  // Si on a des tags ID3v1 présents dans le MP3
+  if (strncmp(Buffer,"TAG",3))
+      // Si différent, on remet le Buffer à 0x00
+      memset(Buffer, '\0', 128);
+  else
+      // Si identique, on supprime les éventuels caractères non-latins
+      *Buffer = strip_nonalpha_inplace(*Buffer);
+
+  
+}
+
+/* ********************************************************
+ * Chomp non printable characters out of the string. 
+ * (from VLSI library)
+ * ******************************************************** */
+char* MusicPlayer::strip_nonalpha_inplace(char *s) 
+{
+   for ( ; *s && !isalpha(*s); ++s)
+     ; // skip leading non-alpha chars
+   if(*s == '\0')
+     return s; // there are no alpha characters
+ 
+   char *tail = s + strlen(s);
+   for ( ; !isalpha(*tail); --tail)
+     ; // skip trailing non-alpha chars
+   *++tail = '\0'; // truncate after the last alpha
+   return s;
+ }
+
+ // ******************************************************************************
 // Liste le contenu de la carte SD sur le port série
 // ******************************************************************************
 void MusicPlayer::printDirectory()
@@ -271,116 +388,3 @@ void MusicPlayer::printDirectory()
   }
   dir.close();
 }
-
-// ******************************************************************************
-// Un petit séquenceur d'étapes (de 1 à MAX_STEP). 0 si inactif.
-// Il part de 1 chaque fois qu'un nouveau clip commence à être joué (etat transitoire).
-// ******************************************************************************
-int MusicPlayer::getStep()
-{
-  int CurrentStep = Step;
-  if (CurrentStep > 0) Step++;
-  if (Step > MAX_STEP) Step=0;
-  // Serial.print(F("  Step ")); Serial.print(CurrentStep); Serial.print(F("-->")); Serial.println(Step);
-  return Step;
-}
-
-// ******************************************************************************
-// Disable interrupts to avoid collisions on the SPI bus between this code 
-// and the AdafruitShield library.
-// These functions make sure there will be no data collisions on the SPI bus 
-// caused by the MP3 decoder asking for more data at the wrong time. 
-// You need to wrap any SPI code you add to your project with these two functions.
-// ******************************************************************************
-void MusicPlayer::pauseDataStream()
-{
-  Adafruit_VS1053_FilePlayer::pausePlaying(true);
-}
-
-// ******************************************************************************
-// Enable interrupts.
-// Note: you can not stop the data stream to the MP3 Shield for too long 
-//       before it runs out of data so be careful and try not to do too much stuff in between the functions.
-// ******************************************************************************
-void MusicPlayer::resumeDataStream()
-{
-  Adafruit_VS1053_FilePlayer::pausePlaying(false);
-}
-
-
-/* *****************************************************************************************************************
- *  Lit la zone ID3 du fichier MP3 et la stocke dans un Buffer.
- * ****************************************************************************************************************** 
- * La zone destags ID3 est un espace de 128 octets placés à la fin du fichier. 
- * Les 3 premiers octets commencent par la chaîne « TAG », cela permet de trouver le début des informations par les lecteurs MP3. 
- * Le reste des octets est partagé entre les différents champs d'informations. 
- * Les chaînes de caractères doivent être codées en ISO/CEI 8859-1 (alphabet latin). 
- * En partant du début de la structure:
- * Offset   Taille (octets)   Description
-      0        3              Identifiant "TAG"
-      3       30              Titre de la chanson
-     33       30              Nom de l'interprète
-     63       30              Nom de l'album
-     93        4              Année de parution
-     97       30              Commentaire sur la chanson
-    127        1              Genre musical (code sur 1 octet)
- * ****************************************************************************************************************** 
- * Note: this suspends currently playing streams and returns afterwards.
- * Restoring the file position to where it left off, before resuming.
- * ****************************************************************************************************************** */
-void MusicPlayer::readID3tags(File mp3file)
-{
-  unsigned long currentPos;
-  unsigned long fileSize;
-  // "TAGRailroad Boy                  Joan Baez                     In Concert                    1961                             [12]"
-  // "TAGVariable white noise          David de lorenzo              R⸮alisation & Software        2020                              [39]"
-
-
-  // disable interrupts
-  if (Adafruit_VS1053_FilePlayer::playingMusic) noInterrupts();
-  
-  // save the current position in the file
-  currentPos = mp3file.position();
-  fileSize = mp3file.size();
-  Serial.print("fileSize ");  Serial.println(fileSize);            // Noise.mp3 = (118 634 bytes)
-  Serial.print("currentPos ");  Serial.println(currentPos);
-  // skip to 128 bytes before the end
-  mp3file.seek(fileSize-128);
-
-  // Read 128 bytes of tag information
-  mp3file.read(Buffer, 128);
-  // Display ID3 tag values:
-  {
-     Serial.println("ID3 tag:"); 
-     for (int i=0; i<127;i++){  Serial.print(Buffer[i]);}
-     Serial.print('[');Serial.print(int(Buffer[127]));Serial.print(']'); // le dernier octet est un code de Genre
-     Serial.println();
-  }
-  // On supprime les éventuels caratères non-latins
-  *Buffer = strip_nonalpha_inplace(*Buffer);
-
-  //seek back to saved file position
-  mp3file.seek(currentPos);
-
-  // renable interrupts
-  if (Adafruit_VS1053_FilePlayer::playingMusic) interrupts();
-}
-
-/* ********************************************************
- * Chomp non printable characters out of the string. 
- * (from VLSI library)
- * ******************************************************** */
-char* MusicPlayer::strip_nonalpha_inplace(char *s) 
-{
-   for ( ; *s && !isalpha(*s); ++s)
-     ; // skip leading non-alpha chars
-   if(*s == '\0')
-     return s; // there are no alpha characters
- 
-   char *tail = s + strlen(s);
-   for ( ; !isalpha(*tail); --tail)
-     ; // skip trailing non-alpha chars
-   *++tail = '\0'; // truncate after the last alpha
-   return s;
- }
- 

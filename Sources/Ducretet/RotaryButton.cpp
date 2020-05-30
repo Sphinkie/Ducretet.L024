@@ -1,11 +1,21 @@
 /* ***********************************************************
  *  Gestion de Bouton de type Commutateur Rotatif
  *  
+ * INPUT:
+ *   Pushbutton attached to pin N from +5V
+ *   10K resistor attached to pin N from Ground. 
+ *   Cela permet que les entrées au repos (normaly open) soient à la masse.
+ *   
+ * For debuging, you can add in your code:
+ *   #define DEBUG
+ *   #define DEBUG_ROTVALUE   1    // Value returned by Rotary Button in debug mode
  ************************************************************* */
 #include "Arduino.h"
 #include "RotaryButton.h"
      
-        
+#define DEBUG
+#define DEBUG_ROTVALUE   1    // Value returned by Rotary Button in Debug mode
+
 // ****************************************************************        
 // Constructeur
 //    4pin max => 4 positions max.
@@ -37,10 +47,13 @@ int Rotary::readPosition()
 {
   LastValue=Value;
   Value=0;
-  if (digitalRead(Pin1)==HIGH) Value=1;
-  if (digitalRead(Pin2)==HIGH) Value=2;
+  if ((Pin3!=0) && (digitalRead(Pin1)==HIGH)) Value=1;
+  if ((Pin3!=0) && (digitalRead(Pin2)==HIGH)) Value=2;
   if ((Pin3!=0) && (digitalRead(Pin3)==HIGH)) Value=3;
   if ((Pin4!=0) && (digitalRead(Pin4)==HIGH)) Value=4;
+  #ifdef DEBUG
+  Value=DEBUG_ROTVALUE;
+  #endif
   if (Value != LastValue) Changed=true;
   return Value;
 }

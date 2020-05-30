@@ -26,7 +26,7 @@ Media::Media()
 void Media::fillWith(String medialine, long nextmediaposition)
 {
   // Serial.print("  fillWith: "); Serial.println (medialine);
-  if (medialine.length()<18) 
+  if (medialine.length()<18)         // Cela comprend "" et "ERROR" et "EOF"
   {
     // Si la ligne est trop courte pour être exploitable, on met les valeurs par défaut
     this->Field1 = "0000";

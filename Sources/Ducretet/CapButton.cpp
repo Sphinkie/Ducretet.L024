@@ -12,6 +12,11 @@
 #include "Arduino.h"
 #include "CapButton.h"
 
+#define DEBUG
+#define DEBUG_CAPMESUR 250    // Average value (+/-5) measured by Capacity Button in Debug mode (not normalized)
+
+
+
 // *******************************************************************************
 // Constructor
 // *******************************************************************************
@@ -36,11 +41,11 @@ CapButton::CapButton(int in_pin, int out_pin)
 // *******************************************************************************
 // Initialisations
 // *******************************************************************************
-void CapButton::begin()
+void CapButton::initialize()
 {
   this->dischargeCapacitor();
   // On dépoussière en lisant quelques premières valeurs
-  this->captureMeanValue();
+  this->_captureMeanValue();
 }
 
 // *******************************************************************************
@@ -53,12 +58,12 @@ int CapButton::readValue(bool debug = false)
   LastValue=Value;
 
   // On mesure la valeur courante (moyenne de plusieurs captures)
-  Value = this->captureMeanValue();
+  Value = this->_captureMeanValue();
   // Au debut, on aligne les 3 valeurs de l'historique
   if (PrevPrevValue==0) PrevPrevValue=LastValue=Value;
 
   // On détermine les variations
-  int Variation = abs(Value-LastValue);
+  int Variation         = abs(Value-LastValue);
   int PreviousVariation = abs(LastValue-PrevPrevValue);
   int GlobalVariation   = abs(Value-PrevPrevValue);
   
@@ -118,13 +123,25 @@ bool CapButton::hasChanged()
   }
   return ChangedAndStabilized;
 }
-        
+
+// *******************************************************************************
+// Décharge la Capa en mettant les deux pins à LOW (=GND)
+// *******************************************************************************
+void CapButton::dischargeCapacitor()
+{
+   pinMode(Pin_Out, OUTPUT);
+   pinMode(Pin_In,  OUTPUT);
+   digitalWrite(Pin_In,  LOW);
+   digitalWrite(Pin_Out, LOW);
+   delay (200);
+}
+
 // *******************************************************************************
 // Effectue plusieurs mesures pour obtenir une valeur estimée.
 //   ecart   = ecart entre chaque mesure (en ms)
-// On la normalise [entre 0 et 1023].
+//   retour  = valeur de la mesure, normalisée [entre 0 et 1023].
 // *******************************************************************************
-int CapButton::captureMeanValue(int ecart=4)
+int CapButton::_captureMeanValue(int ecart=4)
 {
   int  nbsamples =11;  // prendre un nombre impair
   int  index_mediane = (int)(nbsamples/2)+1;
@@ -135,7 +152,7 @@ int CapButton::captureMeanValue(int ecart=4)
   // On met les mesures dans un tableau
   for (int i=0; i<nbsamples; i++)
   {
-     tableau[i] = this->chargeAndMesure();
+     tableau[i] = this->_chargeAndMesure();
      delay(ecart);
   }
 
@@ -150,7 +167,7 @@ int CapButton::captureMeanValue(int ecart=4)
    */
   
   mediane = tableau[index_mediane];
-  value=this->normalizeValue(mediane);
+  value=this->_normalizeValue(mediane);
   // Serial.print(F("  mediane= ")); Serial.print(mediane);
   // Serial.print(F("  valeur lue calibree= "));  Serial.print(value);
   return (value);
@@ -160,7 +177,7 @@ int CapButton::captureMeanValue(int ecart=4)
 // Effectue une lecture de Pin_In (mesure théoriquement entre 0 et 1023).
 // On envoie une impulsion sur Pin_Out et 0.1ms plus tard, on lit la valeur de Pin_In
 // *******************************************************************************
-int CapButton::chargeAndMesure()
+int CapButton::_chargeAndMesure()
 {
    int measure;
    // On génère un Front Montant (charge) sur Pin_Out
@@ -171,42 +188,32 @@ int CapButton::chargeAndMesure()
    // On redescend le niveau sur Pin_Out (le creneau a duré 0.1 ms)
    digitalWrite(Pin_Out, LOW);
    pinMode(Pin_In, OUTPUT);
-
- return (measure);
+#ifdef DEBUG
+   measure = random(DEBUG_CAPMESUR-2, DEBUG_CAPMESUR+2);
+#endif
+   return (measure);
 }
 
-
 // *******************************************************************************
-// Décharge la Capa en mettant les deux pins à LOW (=GND)
+// Normalise la valeur.
+// Etale la mesure qui est comprise entre MIN_MESURE et MAX_MESURE en une valeur comprise entre 0 et 1023
 // *******************************************************************************
-void CapButton::dischargeCapacitor()
-{
-   pinMode(Pin_Out, OUTPUT);
-   pinMode(Pin_In,  OUTPUT);
-   digitalWrite(Pin_In,  LOW);
-   digitalWrite(Pin_Out, LOW);
-   delay (200);
-}
-
-
-// *******************************************************************************
-// Normalise la valeur
-// *******************************************************************************
-int CapButton::normalizeValue(float value)
+int CapButton::_normalizeValue(float value)
 {
   // Normalisation linéaire inversée:
-  value = MAX_VALUE - value;
+  value = MAX_MESURE - value;
   value = value * FACTOR;
+  /*
   // Normalisation logarithmique:
-  // value = log10(value-MIN_VALUE);  // value varie entre 1.2 et 2.3
-  // value = (value-1)*755;           // on étale entre 0 et 1023
+  value = log10(value-MIN_MESURE);  // value varie entre 1.2 et 2.3
+  value = (value-1)*755;            // on étale entre 0 et 1023     
+  */
   // Gestion des limites:
   value = max(0,value);
   value = min(value,1023);
 
   return (int(value));
 }
-
 
 // *******************************************************************************
 // Fonction statique de tri pour Qsort (tri de tableau)

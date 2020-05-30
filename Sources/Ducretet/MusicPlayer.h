@@ -42,6 +42,7 @@ class MusicPlayer : public Adafruit_VS1053_FilePlayer
     // Private Member Variables:
         int    Step;
         byte   pinCard_CS;
+        char   filename[30];        // Chemin complet du clip (ne doit pas depasser 30 char)
         char   Buffer[128] = {0};   // Buffer to contain the extracted Tag from the current MP3 file. Inizialized with zeros.
 };
 

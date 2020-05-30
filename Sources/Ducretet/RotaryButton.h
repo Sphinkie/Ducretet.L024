@@ -1,10 +1,6 @@
 /* ***********************************************************
  *  Gestion de Bouton de type Commutateur Rotatif
  *  
- * mode INPUT:
- *   Pushbutton attached to pin N from +5V
- *   10K resistor attached to pin N from Ground. 
- *   Cela permet que les entrées au repos (normaly open) soient à la masse.
  ************************************************************* */
 
 #ifndef ROTARYCLASS_H_INCLUDED

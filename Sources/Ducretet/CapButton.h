@@ -17,7 +17,7 @@ class CapButton
 {
     public:
         CapButton(int in_pin,int out_pin);
-        void   begin();
+        void   initialize();
         int    readValue(bool debug = false);
         int    getValue();
         int    getLastValue();
@@ -25,11 +25,11 @@ class CapButton
         void   dischargeCapacitor();
         
     private:
-        int    captureMeanValue(int ecart=4);
-        int    chargeAndMesure();
-        int    normalizeValue(float value);
+        int    _captureMeanValue(int ecart=4);
+        int    _chargeAndMesure();
+        int    _normalizeValue(float value);
         
-    //variables:
+    // Private member variables:
         int   Value;
         int   LastValue;
         int   PrevPrevValue;
@@ -37,10 +37,10 @@ class CapButton
         bool  Stabilized;
         int   Pin_In,Pin_Out;
 
-        const float MIN_VALUE = 30.0;   // la valeur la plus petite, jamais mesurée.
-        const float MAX_VALUE = 400.0;  // la valeur la plus grande, jamais mesurée.
+        const float MIN_MESURE = 30.0;   // la valeur la plus petite, jamais mesurée.
+        const float MAX_MESURE = 400.0;  // la valeur la plus grande, jamais mesurée.
         // le FACTOR sert à normaliser les mesures
-        const float FACTOR = 1023.0/(MAX_VALUE-MIN_VALUE);   // 2.76
+        const float FACTOR = 1023.0/(MAX_MESURE-MIN_MESURE);   // 2.76
         // Le status hasChanged est positionné si la variation est supérieure à l'imprecision
         const int  IMPRECISION = 3*FACTOR;                   // 8.00
         // On considère que la valeur est stable une fois qu'elle ne varie plus que dans +/- STABILITY

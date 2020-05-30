@@ -43,13 +43,13 @@ class Bouchon
         // void clearPicto();
         // char requestStatus();
         void  clearBackground()         {};
-        void  printTitle(String texte)  {};
-        void  printArtist(String texte) {};
-        void  printAlbum(String texte)  {};
-        void  printYear(String texte)   {};
-        void  printGenre(String texte)  {};
-        void  printLog(String texte)    {};
-        void  printStars(String texte)  {};
+        void  printTitle(String texte)  {Serial.println("'"+texte+"'");};
+        void  printArtist(String texte) {Serial.println("'"+texte+"'");};
+        void  printAlbum(String texte)  {Serial.println("'"+texte+"'");};
+        void  printYear(String texte)   {Serial.println("'"+texte+"'");};
+        void  printGenre(String texte)  {Serial.println("'"+texte+"'");};
+        void  printLog(String texte)    {Serial.println("'"+texte+"'");};
+        void  printStars(String texte)  {Serial.println("'"+texte+"'");};
         void  clearAllText()            {};
         void  setBacklight(bool on)     {};
         // ------------------------- 

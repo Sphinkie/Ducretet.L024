@@ -4,26 +4,27 @@
  *
  ************************************************************************************************ */
 
-//   typedef void (*voidFuncPtr)(void);
-
    // -----------------------------------------------------
-   // Declaration des fonctions Interrupt forward 
+   // Declaration des fonctions Interrupt Forward 
    // -----------------------------------------------------
    void ISR_NextButton();
    void ISR_AgainButton();
 //   void ISR_PromoteButton();
 
    // -----------------------------------------------------
-   // Constantes
+   // Boutons Poussoirs
    // -----------------------------------------------------
    #define _IDLE    0
    #define _NEXT    1
    #define _AGAIN   2
-   #define _PROMOTE 3
+//   #define _PROMOTE 3
 
    // -----------------------------------------------------
    // Valeurs retournées par ROTARY BUTTON
    // -----------------------------------------------------
-   #define RANDOM  3
-   #define GENRE   2
-   #define YEAR    1
+   #define GENRE   1
+   #define YEAR    2
+   #define BEAT    3
+   #define RANDOM  4
+   #define RATING  5  // pour Radial-V uniquement
+   

@@ -30,6 +30,8 @@ Ne pas hésiter à donner des étoiles (*Rating*) aux différents morceaux.
 
 * Lancer "**TransfertFiles.bat**"
 
+* **Ejecter** la carte SD du PC, et l'insérer dans le shield "*MP3 Player*".
+
 ## Format du fichier Catalogue
 
 | Année (4 chars) | Hash (8 chars) | Genre | Rating (1 char) |Beat|

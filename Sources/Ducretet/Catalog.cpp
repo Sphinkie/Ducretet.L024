@@ -39,7 +39,7 @@ void Catalog::takeClip()
 {
   CurrentMedia=NextMediaToPlay;       // Take clip
   NextMediaToPlay.fillWith("",0);     // NOISE
-  Serial.println("  takeClip: "+CurrentMedia.getID());
+  Serial.println("takeClip: "+CurrentMedia.getID());
   SearchInProgress=true;              // On continue la recherche là où elle s'était arrêtée.
 }
 
@@ -68,24 +68,26 @@ void Catalog::selectRandomClip()
 
   // Si aucune recherche n'est demandée ou en cours: on sort.
   if (!SearchInProgress) return;
+  Serial.println(F("  selectRandomClip"));
+  
+  // On mémorise l'ID du media trouvé précédemment
+  LastMedia_ID = NextMediaToPlay.getID();
   
   // On ouvre le catalogue au hasard, de façon à trouver une position initiale viable.
   FileAccessOK = CatalogFile::openCatalogAtRandomPosition();
   // En cas d'erreur d'ouverture du fichier, on renvoie "NOISE"
-  if (!FileAccessOK) this->NextMediaToPlay.fillWith("",0); // NOISE
-  medialine       = CatalogFile::readNextLine();
-  CurrentPosition = CatalogFile::getCurrentPosition();
-  CatalogFile::closeCatalog(); 
-
-  if ((medialine=="ERROR") || (medialine=="EOF"))
+  if (FileAccessOK) 
   {
-     NextMediaToPlay.fillWith("",0);   // Noise
+      medialine       = CatalogFile::readNextLine();
+      CurrentPosition = CatalogFile::getCurrentPosition();
+      CatalogFile::closeCatalog();      
+      NextMediaToPlay.fillWith(medialine,CurrentPosition);
   }
-
-  // On a trouvé une ligne valide.
+  else
+  {
+      this->NextMediaToPlay.fillWith("",0); // NOISE
+  }
   // On extrait l'ID du media trouvé et du précédent
-  LastMedia_ID = NextMediaToPlay.getID();
-  NextMediaToPlay.fillWith(medialine,CurrentPosition);
   NextMedia_ID = NextMediaToPlay.getID();
   if (LastMedia_ID==NextMedia_ID) 
     // Si on est tombé 2 fois sur le même ID, on met du Noise
@@ -94,8 +96,7 @@ void Catalog::selectRandomClip()
     // Sinon, la recherche est terminée.
     SearchInProgress=false;
   
-  Serial.print(F("  Found: ")); Serial.println (NextMediaToPlay.getID());
-
+  Serial.print(F("  Found a random clip: ")); Serial.println (NextMediaToPlay.getID());
 }
 
 
@@ -117,9 +118,10 @@ void Catalog::initSearchForRequestedGenre()
     FirstMediaForRequestedGenre.isValid(false);
     Serial.print(F("  New CurrentPositionG="));  Serial.println(CurrentPositionG);
 }
+
 // *******************************************************************************
 // Recherche un media de RequestedGenre à partir de la deniere position
-// Positionne NextMediaToPlay une fois le media trouvé.
+// Positionne NextMediaToPlay et SearchInProgress une fois le media trouvé.
 // *******************************************************************************
 void Catalog::searchClipForRequestedGenre()
 {
@@ -130,7 +132,6 @@ void Catalog::searchClipForRequestedGenre()
                                   genre, 
                                   Plexi.Genre);
 }
-
 /* *******************************************************************************
  * MODE YEAR:
  *          Step 1: on se positionne sur le premier media du catalogue (1 appel)
@@ -208,13 +209,24 @@ void Catalog::searchClipForRequestedRating()
 }
 
 
-
 /* *******************************************************************************
- * Fonction de recherche générale (test)
+ * Fonction de recherche générale
+ * ******************************************************************************* 
  * Params:
  *   StartingPosition = Là où commencer la recherche
- *   Le first Media, sur lequel se replier en cas de EOF (passage par référence, car on va le modifier)
- *   RequestedValue = La valeur textuelle à chercher dans le catalogue
+ *   first Media      = Media  sur lequel se replier en cas de EOF (passage par référence, car on va le modifier)
+ *   SearchType       = le type de recherche (rating|genre|year)
+ *   RequestedValue   = La valeur textuelle à chercher dans le catalogue
+ * ******************************************************************************* 
+ * Si le Media est trouvé:
+ *    NextMediaToPlay  positionné
+ *    SearchInProgress passe a false
+ * Si rien de trouvé lors de ce passage:
+ *    NextMediaToPlay  garde sa valeur précédente
+ *    SearchInProgress reste à true
+ * Si on arrive au bout de la decade ou du genre ou du fichier:
+ *    NextMediaToPlay  reçoit first_media
+ *    SearchInProgress passe a false
  * ******************************************************************************* */
 long Catalog::searchClipInCatalog(long starting_position, Media &first_media, SearchType search_type, String requested_value)
 {
@@ -290,10 +302,10 @@ long Catalog::searchClipInCatalog(long starting_position, Media &first_media, Se
           first_media=CursorMedia;
           Serial.print(F("  first_media set to: "));Serial.println(first_media.getID());
         }
-        // On retourne le media trouvé
+        // On mémorise le media trouvé
         NextMediaToPlay=CursorMedia;
         SearchInProgress=false; // La recherche est terminée
-        Serial.println("  Found: "+NextMediaToPlay.getID());
+        Serial.print(F("  Found next media to play: "));Serial.println(NextMediaToPlay.getID());
         break;
      }
      // ----------------------------------------------
@@ -314,7 +326,7 @@ long Catalog::searchClipInCatalog(long starting_position, Media &first_media, Se
      if ((search_type==year) && (CursorMedia.getYear()>Plexi.RangeEnd) )
      {
         // Si on a depassé la fin de la période, alors on rewinde.
-        Serial.println("  End of decade. Rewinding to : "+first_media.getID());
+        Serial.print(F("  End of decade. Rewinding to : ")); Serial.println(first_media.getID());
         NextMediaToPlay  = first_media;
         CurrentPositionY = first_media.getNextMediaPosition();
         SearchInProgress=false;
