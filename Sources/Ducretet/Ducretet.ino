@@ -18,8 +18,6 @@
  *
  *************************************************************************************************** 
  * 0.1  19/02/2020  version initiale - Basée sur RADIAL-V. Read ID3 tags in MP3 file.
- * 0.2  27/05/2020  Playing a MP3 file
- * 0.3  30/05/2020  Manage Modes
   *************************************************************************************************** 
 */
 
@@ -87,9 +85,9 @@ Bouchon  RemoteTFT;  // RemoteDisplay
 //SelfReturnButton   AgainButton(AGAIN,     &ISR_AgainButton);
 //SelfReturnButton   NextButton(NEXT,       &ISR_NextButton);
 
-volatile int       Action = _IDLE;             // variable de type volatile, utilisable par les ISR
-String             MusicFile;                  // ID du clip MP3 en cours
-String             NextMusicFile;              // ID du prochain clip MP3 à jouer
+volatile int       Action = _IDLE;          // variable de type volatile, utilisable par les ISR
+String             MusicFile;               // ID du clip MP3 en cours
+String             NextMusicFile;           // ID du prochain clip MP3 à jouer
 
 
 // *******************************************************************************
@@ -147,6 +145,7 @@ void setup()
     Serial.println(F("================================="));
     RemoteTFT.setSlavePresent(USE_TWO_ARDUINO);
 */
+  //  MP3Player.playTrack("NOISE");   // On commence par jouer Noise
 }
 
 
@@ -216,10 +215,11 @@ void loop()
             {
                switch (ModeButton.getValue())
                {
-                   case 1: RemoteTFT.printTitle(F("Rech. parmi les favoris")); break;
-                   case 2: RemoteTFT.printTitle(F("Rech. par année"));         break;
-                   case 3: RemoteTFT.printTitle(F("Rech. par genre"));         break;
-                   case 4: RemoteTFT.printTitle(F("Rech. aléatoire"));         break;
+                   case FAV: RemoteTFT.printTitle(F("Rech. parmi les favoris")); break;
+                   case YEAR: RemoteTFT.printTitle(F("Rech. par année"));         break;
+                   case BEAT: RemoteTFT.printTitle(F("Rech. aléatoire"));         break;
+                   case GENRE: RemoteTFT.printTitle(F("Rech. par genre"));         break;
+                   case RANDOM: RemoteTFT.printTitle(F("Rech. aléatoire"));         break;
                }
             }
             else
@@ -315,9 +315,10 @@ void initClipSearch()
       MP3Player.pauseDataStream();
       switch (ModeButton.getValue())
       {
-          case YEAR  : Catalogue.initSearchForRequestedYear();         break;
-          case GENRE : Catalogue.initSearchForRequestedGenre();        break;
-          //case RATING: Catalogue.initSearchForRequestedRating();     break;
+          case YEAR  : Catalogue.initSearchForRequestedYear();       break;
+          case BEAT  : Catalogue.initSearchForRequestedBeat();       break;
+          case GENRE : Catalogue.initSearchForRequestedGenre();      break;
+          //case RATING: Catalogue.initSearchForRequestedRating();   break;
       }
       MP3Player.resumeDataStream();
       digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
@@ -330,13 +331,14 @@ void searchNextClip()
 {
     // On lit la position du bouton de reglage, pour le cas où il aurait changé au cours du clip précédent
     int tuning = TuneButton.readValue();
-    Serial.print(F(" >searchNextClip for mode ")); Serial.print(ModeButton.getValue());
+    //Serial.print(F(" >searchNextClip for mode ")); Serial.print(ModeButton.getValue());
 
     digitalWrite(LED_1,LOW); // Allume la Led témoin SPI BUSY
     MP3Player.pauseDataStream();
     switch (ModeButton.getValue())
     {
         case YEAR  : Catalogue.searchClipForRequestedYear();         break;
+        case BEAT  : Catalogue.searchClipForRequestedBeat();        break;
         case GENRE : Catalogue.searchClipForRequestedGenre();        break;
         //case RATING: Catalogue.searchClipForRequestedRating();     break;
         case RANDOM: Catalogue.selectRandomClip();                   break; 
@@ -346,7 +348,7 @@ void searchNextClip()
 }
 
 // *******************************************************************************
-// Envoie un message à l'Arduino Slave, pour afficher le mode demandé
+//Affiche le mode demandé
 // *******************************************************************************
 void displayRequestedMode()
 {
@@ -365,6 +367,9 @@ void displayRequestedMode()
                 ModeMessage += "-";
                 ModeMessage += String(Catalogue.Plexi.RangeEnd);
                  break;
+         case BEAT:
+                ModeMessage = "Tempo: " + Catalogue.Plexi.Genre;            
+                break;
          case GENRE:
                 ModeMessage = "Genre: " + Catalogue.Plexi.Genre;            
                 break;

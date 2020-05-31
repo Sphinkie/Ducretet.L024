@@ -27,6 +27,7 @@ class Plexiglass
         int           RangeStart;            // Début de la période associée au bouton Tuning (ex: 1960)
         int           RangeEnd;              // Fin de la période associée au bouton Tuning (ex: 1970)
         int           Rating;                // Le Rating associé au bouton Tunnig
+        String        Beat;                  // Le BPM associé au bouton Tunnig
 
 };
 

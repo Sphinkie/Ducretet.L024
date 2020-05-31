@@ -27,4 +27,5 @@
    #define BEAT    3
    #define RANDOM  4
    #define RATING  5  // pour Radial-V uniquement
+   #define FAV     6  // pour Radial-V uniquement
    

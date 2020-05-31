@@ -81,6 +81,7 @@ void Catalog::selectRandomClip()
       medialine       = CatalogFile::readNextLine();
       CurrentPosition = CatalogFile::getCurrentPosition();
       CatalogFile::closeCatalog();      
+      Serial.println(F("close Catalog.ndx"));
       NextMediaToPlay.fillWith(medialine,CurrentPosition);
   }
   else
@@ -104,21 +105,20 @@ void Catalog::selectRandomClip()
  * MODE GENRE:
  *          Step 1: on se positionne sur un media random du catalogue (1 appel)
  *          Step 2: à partir de là, on cherche un media avec le RequestedGenre (N appels)
- * *******************************************************************************
- * Initialisation des recherches de clip pour les genres.
- * Cette fonction initialise CurrentPositionG.
  * ******************************************************************************* */
+// Initialisation des recherches de clip pour les genres.
+// Cette fonction initialise CurrentPositionG.
+// ******************************************************************************* 
 void Catalog::initSearchForRequestedGenre()
 {
     Serial.println(F(" initSearchForRequestedGenre"));
     // On ouvre le catalogue au hasard, de façon à trouver une position initiale viable.
     CurrentPositionG = CatalogFile::getRandomPosition();
-    // On peut demarrer la recherche
+    // On démarre la recherche
     SearchInProgress=true;
     FirstMediaForRequestedGenre.isValid(false);
     Serial.print(F("  New CurrentPositionG="));  Serial.println(CurrentPositionG);
 }
-
 // *******************************************************************************
 // Recherche un media de RequestedGenre à partir de la deniere position
 // Positionne NextMediaToPlay et SearchInProgress une fois le media trouvé.
@@ -132,15 +132,48 @@ void Catalog::searchClipForRequestedGenre()
                                   genre, 
                                   Plexi.Genre);
 }
+
+/* *******************************************************************************
+ * MODE BEAT:
+ *          Step 1: on se positionne sur un media random du catalogue (1 appel)
+ *          Step 2: à partir de là, on cherche un media avec le RequestedBeat (N appels)
+ * ******************************************************************************* */
+// Initialisation des recherches de clip pour les genres.
+// Cette fonction initialise CurrentPositionBeat.
+// ******************************************************************************* 
+void Catalog::initSearchForRequestedBeat()
+{
+    Serial.println(F(" initSearchForRequestedBeat"));
+    // On ouvre le catalogue au hasard, de façon à trouver une position initiale viable.
+    CurrentPositionBeat = CatalogFile::getRandomPosition();
+    // On démarre la recherche
+    SearchInProgress=true;
+    FirstMediaForRequestedBeat.isValid(false);
+    Serial.print(F("  New CurrentPositionBeat="));  Serial.println(CurrentPositionBeat);
+}
+// *******************************************************************************
+// Recherche un media de RequestedBeat à partir de la deniere position
+// Positionne NextMediaToPlay et SearchInProgress une fois le media trouvé.
+// *******************************************************************************
+void Catalog::searchClipForRequestedBeat()
+{
+    if (SearchInProgress) 
+      CurrentPositionBeat = this->searchClipInCatalog(
+                                  CurrentPositionBeat,
+                                  FirstMediaForRequestedBeat, 
+                                  beat, 
+                                  Plexi.Beat);
+}
+
 /* *******************************************************************************
  * MODE YEAR:
  *          Step 1: on se positionne sur le premier media du catalogue (1 appel)
  *          Step 2: à partir de là, on cherche un media avec le RequestedYear (N appels)
  *          (Le premier Step2 va demander N appels, les suivants: 1 appel)
- * *******************************************************************************
- * Initialisation des recherches de clip pour une année donnée.
- * Il faut appeler cette méthode lorsque l'année demandée change, ou que l'on vient de basculer sur le mode "YEAR".
  * ******************************************************************************* */
+// Initialisation des recherches de clip pour une année donnée.
+// Il faut appeler cette méthode lorsque l'année demandée change, ou que l'on vient de basculer sur le mode "YEAR".
+// ******************************************************************************* 
 void Catalog::initSearchForRequestedYear()
 {
   Serial.print(F(" initSearchForRequestedYear ")); Serial.println(Plexi.Year);
@@ -293,6 +326,7 @@ long Catalog::searchClipInCatalog(long starting_position, Media &first_media, Se
      // ----------------------------------------------
      if (search_type==rating) Found = CursorMedia.hasRating(requested_value);
      if (search_type==genre)  Found = CursorMedia.hasGenre(requested_value);
+     if (search_type==beat)   Found = CursorMedia.hasGenre(requested_value);
      if (search_type==year)   Found = CursorMedia.hasYearBetween(requested_value.toInt(), Plexi.RangeEnd);
      if (Found)
      {

@@ -9,9 +9,9 @@
 #include "Plexiglass.h"
 #include "Media.h"
 
-#define SEARCH_PACKET 100    // Nombre de lignes du catalogue que l'on parcourt à chaque seconde.
+#define SEARCH_PACKET 160    // Nombre de lignes du catalogue que l'on parcourt à chaque seconde.
 
-typedef enum {genre, year, rating} SearchType;
+typedef enum {genre, year, rating, beat} SearchType;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------
@@ -27,18 +27,21 @@ class Catalog : CatalogFile
         void   removeStar();
         void   addStar();
         // Initialisation des recherches
-        void   initSearchForRequestedGenre();
         void   initSearchForRequestedYear();
+        void   initSearchForRequestedBeat();
+        void   initSearchForRequestedGenre();
         void   initSearchForRequestedRating();
-        // Recherche d'un clip (fonction itératives)
+        // Recherche d'un clip (fonctions itératives)
         void   selectRandomClip();
-        void   searchClipForRequestedGenre();
         void   searchClipForRequestedYear();
+        void   searchClipForRequestedBeat();
+        void   searchClipForRequestedGenre();
         void   searchClipForRequestedRating();
         // recupération des infos du clip sélectionné
         String getSelectedClipID();
-        String getSelectedClipGenre();
         String getSelectedClipYear();
+        String getSelectedClipBeat();
+        String getSelectedClipGenre();
         String getSelectedClipRating();
 
     private:              
@@ -58,14 +61,17 @@ class Catalog : CatalogFile
         Media         FirstMediaForRequestedYear;    // Premier Media du catalogue ayant la date demandée
         Media         FirstMediaForRequestedGenre;   // Premier Media ayant le genre demandé
         Media         FirstMediaForRequestedRating;  // Premier Media ayant le rating demandé
+        Media         FirstMediaForRequestedBeat;    // Premier Media ayant le BPM demandé
 
 		    // Les curseurs dans le catalogue
-        long          FirstcurrentPositionY; // curseur de debut de décade (mode YEAR)
-        long          FirstcurrentPositionG; // curseur de debut de genre  (mode GENRE)
+        long          FirstcurrentPositionY;    // curseur de debut de décade (mode YEAR)
+        long          FirstcurrentPositionG;    // curseur de debut de genre  (mode GENRE)
+        long          FirstcurrentPositionBeat; // curseur de debut de Beat   (mode BEAT)
         
         long          CurrentPositionY;      // curseur pour le mode YEAR
         long          CurrentPositionG;      // curseur pour le mode GENRE
         long          CurrentPositionR;      // curseur pour le mode RATING
+        long          CurrentPositionBeat;   // curseur pour le mode BEAT
 
 };
 

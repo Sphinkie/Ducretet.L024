@@ -99,6 +99,7 @@ long CatalogFile::getRandomPosition()
     this->openCatalogAtRandomPosition();
     long pos = FichierIndex.position();
     FichierIndex.close();
+    Serial.println (F("close Catalog.ndx"));
     return pos;
 }
 

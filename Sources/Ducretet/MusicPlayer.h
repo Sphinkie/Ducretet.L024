@@ -7,14 +7,8 @@
 #define MUSICPLAYERCLASS_H_INCLUDED
 
 #include "Adafruit_VS1053.h"
-/*
-// ------------------ Pour SPI
-  #define SPI_MISO   50     // D50  input  
-  #define SPI_MOSI   51     // D51  output 
-  #define SPI_SCLK   52     // D52  output 
-  #define SPI_SS     53     // D53  input  (configuré en output car Master)
-*/
-  #define  MAX_STEP  20     // Nombre d'étapes gérées par le mini-séquenceur
+
+#define  MAX_STEP  16     // Nombre d'étapes gérées par le mini-séquenceur
 
 class MusicPlayer : public Adafruit_VS1053_FilePlayer
 {
