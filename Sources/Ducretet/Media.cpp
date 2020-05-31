@@ -57,8 +57,9 @@ void Media::fillWith(String medialine, long nextmediaposition)
   if (this->Field2.length()==0) this->Field2="NOISE";
   if (this->Field3.length()==0) this->Field3="-";
   if (this->Field4.length()==0) this->Field4="-";
+  if (this->Field5.length()==0) this->Field5="-";
 
-  // On positionne à TRUE si le Field3 est dans la WhiteList
+  // On positionne WhiteListed à TRUE si le Field3 est dans la WhiteList
   this->WhiteListed = (GenreWhiteList.indexOf(this->Field3)>=0); 
 }
 
@@ -69,6 +70,7 @@ int    Media::getYear()                {return Field1.toInt();}
 String Media::getID()                  {return Field2;}
 String Media::getGenre()               {return Field3;}
 int    Media::getRating()              {return Field4.toInt();}
+int    Media::getBeat()                {return Field5.toInt();}
 bool   Media::isValid()                {return Valid;}
 void   Media::isValid(bool validity)   {Valid=validity;}
 long   Media::getNextMediaPosition()   {return NextMediaPosition;}
@@ -119,6 +121,23 @@ bool Media::hasRating(String rating)
   else 
     // sinon on compare 
     return (this->Field4.equals(rating));
+}
+
+// *******************************************************************************
+// Renvoie TRUE si le BPM du média est egal au BPM demandé (+/- 10%).
+// *******************************************************************************
+bool Media::hasBeat(String beat)
+{
+  Serial.println ("hasBeat "+beat);
+  int bpm     = beat.toInt();
+  int bpm_min = this->Field5.toInt()*0.9;
+  int bpm_max = this->Field5.toInt()*1.1;
+  if (bpm<bpm_min)
+    return false;
+  else if (bpm>bpm_max)
+    return false;
+  else
+    return true;
 }
 
 // *******************************************************************************

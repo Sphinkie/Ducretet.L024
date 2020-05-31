@@ -105,7 +105,7 @@ void setup()
     while (!Serial) { ; } // wait for serial port to connect. Needed for native USB port only
   
     Serial.println(F("================================="));
-    Serial.println(F("==    DUCRETET     v0.3        =="));
+    Serial.println(F("==    DUCRETET     v0.4        =="));
     Serial.println(F("================================="));
     Serial.print  (F("CPU Frequency: ")); Serial.print(F_CPU/1000000); Serial.println(F(" MHz"));
     Serial.print  (F("Free RAM: "));      Serial.print(FreeRam(),DEC); Serial.println(F(" bytes"));
@@ -217,7 +217,7 @@ void loop()
                {
                    case FAV: RemoteTFT.printTitle(F("Rech. parmi les favoris")); break;
                    case YEAR: RemoteTFT.printTitle(F("Rech. par année"));         break;
-                   case BEAT: RemoteTFT.printTitle(F("Rech. aléatoire"));         break;
+                   case BEAT: RemoteTFT.printTitle(F("Rech. par tempo"));         break;
                    case GENRE: RemoteTFT.printTitle(F("Rech. par genre"));         break;
                    case RANDOM: RemoteTFT.printTitle(F("Rech. aléatoire"));         break;
                }
@@ -230,16 +230,18 @@ void loop()
             }
             break;
     case 4: // On affiche la suite des infos du clip issues du fichier Catalog
-            Serial.println(F("  Display Year+Genre from Catalog"));
+            Serial.println(F("  Display Year+Genre+Beat from Catalog"));
             if (MusicFile == "NOISE") 
             {
                RemoteTFT.printYear(" ");
                RemoteTFT.printGenre(" ");
+               RemoteTFT.printBeat(" ");
             }
             else
             {
                 RemoteTFT.printYear(Catalogue.getSelectedClipYear());
                 RemoteTFT.printGenre(Catalogue.getSelectedClipGenre());
+                RemoteTFT.printBeat(Catalogue.getSelectedClipBeat());
             }
             break;
     case 5: // On determine le nombre d'étoiles et on l'affiche.

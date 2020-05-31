@@ -47,6 +47,7 @@ class Bouchon
         void  printArtist(String texte) {Serial.println("'"+texte+"'");};
         void  printAlbum(String texte)  {Serial.println("'"+texte+"'");};
         void  printYear(String texte)   {Serial.println("'"+texte+"'");};
+        void  printBeat(String texte)   {Serial.println("'"+texte+"'");};
         void  printGenre(String texte)  {Serial.println("'"+texte+"'");};
         void  printLog(String texte)    {Serial.println("'"+texte+"'");};
         void  printStars(String texte)  {Serial.println("'"+texte+"'");};

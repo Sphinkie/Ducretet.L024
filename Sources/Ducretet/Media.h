@@ -15,6 +15,7 @@ class Media
         void   setRating(int rating);
         // Getters
         int    getYear();
+        int    getBeat();
         String getID();
         String getGenre();
         int    getRating();
@@ -25,6 +26,7 @@ class Media
         void   isValid(bool validity);
         bool   hasRating(String rating);
         bool   hasGenre(String genre);
+        bool   hasBeat(String beat);
         bool   hasYearBetween(int YearStart, int YearEnd);
         // Operateur d'affectation
         Media& operator=(const Media& media_source);

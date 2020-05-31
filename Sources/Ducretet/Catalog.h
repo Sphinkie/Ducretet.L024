@@ -64,14 +64,14 @@ class Catalog : CatalogFile
         Media         FirstMediaForRequestedBeat;    // Premier Media ayant le BPM demandé
 
 		    // Les curseurs dans le catalogue
-        long          FirstcurrentPositionY;    // curseur de debut de décade (mode YEAR)
-        long          FirstcurrentPositionG;    // curseur de debut de genre  (mode GENRE)
-        long          FirstcurrentPositionBeat; // curseur de debut de Beat   (mode BEAT)
+//      long          FirstcurrentPositionYear;  // curseur de debut de décade (mode YEAR)
+//      long          FirstcurrentPositionGenre;     // curseur de debut de Genre
+//      long          FirstcurrentPositionBeat;  // curseur de debut de Beat
         
-        long          CurrentPositionY;      // curseur pour le mode YEAR
-        long          CurrentPositionG;      // curseur pour le mode GENRE
-        long          CurrentPositionR;      // curseur pour le mode RATING
-        long          CurrentPositionBeat;   // curseur pour le mode BEAT
+        long          CurrentPositionYear;       // curseur pour le mode YEAR
+        long          CurrentPositionGenre;          // curseur pour le mode GENRE
+        long          CurrentPositionRating;     // curseur pour le mode RATING
+        long          CurrentPositionBeat;       // curseur pour le mode BEAT
 
 };
 
