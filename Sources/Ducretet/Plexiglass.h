@@ -14,6 +14,7 @@ class Plexiglass
   private:
         String getGenreLabel(int tuning);
         int    getYearValue(int tuning);
+        int    getBeatValue(int tuning);
         int    getStarsValue(int tuning);
         // debuggage
         void   debugGenre();

@@ -24,6 +24,7 @@ void Plexiglass::setTuning(int tuning)
   this->Genre  = this->getGenreLabel(tuning);   // La valeur du genre demandé
   this->Year   = this->getYearValue(tuning);    // La valeur de l'année demandée
   this->Rating = this->getStarsValue(tuning);   // La valeur du rating demandé
+  this->Beat   = this->getBeatValue(tuning);    // La valeur du BPM demandé
 }
 
 // *********************************************************************
@@ -85,6 +86,40 @@ int Plexiglass::getYearValue(int tuning)
   if (tuning < 860)       {RangeStart=1990; RangeEnd=2000; return map(tuning, 840, 860,RangeStart,RangeEnd); }   // 1990...2000
   if (tuning < 1023)      {RangeStart=2000; RangeEnd=2050; return map(tuning, 860,1023,RangeStart,RangeEnd); }   // 2000...2050
 }
+
+// *********************************************************************
+// Renvoie le Beat correspondant à la position du bouton TUNE
+// *********************************************************************
+int Plexiglass::getBeatValue(int tuning)
+{
+  /*
+   map(value, fromLow, fromHigh, toLow, toHigh)
+   Parameters:
+     value   : the number to map.
+     fromLow : the lower bound of the value’s current range.
+     fromHigh: the upper bound of the value’s current range.
+     toLow   : the lower bound of the value’s target range.
+     toHigh  : the upper bound of the value’s target range.
+  */
+/*  
+  if (tuning < 100 )      {RangeStart=0;    RangeEnd=20; return map(tuning, 860,1023,RangeStart,RangeEnd); }  
+  if (tuning < 200)       {RangeStart=0;    RangeEnd=1700; return map(tuning,   0, 270,RangeStart,RangeEnd); }   
+  if (tuning < 400)       {RangeStart=1700; RangeEnd=1800; return map(tuning, 270, 360,RangeStart,RangeEnd); }   
+  if (tuning < 500)       {RangeStart=1800; RangeEnd=1900; return map(tuning, 360, 410,RangeStart,RangeEnd); }   
+  if (tuning < 600)       {RangeStart=1960; RangeEnd=1970; return map(tuning, 600, 700,RangeStart,RangeEnd); }   
+  if (tuning < 700)       {RangeStart=1970; RangeEnd=1980; return map(tuning, 700, 790,RangeStart,RangeEnd); }   
+  if (tuning < 800)       {RangeStart=1980; RangeEnd=1990; return map(tuning, 790, 840,RangeStart,RangeEnd); }   
+  if (tuning < 900)       {RangeStart=1980; RangeEnd=1990; return map(tuning, 790, 840,RangeStart,RangeEnd); }   
+  if (tuning < 1023)       {RangeStart=1990; RangeEnd=2000; return map(tuning, 840, 860,RangeStart,RangeEnd); }   
+*/
+}
+/* 00.......40 Larghissimo  60................80 adagio          100 .................. 128 allegretto
+ *      Gravemente                   Adagissimo
+ *          40..............60 largo       76....................100 andante   112.................160 allegro      188 prestissimo
+ *                Lentissimo(48)                          Andantino 
+ *                     52........68 lento            88...................112 moderato       140 vivace 140..................200 presto
+ *                            Adagietto                                                               Vivacissimo   
+ */
 
 
 // *******************************************************************************

@@ -256,6 +256,9 @@ void loop()
             // On baisse l'intensité de l'affichage
             RemoteTFT.setBacklight(false);
             break;
+    case 15: // STOP (DEBUG)
+            //MP3Player.stopTrack();
+            break;
    }
 
 /*       

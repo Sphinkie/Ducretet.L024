@@ -190,12 +190,12 @@ void Catalog::initSearchForRequestedYear()
   FirstMediaForRequestedYear.isValid(false);
   Serial.print(F("  New CurrentPositionYear="));  Serial.println(CurrentPositionYear);
 }
-/* *******************************************************************************
- * Renvoie le clip suivant dans l'index, correspondant à une periode allant 
- * de l'année sélectionnée à la fin de la période.
- * La fin de la période est définie dans getYearValue().
- * L'index (ordonné) Catalog.ndx permet d'avancer d'année en année.
- * ******************************************************************************* */
+// *******************************************************************************
+// Renvoie le clip suivant dans l'index, correspondant à une période allant 
+// de l'année sélectionnée à la fin de la période.
+// La fin de la période est définie dans getYearValue().
+// L'index (ordonné) Catalog.ndx permet d'avancer d'année en année.
+// ******************************************************************************* 
 void Catalog::searchClipForRequestedYear()
 {
       if (SearchInProgress) 
@@ -211,10 +211,11 @@ void Catalog::searchClipForRequestedYear()
  * MODE RATING:
  *          Step 1: on se positionne sur un media random du catalogue (1 appel)
  *          Step 2: à partir de là, on cherche un media avec le Rating demandé (N appels)
- * *******************************************************************************
- * Initialisation des recherches de clip pour un Rating donné.
- * Il faut appeler cette méthode à chaque fois qu'un clip commence pour initier la recherche du suivant
  * ******************************************************************************* */
+// ******************************************************************************* 
+// Initialisation des recherches de clip pour un Rating donné.
+// Il faut appeler cette méthode à chaque fois qu'un clip commence pour initier la recherche du suivant
+// ******************************************************************************* 
 void Catalog::initSearchForRequestedRating()
 {
     Serial.print(F(" initSearchForRequestedRating ")); Serial.println(Plexi.Rating);
@@ -332,6 +333,7 @@ long Catalog::searchClipInCatalog(long starting_position, Media &first_media, Se
      if (search_type==genre)  Found = CursorMedia.hasGenre(requested_value);
      if (search_type==beat)   Found = CursorMedia.hasBeat(requested_value);
      if (search_type==year)   Found = CursorMedia.hasYearBetween(requested_value.toInt(), Plexi.RangeEnd);
+     Serial.print("  ?:"+CursorMedia.getID()+"-"); Serial.print(CursorMedia.getYear());Serial.print("-NextPos:");Serial.println(CurrentPosition);
      if (Found)
      {
         // Si on a trouvé notre FirstMedia: on le mémorise
@@ -355,6 +357,7 @@ long Catalog::searchClipInCatalog(long starting_position, Media &first_media, Se
         if (!first_media.isValid()) 
         {
           first_media=CursorMedia;
+          first_media.isValid(true);
           Serial.print(F("  first_media set to Start of Decade: "));Serial.println(first_media.getID());
         }
      }
@@ -366,7 +369,7 @@ long Catalog::searchClipInCatalog(long starting_position, Media &first_media, Se
         // Si on a depassé la fin de la période, alors on rewinde.
         Serial.print(F("  End of decade. Rewinding to : ")); Serial.println(first_media.getID());
         NextMediaToPlay  = first_media;
-        CurrentPositionYear = first_media.getNextMediaPosition();
+        CurrentPosition = first_media.getNextMediaPosition();
         SearchInProgress=false;
         break;
      }
