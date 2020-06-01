@@ -8,8 +8,10 @@ La préparation nécessite l'application freeware MP3Tag "*The universal Tag Edi
 
 ### Tags
 
-Les tags MP3 doivent être bien renseignés, en particulier: **Titre, Artiste, Album, Genre, Année**.
+Les tags MP3 doivent être bien renseignés, en particulier: **Titre, Artiste, Album, Genre, Année, BPM**.
 Ne pas hésiter à donner des étoiles (*Rating*) aux différents morceaux.
+
+Pour renseigner les BPM, lancer l'utilitaire **Pistonsoft BPM Detector**. Sélection le répertoire des musiques. Attendre qu'il ait fini son analyse.Save.
 
 ### Préparation
 

@@ -216,10 +216,10 @@ void loop()
                switch (ModeButton.getValue())
                {
                    case FAV: RemoteTFT.printTitle(F("Rech. parmi les favoris")); break;
-                   case YEAR: RemoteTFT.printTitle(F("Rech. par année"));         break;
-                   case BEAT: RemoteTFT.printTitle(F("Rech. par tempo"));         break;
-                   case GENRE: RemoteTFT.printTitle(F("Rech. par genre"));         break;
-                   case RANDOM: RemoteTFT.printTitle(F("Rech. aléatoire"));         break;
+                   case YEAR: RemoteTFT.printTitle(F("Rech. par année"));        break;
+                   case BEAT: RemoteTFT.printTitle(F("Rech. par tempo"));        break;
+                   case GENRE: RemoteTFT.printTitle(F("Rech. par genre"));       break;
+                   case RANDOM: RemoteTFT.printTitle(F("Rech. aléatoire"));      break;
                }
             }
             else
@@ -257,7 +257,7 @@ void loop()
             RemoteTFT.setBacklight(false);
             break;
     case 15: // STOP (DEBUG)
-            //MP3Player.stopTrack();
+            MP3Player.stopTrack();
             break;
    }
 

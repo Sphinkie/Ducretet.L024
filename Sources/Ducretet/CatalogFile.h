@@ -12,25 +12,25 @@ class CatalogFile
 {
    protected:
         void   begin();
-        bool   openCatalogAtPosition(long pos=5);
+        bool   openCatalogAtPosition(unsigned long pos=5);
         bool   openCatalogAtRandomPosition();
         void   closeCatalog();
-        long   getCurrentPosition();
-        long   getRandomPosition();
+        unsigned long getCurrentPosition();
+        unsigned long getRandomPosition();
 
         // Lecture/Ecriture de lignes
         String readRandomLine();
         String readNextLine();
               
         // Lecture/Ecriture du Rating
-        int    updateRating(long clipPosition, int increment);
+        int    updateRating(unsigned long clipPosition, int increment);
 
       private:
-        int    readRating(long clipPosition);
-        void   writeRating(int rating, long clipPosition);
+        int    readRating(unsigned long clipPosition);
+        void   writeRating(unsigned long clipPosition, int rating);
         // Private Member Variables
-        unsigned int  RandomMax=10;         
         File          FichierIndex;
+        unsigned int  CatalogSize=10;
 
 };
 

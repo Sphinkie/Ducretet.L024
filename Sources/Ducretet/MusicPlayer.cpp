@@ -95,7 +95,7 @@ void MusicPlayer::playTrack(String trackName)
     trackName = String ("/Music/"+trackName+".mp3");
     trackName.toCharArray(this->filename,30);
 
-    // on lit les tag avant de jouer le fichier
+    // on lit les Tags avant de jouer le fichier
     File mp3file = SD.open(this->filename);
     this->readID3tags(mp3file);
     mp3file.close();

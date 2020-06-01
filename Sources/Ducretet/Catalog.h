@@ -69,9 +69,10 @@ class Catalog : CatalogFile
 //      long          FirstcurrentPositionBeat;  // curseur de debut de Beat
         
         long          CurrentPositionYear;       // curseur pour le mode YEAR
-        long          CurrentPositionGenre;          // curseur pour le mode GENRE
+        long          CurrentPositionGenre;      // curseur pour le mode GENRE
         long          CurrentPositionRating;     // curseur pour le mode RATING
         long          CurrentPositionBeat;       // curseur pour le mode BEAT
+        bool          HasRewinded;               // Indique si on a deja atteint la fin (EOF ou Decade) et que l'on est revenu au début du catalogue.
 
 };
 
