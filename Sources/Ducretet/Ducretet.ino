@@ -257,7 +257,7 @@ void loop()
             RemoteTFT.setBacklight(false);
             break;
     case 15: // STOP (DEBUG)
-            MP3Player.stopTrack();
+            /* MP3Player.stopTrack(); */
             break;
    }
 
@@ -320,10 +320,10 @@ void initClipSearch()
       MP3Player.pauseDataStream();
       switch (ModeButton.getValue())
       {
-          case YEAR  : Catalogue.initSearchForRequestedYear();       break;
-          case BEAT  : Catalogue.initSearchForRequestedBeat();       break;
-          case GENRE : Catalogue.initSearchForRequestedGenre();      break;
-          //case RATING: Catalogue.initSearchForRequestedRating();   break;
+          case YEAR  : Catalogue.initSearchForRequestedYear();     break;
+          case BEAT  : Catalogue.initSearchForRequestedBeat();     break;
+          case GENRE : Catalogue.initSearchForRequestedGenre();    break;
+          case RATING: Catalogue.initSearchForRequestedRating();   break;
       }
       MP3Player.resumeDataStream();
       digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
@@ -342,11 +342,11 @@ void searchNextClip()
     MP3Player.pauseDataStream();
     switch (ModeButton.getValue())
     {
-        case YEAR  : Catalogue.searchClipForRequestedYear();         break;
-        case BEAT  : Catalogue.searchClipForRequestedBeat();        break;
-        case GENRE : Catalogue.searchClipForRequestedGenre();        break;
-        //case RATING: Catalogue.searchClipForRequestedRating();     break;
-        case RANDOM: Catalogue.selectRandomClip();                   break; 
+        case YEAR  : Catalogue.searchClipForRequestedYear();       break;
+        case BEAT  : Catalogue.searchClipForRequestedBeat();       break;
+        case GENRE : Catalogue.searchClipForRequestedGenre();      break;
+        case RATING: Catalogue.searchClipForRequestedRating();     break;
+        case RANDOM: Catalogue.selectRandomClip();                 break; 
     }
     MP3Player.resumeDataStream();
     digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
