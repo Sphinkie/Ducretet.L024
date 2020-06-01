@@ -13,7 +13,7 @@
 #include "CapButton.h"
 
 #define DEBUG
-#define DEBUG_CAPMESUR 250    // Average value (+/-5) measured by Capacity Button in Debug mode (not normalized)
+#define DEBUG_CAPMESUR 130    // Average value (+/-5) measured by Capacity Button in Debug mode (not normalized)
 // 250 Blues        1903 [1934]
 // 150 Rock n'Roll  1968 [1966]
 // 100              1988 [1982]

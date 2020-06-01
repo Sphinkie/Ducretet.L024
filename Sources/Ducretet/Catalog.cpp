@@ -344,12 +344,11 @@ unsigned long Catalog::searchClipInCatalog(unsigned long starting_position, Sear
          int Begin;
          if (HasRewinded) Begin=Plexi.RangeStart;        // Aux autres passages, on cherche un media dans la décade (entre le début et la fin de la décade)
          else             Begin=requested_value.toInt(); // Au premier passage, on cherche entre le YEAR pointé par le Tuning et la fin de la décade
-         if (search_type==year)   Found = CursorMedia.hasYearBetween(Begin, Plexi.RangeEnd);
+         Found = CursorMedia.hasYearBetween(Begin, Plexi.RangeEnd);
          // ----------------------------------------------------------------------------------------------
-         // Détermine FirstMedia
+         // Détermine FirstMedia (premier media de la décade)
          // ----------------------------------------------------------------------------------------------
-         // Le FirstMediaForYear correspond au premier media de la décade, et pas au premier qui correspond au critère.
-         if ((Found) && (CursorMedia.getYear()>Plexi.RangeStart) )
+         if (CursorMedia.getYear()>Plexi.RangeStart)
          {
             if (!this->FirstMediaForRequestedYear.isValid()) 
             {
@@ -372,29 +371,16 @@ unsigned long Catalog::searchClipInCatalog(unsigned long starting_position, Sear
             break;
          }
      }
-     // --------------------------------------------------------------------------------------------------
-     // Autres Cas: GENRE / RATING / BEAT
-     // --------------------------------------------------------------------------------------------------
-     else
+     // ----------------------------------------------------------------------------------------------
+     // On mémorise le media trouvé. (La recherche est terminée).
+     // ----------------------------------------------------------------------------------------------
+     if (Found)
      {
-         // ----------------------------------------------------------------------------------------------
-         // Vérification
-         // ----------------------------------------------------------------------------------------------
-         if (Found)
-         {
-            /* // Si on a trouvé notre FirstMedia: on le mémorise
-            if (!first_media.isValid())
-            {
-              first_media=CursorMedia;
-              Serial.print(F("  first_media set to: "));Serial.println(first_media.getID());
-            }*/
-            // On mémorise le media trouvé
-            NextMediaToPlay=CursorMedia;
-            SearchInProgress=false;       // La recherche est terminée
-            Serial.print(F("  Found next media to play: "));Serial.println(NextMediaToPlay.getID());
-            break;
-         }
-      } 
+        NextMediaToPlay=CursorMedia;
+        SearchInProgress=false; 
+        Serial.print(F("  Found next media to play: "));Serial.println(NextMediaToPlay.getID());
+        break;
+     } 
   }
   this->closeCatalog();
   return CurrentPosition;
