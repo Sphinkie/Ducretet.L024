@@ -120,7 +120,7 @@ void Catalog::initSearchForRequestedGenre()
     // On démarre la recherche
     SearchInProgress=true;
     HasRewinded=false;
-    FirstMediaForRequestedGenre.isValid(false);
+    // FirstMediaForRequestedGenre.isValid(false);
     Serial.print(F("  New CurrentPositionGenre="));  Serial.println(CurrentPositionGenre);
 }
 // *******************************************************************************
@@ -132,7 +132,7 @@ void Catalog::searchClipForRequestedGenre()
     if (SearchInProgress) 
       CurrentPositionGenre = this->searchClipInCatalog(
                                   CurrentPositionGenre, 
-                                  FirstMediaForRequestedGenre, 
+//                                  NULL, 
                                   genre, 
                                   Plexi.Genre);
 }
@@ -154,7 +154,7 @@ void Catalog::initSearchForRequestedBeat()
     // On démarre la recherche
     SearchInProgress=true;
     HasRewinded=false;
-    FirstMediaForRequestedBeat.isValid(false);
+    // FirstMediaForRequestedBeat.isValid(false);
     Serial.print(F("  New CurrentPositionBeat="));  Serial.println(CurrentPositionBeat);
 }
 // *******************************************************************************
@@ -166,7 +166,7 @@ void Catalog::searchClipForRequestedBeat()
     if (SearchInProgress) 
       CurrentPositionBeat = this->searchClipInCatalog(
                                   CurrentPositionBeat,
-                                  FirstMediaForRequestedBeat, 
+//                                  NULL, 
                                   beat, 
                                   Plexi.Beat);
 }
@@ -191,7 +191,7 @@ void Catalog::initSearchForRequestedYear()
     // On peut demarrer la recherche
     SearchInProgress=true;
     HasRewinded=false;
-    FirstMediaForRequestedYear.isValid(false);
+    this->FirstMediaForRequestedYear.isValid(false);
     Serial.print(F("  New CurrentPositionYear="));  Serial.println(CurrentPositionYear);
 }
 // *******************************************************************************
@@ -205,7 +205,7 @@ void Catalog::searchClipForRequestedYear()
       if (SearchInProgress) 
       CurrentPositionYear = this->searchClipInCatalog(
                                   CurrentPositionYear, 
-                                  FirstMediaForRequestedYear, 
+//                                  FirstMediaForRequestedYear, 
                                   year, 
                                   Plexi.getYear());
 }
@@ -228,8 +228,8 @@ void Catalog::initSearchForRequestedRating()
     SearchInProgress=true;
     HasRewinded=false;
     // Pour anticiper le cas EOF, on pré-remplit le FirstMedia avec un clip aléatoire.    
-    FirstMediaForRequestedRating = NextMediaToPlay;
-    FirstMediaForRequestedYear.isValid(true);
+//    FirstMediaForRequestedRating = NextMediaToPlay;
+//    FirstMediaForRequestedYear.isValid(true);
 }
 // ******************************************************************************* 
 // On cherche un clip ayant le bon rating, à partir d'une position aléatoire à chaque fois différente.
@@ -246,7 +246,7 @@ void Catalog::searchClipForRequestedRating()
         Serial.print(F("  New CurrentPositionRating="));  Serial.println(CurrentPositionRating);
         // recherche
         this->searchClipInCatalog(CurrentPositionRating, 
-                                  FirstMediaForRequestedRating, 
+//                                  NULL, 
                                   rating, 
                                   RequestedValue);
     }
@@ -258,9 +258,9 @@ void Catalog::searchClipForRequestedRating()
  * ******************************************************************************* 
  * Params:
  *   StartingPosition = Là où commencer la recherche
- *   first Media      = Media  sur lequel se replier en cas de EOF (passage par référence, car on va le modifier)
  *   SearchType       = le type de recherche (rating|genre|year)
  *   RequestedValue   = La valeur textuelle à chercher dans le catalogue
+ * FirstMediaForRequestedYear est actualisé.
  * ******************************************************************************* 
  * Si le Media est trouvé:
  *    NextMediaToPlay  positionné
@@ -268,15 +268,19 @@ void Catalog::searchClipForRequestedRating()
  * Si rien de trouvé lors de ce passage:
  *    NextMediaToPlay  garde sa valeur précédente
  *    SearchInProgress reste à true
- * Si on arrive au bout de la decade ou du genre ou du fichier:
- *    NextMediaToPlay  reçoit first_media
+ * Si on arrive au bout de la decade 
+ *    NextMediaToPlay  reçoit FirstMediaForRequestedYear
  *    SearchInProgress passe a false
+ * Si on arrive au bout du fichier:
+ *    On se remet au debut du fichier Catalogue
+ *    SearchInProgress reste à true
  * ******************************************************************************* */
-long Catalog::searchClipInCatalog(long starting_position, Media &first_media, SearchType search_type, String requested_value)
+//unsigned long Catalog::searchClipInCatalog(unsigned long starting_position, Media &first_media, SearchType search_type, String requested_value)
+unsigned long Catalog::searchClipInCatalog(unsigned long starting_position, SearchType search_type, String requested_value)
 {
   bool   FileAccessOK;
   String medialine;
-  long   CurrentPosition;
+  unsigned long   CurrentPosition;
   bool   Found=false;
         
   // Si aucune recherche n'est demandée ou en cours: on sort.
@@ -322,61 +326,76 @@ long Catalog::searchClipInCatalog(long starting_position, Media &first_media, Se
      // La ligne est valide: on peut l'analyser     
      // ----------------------------------------------
      CursorMedia.fillWith(medialine, CurrentPosition);
+     Serial.print("    ?:"+CursorMedia.getID()+"-"); Serial.print(CursorMedia.getYear());Serial.print(" NextPos:");Serial.println(CurrentPosition);
      // ----------------------------------------------
      // On vérifie si la ligne correspond au critère
      // ----------------------------------------------
      if (search_type==rating) Found = CursorMedia.hasRating(requested_value);
      if (search_type==genre)  Found = CursorMedia.hasGenre(requested_value);
      if (search_type==beat)   Found = CursorMedia.hasBeat(requested_value);
-     // ----------------------------------------------
-     // Cas particulier YEAR: verification
-     // ----------------------------------------------
-     int Begin;
-     if (HasRewinded) Begin=Plexi.RangeStart;        // Aux autres passages, on cherche un media dans la décade (entre le début et la fin de la décade)
-     else             Begin=requested_value.toInt(); // Au premier passage, on cherche entre le YEAR pointé par le Tuning et la fin de la décade
-     if (search_type==year)   Found = CursorMedia.hasYearBetween(Begin, Plexi.RangeEnd);
-     Serial.print("    ?:"+CursorMedia.getID()+"-"); Serial.print(CursorMedia.getYear());Serial.print(" NextPos:");Serial.println(CurrentPosition);
-     if (Found)
+     // --------------------------------------------------------------------------------------------------
+     // Cas particulier YEAR
+     // --------------------------------------------------------------------------------------------------
+     if (search_type==year)
      {
-        // Si on a trouvé notre FirstMedia: on le mémorise
-        if (!first_media.isValid())
-        {
-          first_media=CursorMedia;
-          Serial.print(F("  first_media set to: "));Serial.println(first_media.getID());
-        }
-        // On mémorise le media trouvé
-        NextMediaToPlay=CursorMedia;
-        SearchInProgress=false; // La recherche est terminée
-        Serial.print(F("  Found next media to play: "));Serial.println(NextMediaToPlay.getID());
-        break;
+         // ----------------------------------------------------------------------------------------------
+         // Vérification
+         // ----------------------------------------------------------------------------------------------
+         int Begin;
+         if (HasRewinded) Begin=Plexi.RangeStart;        // Aux autres passages, on cherche un media dans la décade (entre le début et la fin de la décade)
+         else             Begin=requested_value.toInt(); // Au premier passage, on cherche entre le YEAR pointé par le Tuning et la fin de la décade
+         if (search_type==year)   Found = CursorMedia.hasYearBetween(Begin, Plexi.RangeEnd);
+         // ----------------------------------------------------------------------------------------------
+         // Détermine FirstMedia
+         // ----------------------------------------------------------------------------------------------
+         // Le FirstMediaForYear correspond au premier media de la décade, et pas au premier qui correspond au critère.
+         if ((Found) && (CursorMedia.getYear()>Plexi.RangeStart) )
+         {
+            if (!this->FirstMediaForRequestedYear.isValid()) 
+            {
+              FirstMediaForRequestedYear=CursorMedia;
+              FirstMediaForRequestedYear.isValid(true);
+              Serial.print(F("  first_media of Decade: "));Serial.println(FirstMediaForRequestedYear.getID());
+            }
+         }
+         // ----------------------------------------------------------------------------------------------
+         // Cas particulier YEAR: on est arrivé à la fin de la décade
+         // ----------------------------------------------------------------------------------------------
+         if (CursorMedia.getYear()>Plexi.RangeEnd)
+         {
+            // Si on a depassé la fin de la période, alors on rewinde.
+            Serial.print(F("  End of decade. Rewinding to : ")); Serial.println(FirstMediaForRequestedYear.getID());
+            NextMediaToPlay = FirstMediaForRequestedYear;
+            CurrentPosition = FirstMediaForRequestedYear.getNextMediaPosition();
+            SearchInProgress=false;
+            HasRewinded=true;
+            break;
+         }
      }
-     // ----------------------------------------------
-     // Cas particulier YEAR: Le FirstMedia
-     // ----------------------------------------------
-     // Le FirstMediaForYear correspond au premier media de la décade, et pas au premier qui correspond au critère.
-     if ((search_type==year) && (CursorMedia.getYear()>Plexi.RangeStart) )
+     // --------------------------------------------------------------------------------------------------
+     // Autres Cas: GENRE / RATING / BEAT
+     // --------------------------------------------------------------------------------------------------
+     else
      {
-        if (!first_media.isValid()) 
-        {
-          first_media=CursorMedia;
-          first_media.isValid(true);
-          Serial.print(F("  first_media of Decade: "));Serial.println(first_media.getID());
-        }
-     }
-     // ----------------------------------------------
-     // Cas particulier YEAR: on est arrivé à la fin de la décade
-     // ----------------------------------------------
-     if ((search_type==year) && (CursorMedia.getYear()>Plexi.RangeEnd) )
-     {
-        // Si on a depassé la fin de la période, alors on rewinde.
-        Serial.print(F("  End of decade. Rewinding to : ")); Serial.println(first_media.getID());
-        NextMediaToPlay = first_media;
-        CurrentPosition = first_media.getNextMediaPosition();
-        SearchInProgress=false;
-        HasRewinded=true;
-        break;
-     }
-  } 
+         // ----------------------------------------------------------------------------------------------
+         // Vérification
+         // ----------------------------------------------------------------------------------------------
+         if (Found)
+         {
+            /* // Si on a trouvé notre FirstMedia: on le mémorise
+            if (!first_media.isValid())
+            {
+              first_media=CursorMedia;
+              Serial.print(F("  first_media set to: "));Serial.println(first_media.getID());
+            }*/
+            // On mémorise le media trouvé
+            NextMediaToPlay=CursorMedia;
+            SearchInProgress=false;       // La recherche est terminée
+            Serial.print(F("  Found next media to play: "));Serial.println(NextMediaToPlay.getID());
+            break;
+         }
+      } 
+  }
   this->closeCatalog();
   return CurrentPosition;
 }

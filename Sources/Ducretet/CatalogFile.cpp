@@ -39,8 +39,8 @@ bool CatalogFile::openCatalogAtPosition(unsigned long pos=5)
 {
   if (pos<5) pos=5;
   Serial.print (F("open Catalog.ndx at "));Serial.println(pos);
-  FichierIndex = SD.open("/Catalog.ndx");      // on ouvre le fichier Catalog
-  if (!FichierIndex)
+  this->FichierIndex = SD.open("/Catalog.ndx");      // on ouvre le fichier Catalog
+  if (!this->FichierIndex)
   {
     // en cas d'erreur d'ouverture du fichier, on renvoie false
     Serial.println(F("openCatalogAtPosition could not open Catalog.ndx"));
@@ -53,11 +53,11 @@ bool CatalogFile::openCatalogAtPosition(unsigned long pos=5)
     pos=5;
   }
   // On se positionne dans l'index à la position demandée
-  bool FileAccessOK = FichierIndex.seek(pos);
+  bool FileAccessOK = this->FichierIndex.seek(pos);
   if (!FileAccessOK)
   {
     Serial.print(F("openCatalogAtPosition: Cannot go to position ")); Serial.println(pos);
-    FichierIndex.close();
+    this->FichierIndex.close();
     return (false);
   }
   return true;

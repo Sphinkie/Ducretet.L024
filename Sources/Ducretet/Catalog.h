@@ -45,7 +45,8 @@ class Catalog : CatalogFile
         String getSelectedClipRating();
 
     private:              
-        long   searchClipInCatalog(long starting_position, Media &first_media, SearchType search_type, String requested_value);
+        //long   searchClipInCatalog(long starting_position, Media &first_media, SearchType search_type, String requested_value);
+        unsigned long   searchClipInCatalog(unsigned long starting_position, SearchType search_type, String requested_value);
 
     // ---------------------------------------------------------------------------------------------------------------------------------
     // Variables:
@@ -59,10 +60,10 @@ class Catalog : CatalogFile
         Media         NextMediaToPlay;
         Media         CurrentMedia;
         Media         FirstMediaForRequestedYear;    // Premier Media du catalogue ayant la date demandée
-        Media         FirstMediaForRequestedGenre;   // Premier Media ayant le genre demandé
+/*        Media         FirstMediaForRequestedGenre;   // Premier Media ayant le genre demandé
         Media         FirstMediaForRequestedRating;  // Premier Media ayant le rating demandé
         Media         FirstMediaForRequestedBeat;    // Premier Media ayant le BPM demandé
-
+*/
 		    // Les curseurs dans le catalogue
 //      long          FirstcurrentPositionYear;  // curseur de debut de décade (mode YEAR)
 //      long          FirstcurrentPositionGenre;     // curseur de debut de Genre
