@@ -145,7 +145,7 @@ void setup()
     Serial.println(F("================================="));
     RemoteTFT.setSlavePresent(USE_TWO_ARDUINO);
 */
-  //  MP3Player.playTrack("NOISE");   // On commence par jouer Noise
+    MP3Player.playTrack("NOISE");   // On commence par jouer Noise
 }
 
 
@@ -373,7 +373,7 @@ void displayRequestedMode()
                 ModeMessage += String(Catalogue.Plexi.RangeEnd);
                  break;
          case BEAT:
-                ModeMessage = "Tempo: " + Catalogue.Plexi.Genre;            
+                ModeMessage = "Tempo: " + Catalogue.Plexi.Beat;            
                 break;
          case GENRE:
                 ModeMessage = "Genre: " + Catalogue.Plexi.Genre;            

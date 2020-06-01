@@ -14,7 +14,7 @@
 #include "RotaryButton.h"
      
 #define DEBUG
-#define DEBUG_ROTVALUE   2    // Value returned by Rotary Button in Debug mode
+#define DEBUG_ROTVALUE   3    // Value returned by Rotary Button in Debug mode
 
 // ****************************************************************        
 // Constructeur

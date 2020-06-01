@@ -22,13 +22,13 @@ class Plexiglass
 
   public:
         // Valeurs correspondant au Tuning reçu
-        String        Genre;                 // Le Genre associé au bouton Tuning
-        float         GenreLength;           // Correspond à la 'largeur' du Genre associé au bouton Tuning
-        int           Year;                  // L'Année associée au bouton Tuning (ex: 1964)
-        int           RangeStart;            // Début de la période associée au bouton Tuning (ex: 1960)
-        int           RangeEnd;              // Fin de la période associée au bouton Tuning (ex: 1970)
-        int           Rating;                // Le Rating associé au bouton Tunnig
-        String        Beat;                  // Le BPM associé au bouton Tunnig
+        String        Genre;                 // Le Genre pointé par le bouton Tuning
+        float         GenreLength;           // Correspond à la 'largeur' du Genre pointé par le bouton Tuning
+        int           Year;                  // L'Année pointée par le bouton Tuning (ex: 1964)
+        int           RangeStart;            // Début de la décade pointée par le Tuning (ex: 1960)
+        int           RangeEnd;              // Fin de la décade pointée par le Tuning (ex: 1970)
+        int           Rating;                // Le Rating pointé par le bouton Tunnig
+        String        Beat;                  // Le BPM pointé par le bouton Tunnig
 
 };
 

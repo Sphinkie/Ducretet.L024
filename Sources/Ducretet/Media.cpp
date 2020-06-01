@@ -124,20 +124,17 @@ bool Media::hasRating(String rating)
 }
 
 // *******************************************************************************
-// Renvoie TRUE si le BPM du média est egal au BPM demandé (+/- 10%).
+// On renvoie TRUE si le BPM du média est egal au BPM demandé (+/- 10%).
+// On renvoie aussi TRUE si le média a un BPM à 0 (=indéterminé).
 // *******************************************************************************
-bool Media::hasBeat(String beat)
+bool Media::hasBeat(String requestedBeat)
 {
-  Serial.println ("hasBeat "+beat);
-  int bpm     = beat.toInt();
-  int bpm_min = this->Field5.toInt()*0.9;
-  int bpm_max = this->Field5.toInt()*1.1;
-  if (bpm<bpm_min)
-    return false;
-  else if (bpm>bpm_max)
-    return false;
-  else
-    return true;
+  int bpm     = requestedBeat.toInt();
+  int bpm_min = bpm*0.9;
+  int bpm_max = bpm*1.1;
+  int media_bpm = this->Field5.toInt();
+  if (media_bpm==0) return true;
+  return ((media_bpm>bpm_min) && (media_bpm<bpm_max));
 }
 
 // *******************************************************************************
@@ -150,6 +147,7 @@ Media& Media::operator=(const Media& media_source)
   this->Field2 = media_source.Field2;
   this->Field3 = media_source.Field3;
   this->Field4 = media_source.Field4;
+  this->Field5 = media_source.Field5;
   this->Valid  = media_source.Valid;
   this->NextMediaPosition = media_source.NextMediaPosition;
 }

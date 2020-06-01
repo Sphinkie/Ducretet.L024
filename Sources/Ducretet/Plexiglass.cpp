@@ -112,6 +112,7 @@ int Plexiglass::getBeatValue(int tuning)
   if (tuning < 900)       {RangeStart=1980; RangeEnd=1990; return map(tuning, 790, 840,RangeStart,RangeEnd); }   
   if (tuning < 1023)       {RangeStart=1990; RangeEnd=2000; return map(tuning, 840, 860,RangeStart,RangeEnd); }   
 */
+return 130;
 }
 /* 00.......40 Larghissimo  60................80 adagio          100 .................. 128 allegretto
  *      Gravemente                   Adagissimo
