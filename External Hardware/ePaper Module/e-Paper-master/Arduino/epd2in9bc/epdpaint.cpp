@@ -27,6 +27,9 @@
 #include <avr/pgmspace.h>
 #include "epdpaint.h"
 
+/* **************************************
+ *  @brief: Constructor
+ * ************************************** */
 Paint::Paint(unsigned char* image, int width, int height) 
 {
     this->rotate = ROTATE_0;
@@ -36,11 +39,14 @@ Paint::Paint(unsigned char* image, int width, int height)
     this->height = height;
 }
 
+/* **************************************
+ *  @brief: Destuctor
+ * ************************************** */
 Paint::~Paint() {}
 
-/**
+/* **************************************
  *  @brief: clear the image
- */
+ * ************************************** */
 void Paint::Clear(int colored) 
 {
     for (int x = 0; x < this->width; x++) 
@@ -87,34 +93,41 @@ unsigned char* Paint::GetImage(void)
     return this->image;
 }
 
-int Paint::GetWidth(void) {
+int Paint::GetWidth(void) 
+{
     return this->width;
 }
 
-void Paint::SetWidth(int width) {
+void Paint::SetWidth(int width) 
+{
     this->width = width % 8 ? width + 8 - (width % 8) : width;
 }
 
-int Paint::GetHeight(void) {
+int Paint::GetHeight(void) 
+{
     return this->height;
 }
 
-void Paint::SetHeight(int height) {
+void Paint::SetHeight(int height) 
+{
     this->height = height;
 }
 
-int Paint::GetRotate(void) {
+int Paint::GetRotate(void) 
+{
     return this->rotate;
 }
 
-void Paint::SetRotate(int rotate){
+void Paint::SetRotate(int rotate)
+{
     this->rotate = rotate;
 }
 
 /**
  *  @brief: this draws a pixel by the coordinates
  */
-void Paint::DrawPixel(int x, int y, int colored) {
+void Paint::DrawPixel(int x, int y, int colored) 
+{
     int point_temp;
     if (this->rotate == ROTATE_0) {
         if(x < 0 || x >= this->width || y < 0 || y >= this->height) {
@@ -150,7 +163,8 @@ void Paint::DrawPixel(int x, int y, int colored) {
 /**
  *  @brief: this draws a charactor on the frame buffer but not refresh
  */
-void Paint::DrawCharAt(int x, int y, char ascii_char, sFONT* font, int colored) {
+void Paint::DrawCharAt(int x, int y, char ascii_char, sFONT* font, int colored) 
+{
     int i, j;
     unsigned int char_offset = (ascii_char - ' ') * font->Height * (font->Width / 8 + (font->Width % 8 ? 1 : 0));
     const unsigned char* ptr = &font->table[char_offset];
@@ -173,7 +187,8 @@ void Paint::DrawCharAt(int x, int y, char ascii_char, sFONT* font, int colored) 
 /**
 *  @brief: this displays a string on the frame buffer but not refresh
 */
-void Paint::DrawStringAt(int x, int y, const char* text, sFONT* font, int colored) {
+void Paint::DrawStringAt(int x, int y, const char* text, sFONT* font, int colored) 
+{
     const char* p_text = text;
     unsigned int counter = 0;
     int refcolumn = x;
@@ -193,7 +208,8 @@ void Paint::DrawStringAt(int x, int y, const char* text, sFONT* font, int colore
 /**
 *  @brief: this draws a line on the frame buffer
 */
-void Paint::DrawLine(int x0, int y0, int x1, int y1, int colored) {
+void Paint::DrawLine(int x0, int y0, int x1, int y1, int colored) 
+{
     /* Bresenham algorithm */
     int dx = x1 - x0 >= 0 ? x1 - x0 : x0 - x1;
     int sx = x0 < x1 ? 1 : -1;
@@ -217,7 +233,8 @@ void Paint::DrawLine(int x0, int y0, int x1, int y1, int colored) {
 /**
 *  @brief: this draws a horizontal line on the frame buffer
 */
-void Paint::DrawHorizontalLine(int x, int y, int line_width, int colored) {
+void Paint::DrawHorizontalLine(int x, int y, int line_width, int colored) 
+{
     int i;
     for (i = x; i < x + line_width; i++) {
         DrawPixel(i, y, colored);
@@ -227,7 +244,8 @@ void Paint::DrawHorizontalLine(int x, int y, int line_width, int colored) {
 /**
 *  @brief: this draws a vertical line on the frame buffer
 */
-void Paint::DrawVerticalLine(int x, int y, int line_height, int colored) {
+void Paint::DrawVerticalLine(int x, int y, int line_height, int colored) 
+{
     int i;
     for (i = y; i < y + line_height; i++) {
         DrawPixel(x, i, colored);
@@ -237,7 +255,8 @@ void Paint::DrawVerticalLine(int x, int y, int line_height, int colored) {
 /**
 *  @brief: this draws a rectangle
 */
-void Paint::DrawRectangle(int x0, int y0, int x1, int y1, int colored) {
+void Paint::DrawRectangle(int x0, int y0, int x1, int y1, int colored) 
+{
     int min_x, min_y, max_x, max_y;
     min_x = x1 > x0 ? x0 : x1;
     max_x = x1 > x0 ? x1 : x0;
@@ -253,7 +272,8 @@ void Paint::DrawRectangle(int x0, int y0, int x1, int y1, int colored) {
 /**
 *  @brief: this draws a filled rectangle
 */
-void Paint::DrawFilledRectangle(int x0, int y0, int x1, int y1, int colored) {
+void Paint::DrawFilledRectangle(int x0, int y0, int x1, int y1, int colored) 
+{
     int min_x, min_y, max_x, max_y;
     int i;
     min_x = x1 > x0 ? x0 : x1;
@@ -269,7 +289,8 @@ void Paint::DrawFilledRectangle(int x0, int y0, int x1, int y1, int colored) {
 /**
 *  @brief: this draws a circle
 */
-void Paint::DrawCircle(int x, int y, int radius, int colored) {
+void Paint::DrawCircle(int x, int y, int radius, int colored) 
+{
     /* Bresenham algorithm */
     int x_pos = -radius;
     int y_pos = 0;
@@ -297,7 +318,8 @@ void Paint::DrawCircle(int x, int y, int radius, int colored) {
 /**
 *  @brief: this draws a filled circle
 */
-void Paint::DrawFilledCircle(int x, int y, int radius, int colored) {
+void Paint::DrawFilledCircle(int x, int y, int radius, int colored) 
+{
     /* Bresenham algorithm */
     int x_pos = -radius;
     int y_pos = 0;

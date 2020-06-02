@@ -27,25 +27,24 @@
 #include <stdlib.h>
 #include "epd2in9b.h"
 
-Epd::~Epd() {
-};
+Epd::~Epd() {};
 
-Epd::Epd() {
+Epd::Epd() 
+{
     reset_pin = RST_PIN;
-    dc_pin = DC_PIN;
-    cs_pin = CS_PIN;
-    busy_pin = BUSY_PIN;
-    width = EPD_WIDTH;
-    height = EPD_HEIGHT;
+    dc_pin    = DC_PIN;
+    cs_pin    = CS_PIN;
+    busy_pin  = BUSY_PIN;
+    width     = EPD_WIDTH;
+    height    = EPD_HEIGHT;
 };
 
-int Epd::Init(void) {
+int Epd::Init(void) 
+{
     /* this calls the peripheral hardware interface, see epdif */
-    if (IfInit() != 0) {
-        return -1;
-    }
+    if (IfInit() != 0) { return -1;  }
     /* EPD hardware init start */
-    Reset();
+    this->Reset();
     SendCommand(BOOSTER_SOFT_START);
     SendData(0x17);
     SendData(0x17);
@@ -70,15 +69,17 @@ int Epd::Init(void) {
 /**
  *  @brief: basic function for sending commands
  */
-void Epd::SendCommand(unsigned char command) {
+void Epd::SendCommand(unsigned char command) 
+{
     DigitalWrite(dc_pin, LOW);
     SpiTransfer(command);
 }
 
-/**
+/* ********************************************
  *  @brief: basic function for sending data
- */
-void Epd::SendData(unsigned char data) {
+ * ******************************************** */
+void Epd::SendData(unsigned char data) 
+{
     DigitalWrite(dc_pin, HIGH);
     SpiTransfer(data);
 }
@@ -86,7 +87,8 @@ void Epd::SendData(unsigned char data) {
 /**
  *  @brief: Wait until the busy_pin goes HIGH
  */
-void Epd::WaitUntilIdle(void) {
+void Epd::WaitUntilIdle(void) 
+{
     while(DigitalRead(busy_pin) == 0) {      //0: busy, 1: idle
         DelayMs(100);
     }      
@@ -97,7 +99,8 @@ void Epd::WaitUntilIdle(void) {
  *          often used to awaken the module in deep sleep, 
  *          see Epd::Sleep();
  */
-void Epd::Reset(void) {
+void Epd::Reset(void) 
+{
     DigitalWrite(reset_pin, LOW);
     DelayMs(200);
     DigitalWrite(reset_pin, HIGH);
@@ -107,7 +110,8 @@ void Epd::Reset(void) {
 /**
  *  @brief: transmit partial data to the SRAM
  */
-void Epd::SetPartialWindow(const unsigned char* buffer_black, const unsigned char* buffer_red, int x, int y, int w, int l) {
+void Epd::SetPartialWindow(const unsigned char* buffer_black, const unsigned char* buffer_red, int x, int y, int w, int l) 
+{
     SendCommand(PARTIAL_IN);
     SendCommand(PARTIAL_WINDOW);
     SendData(x & 0xf8);     // x should be the multiple of 8, the last 3 bit will always be ignored
@@ -146,7 +150,8 @@ void Epd::SetPartialWindow(const unsigned char* buffer_black, const unsigned cha
 /**
  *  @brief: transmit partial data to the black part of SRAM
  */
-void Epd::SetPartialWindowBlack(const unsigned char* buffer_black, int x, int y, int w, int l) {
+void Epd::SetPartialWindowBlack(const unsigned char* buffer_black, int x, int y, int w, int l) 
+{
     SendCommand(PARTIAL_IN);
     SendCommand(PARTIAL_WINDOW);
     SendData(x & 0xf8);     // x should be the multiple of 8, the last 3 bit will always be ignored
@@ -174,7 +179,8 @@ void Epd::SetPartialWindowBlack(const unsigned char* buffer_black, int x, int y,
 /**
  *  @brief: transmit partial data to the red part of SRAM
  */
-void Epd::SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int w, int l) {
+void Epd::SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int w, int l) 
+{
     SendCommand(PARTIAL_IN);
     SendCommand(PARTIAL_WINDOW);
     SendData(x & 0xf8);     // x should be the multiple of 8, the last 3 bit will always be ignored
@@ -202,11 +208,13 @@ void Epd::SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int
 /**
  * @brief: refresh and displays the frame
  */
-void Epd::DisplayFrame(const unsigned char* frame_buffer_black, const unsigned char* frame_buffer_red) {
+void Epd::DisplayFrame(const unsigned char* frame_buffer_black, const unsigned char* frame_buffer_red) 
+{
     if (frame_buffer_black != NULL) {
         SendCommand(DATA_START_TRANSMISSION_1);
         DelayMs(2);
-        for (int i = 0; i < this->width * this->height / 8; i++) {
+        for (int i = 0; i < this->width * this->height / 8; i++) 
+        {
             SendData(pgm_read_byte(&frame_buffer_black[i]));
         }
         DelayMs(2);
@@ -214,7 +222,8 @@ void Epd::DisplayFrame(const unsigned char* frame_buffer_black, const unsigned c
     if (frame_buffer_red != NULL) {
         SendCommand(DATA_START_TRANSMISSION_2);
         DelayMs(2);
-        for (int i = 0; i < this->width * this->height / 8; i++) {
+        for (int i = 0; i < this->width * this->height / 8; i++) 
+        {
             SendData(pgm_read_byte(&frame_buffer_red[i]));
         }
         DelayMs(2);
@@ -226,7 +235,8 @@ void Epd::DisplayFrame(const unsigned char* frame_buffer_black, const unsigned c
 /**
  * @brief: clear the frame data from the SRAM, this won't refresh the display
  */
-void Epd::ClearFrame(void) {
+void Epd::ClearFrame(void) 
+{
     SendCommand(TCON_RESOLUTION);
     SendData(width >> 8);
     SendData(width & 0xff);
@@ -235,13 +245,15 @@ void Epd::ClearFrame(void) {
 
     SendCommand(DATA_START_TRANSMISSION_1);           
     DelayMs(2);
-    for(int i = 0; i < width * height / 8; i++) {
+    for(int i = 0; i < width * height / 8; i++) 
+    {
         SendData(0xFF);  
     }  
     DelayMs(2);
     SendCommand(DATA_START_TRANSMISSION_2);           
     DelayMs(2);
-    for(int i = 0; i < width * height / 8; i++) {
+    for(int i = 0; i < width * height / 8; i++) 
+    {
         SendData(0xFF);  
     }  
     DelayMs(2);
@@ -250,7 +262,8 @@ void Epd::ClearFrame(void) {
 /**
  * @brief: This displays the frame data from SRAM
  */
-void Epd::DisplayFrame(void) {
+void Epd::DisplayFrame(void) 
+{
     SendCommand(DISPLAY_REFRESH); 
     WaitUntilIdle();
 }
@@ -261,7 +274,8 @@ void Epd::DisplayFrame(void) {
  *         check code, the command would be executed if check code = 0xA5. 
  *         You can use Epd::Reset() to awaken and use Epd::Init() to initialize.
  */
-void Epd::Sleep() {
+void Epd::Sleep() 
+{
   SendCommand(DEEP_SLEEP);
   SendData(0xa5);
 }
