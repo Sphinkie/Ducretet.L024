@@ -396,10 +396,6 @@ SCK
 Wire Wire Line
 	1800 4400 2550 4400
 Wire Wire Line
-	1050 4400 1300 4400
-Wire Wire Line
-	1050 4500 1300 4500
-Wire Wire Line
 	1950 4600 1800 4600
 Wire Wire Line
 	1950 4600 1950 4750
@@ -414,11 +410,11 @@ Wire Wire Line
 	1650 1700 1650 1400
 Wire Wire Line
 	1850 1700 1850 1400
-Text GLabel 9700 4100 0    50   Input ~ 0
+Text GLabel 9700 4200 0    50   Input ~ 0
 MISO
 Text GLabel 9700 4000 0    50   Input ~ 0
 MOSI
-Text GLabel 9700 4200 0    50   Input ~ 0
+Text GLabel 9700 4100 0    50   Input ~ 0
 SCK
 Wire Wire Line
 	9700 3900 9950 3900
@@ -568,10 +564,10 @@ F 3 "http://www.ti.com/lit/gpn/sn74HC14" H 5250 7000 50  0001 C CNN
 	7    5250 7000
 	0    -1   -1   0   
 $EndComp
-Text GLabel 2550 3000 2    50   Input ~ 0
-D23
-Text GLabel 2550 3100 2    50   Input ~ 0
-D25
+Text GLabel 2550 4300 2    50   Input ~ 0
+D49
+Text GLabel 2550 3500 2    50   Input ~ 0
+D33
 Text GLabel 3650 5950 0    50   Input ~ 0
 D18
 Text GLabel 3650 5600 0    50   Input ~ 0
@@ -637,8 +633,8 @@ F 3 "" H 9700 4350 50  0001 C CNN
 	1    9700 4350
 	1    0    0    -1  
 $EndComp
-Text GLabel 9700 3900 0    50   Input ~ 0
-D48
+Text GLabel 3650 3950 0    50   Input ~ 0
+D29
 $Comp
 L Connector_Generic:Conn_01x06 J14
 U 1 1 5EDBFE58
@@ -680,14 +676,9 @@ F 3 "~" H 6800 5700 50  0001 C CNN
 $EndComp
 NoConn ~ 1300 3200
 NoConn ~ 1300 3300
+NoConn ~ 1550 6850
 NoConn ~ 1300 3400
-NoConn ~ 1300 3500
-NoConn ~ 1300 3600
-NoConn ~ 1300 3700
-NoConn ~ 1300 3800
 NoConn ~ 1800 4500
-Wire Wire Line
-	1300 4600 1150 4600
 Wire Wire Line
 	1150 4600 1150 4750
 Wire Wire Line
@@ -742,13 +733,9 @@ Text GLabel 1050 4100 0    50   Input ~ 0
 D44
 Text GLabel 1050 4200 0    50   Input ~ 0
 D46
-Wire Wire Line
-	1050 4100 1300 4100
-Wire Wire Line
-	1050 4200 1300 4200
-Text GLabel 3650 3750 0    50   Input ~ 0
+Text GLabel 3650 3550 0    50   Input ~ 0
 D44
-Text GLabel 3650 3950 0    50   Input ~ 0
+Text GLabel 3650 3750 0    50   Input ~ 0
 D46
 Wire Wire Line
 	3650 3950 3850 3950
@@ -764,17 +751,17 @@ Wire Wire Line
 	1800 3700 2550 3700
 Wire Wire Line
 	1800 3800 2550 3800
-Text GLabel 1050 3900 0    50   Input ~ 0
-D40
+Text GLabel 1650 6850 3    50   Input ~ 0
+D17
 Wire Wire Line
 	1800 3900 2550 3900
 Wire Wire Line
 	1800 4000 2550 4000
 NoConn ~ 4650 1500
-Text GLabel 3650 3550 0    50   Input ~ 0
-D25
+Text GLabel 9700 3900 0    50   Input ~ 0
+D33
 Text GLabel 3650 3450 0    50   Input ~ 0
-D23
+D49
 Wire Wire Line
 	3650 3450 3850 3450
 Wire Wire Line
@@ -782,8 +769,6 @@ Wire Wire Line
 Wire Wire Line
 	1150 2900 1150 2750
 Connection ~ 1150 2750
-Wire Wire Line
-	1150 2900 1300 2900
 Wire Wire Line
 	1150 2750 1900 2750
 Wire Wire Line
@@ -925,7 +910,7 @@ Wire Wire Line
 Wire Wire Line
 	8350 6150 8350 6000
 Text GLabel 9500 6050 0    50   Input ~ 0
-D42
+D38
 Wire Wire Line
 	10150 6050 9500 6050
 Text Label 9650 6050 0    50   ~ 0
@@ -943,9 +928,9 @@ Wire Wire Line
 Wire Wire Line
 	9500 5650 10150 5650
 Text GLabel 9500 5950 0    50   Input ~ 0
-D17
+D40
 Text GLabel 9500 5850 0    50   Input ~ 0
-D16
+D42
 Text Label 9650 5950 0    50   ~ 0
 TFT_RST
 Text Label 9650 5850 0    50   ~ 0
@@ -1000,7 +985,7 @@ Wire Wire Line
 Wire Wire Line
 	9500 5200 10150 5200
 Text GLabel 9500 5000 0    50   Input ~ 0
-D40
+D17
 Wire Wire Line
 	9500 5300 10150 5300
 $Comp
@@ -1092,18 +1077,18 @@ Wire Notes Line
 	7800 2550 10900 2550
 Text Notes 7850 4550 0    50   ~ 0
 SPI and I2C bus
-Text GLabel 2550 3300 2    50   Input ~ 0
-D29
-Text GLabel 2550 3400 2    50   Input ~ 0
-D31
-Text GLabel 2550 3500 2    50   Input ~ 0
-D33
+Text GLabel 2550 3200 2    50   Input ~ 0
+D27
+Text GLabel 2550 3100 2    50   Input ~ 0
+D25
+Text GLabel 2550 3000 2    50   Input ~ 0
+D23
 Text GLabel 3650 1750 0    50   Input ~ 0
-D33
+D23
 Text GLabel 3650 1850 0    50   Input ~ 0
-D31
+D25
 Text GLabel 3650 1950 0    50   Input ~ 0
-D29
+D27
 Text Notes 3350 3700 0    50   ~ 0
 OUTPUTS
 $Comp
@@ -1146,18 +1131,16 @@ $EndComp
 $Comp
 L Connector_Generic:Conn_02x18_Odd_Even J6
 U 1 1 5ED8EC88
-P 1500 3700
-F 0 "J6" V 1050 3900 50  0000 C CNN
-F 1 "ARDUINO_DIGITAL" V 1150 3900 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_2x18_P2.54mm_Vertical" H 1500 3700 50  0001 C CNN
-F 3 "~" H 1500 3700 50  0001 C CNN
-	1    1500 3700
-	1    0    0    -1  
+P 1600 3700
+F 0 "J6" H 1650 2700 50  0000 C CNN
+F 1 "ARDUINO_DIGITAL" H 1600 2600 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x18_P2.54mm_Vertical" H 1600 3700 50  0001 C CNN
+F 3 "~" H 1600 3700 50  0001 C CNN
+	1    1600 3700
+	-1   0    0    -1  
 $EndComp
-Text GLabel 1050 4300 0    50   Input ~ 0
-D48
-Wire Wire Line
-	1050 4300 1300 4300
+Text GLabel 2550 3300 2    50   Input ~ 0
+D29
 $Comp
 L Connector_Generic:Conn_01x06 J7
 U 1 1 5EEEB64E
@@ -1169,21 +1152,14 @@ F 3 "~" H 1850 6200 50  0001 C CNN
 	1    1850 6200
 	0    1    -1   0   
 $EndComp
-NoConn ~ 2550 4300
-Text GLabel 1550 6850 3    50   Input ~ 0
-D16
-Wire Wire Line
-	1550 6400 1550 6850
-Text GLabel 1650 6850 3    50   Input ~ 0
-D17
-Wire Wire Line
-	1650 6400 1650 6850
 Text GLabel 1050 4000 0    50   Input ~ 0
 D42
 Wire Wire Line
-	1050 4000 1300 4000
+	1550 6400 1550 6850
+Text GLabel 1050 3900 0    50   Input ~ 0
+D40
 Wire Wire Line
-	1050 3900 1300 3900
+	1650 6400 1650 6850
 NoConn ~ 2550 3900
 Wire Wire Line
 	5650 5550 5650 5600
@@ -1219,7 +1195,33 @@ F 3 "~" H 1500 7450 50  0001 C CNN
 	1    1500 7450
 	1    0    0    -1  
 $EndComp
-NoConn ~ 2550 3200
-NoConn ~ 2550 3600
 NoConn ~ 2550 4000
+NoConn ~ 1050 4300
+NoConn ~ 1300 3700
+Wire Wire Line
+	1050 4000 1300 4000
+Wire Wire Line
+	1050 3900 1300 3900
+Wire Wire Line
+	1050 4100 1300 4100
+Wire Wire Line
+	1050 4200 1300 4200
+Wire Wire Line
+	1050 4300 1300 4300
+Wire Wire Line
+	1050 4400 1300 4400
+Wire Wire Line
+	1050 4500 1300 4500
+Wire Wire Line
+	1150 4600 1300 4600
+NoConn ~ 1300 3500
+Wire Wire Line
+	1150 2900 1300 2900
+NoConn ~ 1300 3600
+Wire Wire Line
+	1300 3800 1050 3800
+NoConn ~ 2550 3600
+NoConn ~ 2550 3400
+Text GLabel 1050 3800 0    50   Input ~ 0
+D38
 $EndSCHEMATC
