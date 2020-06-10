@@ -173,8 +173,6 @@ $EndComp
 Wire Wire Line
 	1800 3300 2550 3300
 Wire Wire Line
-	1800 3400 2550 3400
-Wire Wire Line
 	1800 3500 2550 3500
 $Comp
 L power:VCC #PWR05
@@ -257,12 +255,12 @@ Wire Wire Line
 $Comp
 L Device:R R1
 U 1 1 5EDB077A
-P 4000 3550
-F 0 "R1" V 4000 3550 50  0000 C CNN
-F 1 "200" V 3950 3750 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal" V 3930 3550 50  0001 C CNN
-F 3 "~" H 4000 3550 50  0001 C CNN
-	1    4000 3550
+P 4000 3650
+F 0 "R1" V 4000 3650 50  0000 C CNN
+F 1 "200" V 3950 3850 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal" V 3930 3650 50  0001 C CNN
+F 3 "~" H 4000 3650 50  0001 C CNN
+	1    4000 3650
 	0    1    1    0   
 $EndComp
 $Comp
@@ -299,9 +297,9 @@ F 3 "~" H 4000 3950 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	4150 3550 6000 3550
+	4150 3650 6000 3650
 Wire Wire Line
-	6000 3550 6000 4050
+	6000 3650 6000 4050
 Wire Wire Line
 	4150 3750 5350 3750
 Wire Wire Line
@@ -567,7 +565,7 @@ $EndComp
 Text GLabel 2550 4300 2    50   Input ~ 0
 D49
 Text GLabel 2550 3500 2    50   Input ~ 0
-D35N
+D33
 Text GLabel 3650 5950 0    50   Input ~ 0
 D18
 Text GLabel 3650 5600 0    50   Input ~ 0
@@ -650,8 +648,6 @@ Wire Wire Line
 	9700 4200 9950 4200
 Wire Wire Line
 	1800 4300 2550 4300
-Wire Wire Line
-	1800 4200 2550 4200
 Text GLabel 2550 4100 2    50   Input ~ 0
 D45
 Wire Wire Line
@@ -733,7 +729,7 @@ Text GLabel 1050 4100 0    50   Input ~ 0
 D44
 Text GLabel 1050 4200 0    50   Input ~ 0
 D46
-Text GLabel 3650 3550 0    50   Input ~ 0
+Text GLabel 3650 3650 0    50   Input ~ 0
 D44
 Text GLabel 3650 3750 0    50   Input ~ 0
 D46
@@ -745,27 +741,17 @@ Text GLabel 3650 3850 0    50   Input ~ 0
 D45
 Wire Wire Line
 	3650 3850 3850 3850
-Wire Wire Line
-	1800 3600 2550 3600
-Wire Wire Line
-	1800 3700 2550 3700
-Wire Wire Line
-	1800 3800 2550 3800
 Text GLabel 1650 6850 3    50   Input ~ 0
 D17
-Wire Wire Line
-	1800 3900 2550 3900
-Wire Wire Line
-	1800 4000 2550 4000
 NoConn ~ 4650 1500
 Text GLabel 9700 3900 0    50   Input ~ 0
-D35N
+D33
 Text GLabel 3650 3450 0    50   Input ~ 0
 D49
 Wire Wire Line
 	3650 3450 3850 3450
 Wire Wire Line
-	3650 3550 3850 3550
+	3650 3650 3850 3650
 Wire Wire Line
 	1150 2900 1150 2750
 Connection ~ 1150 2750
@@ -818,8 +804,8 @@ Wire Wire Line
 Connection ~ 6250 7000
 Text Notes 3650 5850 2    50   ~ 0
 INPUTS\nwith ISR
-Text Notes 3650 4200 2    50   ~ 0
-PWM\nOUTPUTS
+Text Notes 3450 3700 2    50   ~ 0
+PWM
 Text Notes 3400 2100 0    50   ~ 0
 INPUTS
 Text GLabel 8350 3050 0    50   Input ~ 0
@@ -939,9 +925,9 @@ Wire Wire Line
 	9700 3800 9700 3750
 Wire Wire Line
 	9700 3800 9950 3800
-NoConn ~ 2550 3700
-NoConn ~ 2550 3800
-NoConn ~ 2550 4200
+NoConn ~ 1800 3700
+NoConn ~ 1800 3800
+NoConn ~ 1800 4200
 $Comp
 L power:PWR_FLAG #FLG0101
 U 1 1 5EE707A0
@@ -1089,7 +1075,7 @@ Text GLabel 3650 1850 0    50   Input ~ 0
 D25
 Text GLabel 3650 1950 0    50   Input ~ 0
 D27
-Text Notes 3350 3700 0    50   ~ 0
+Text Notes 3400 4100 0    50   ~ 0
 OUTPUTS
 $Comp
 L Device:R_Network04 RN1
@@ -1160,7 +1146,7 @@ Text GLabel 1050 3900 0    50   Input ~ 0
 D40
 Wire Wire Line
 	1650 6400 1650 6850
-NoConn ~ 2550 3900
+NoConn ~ 1800 3900
 Wire Wire Line
 	5650 5550 5650 5600
 Wire Wire Line
@@ -1195,8 +1181,8 @@ F 3 "~" H 1500 7450 50  0001 C CNN
 	1    1500 7450
 	1    0    0    -1  
 $EndComp
-NoConn ~ 2550 4000
-NoConn ~ 1050 4300
+NoConn ~ 1800 4000
+NoConn ~ 1300 4300
 NoConn ~ 1300 3700
 Wire Wire Line
 	1050 4000 1300 4000
@@ -1206,8 +1192,6 @@ Wire Wire Line
 	1050 4100 1300 4100
 Wire Wire Line
 	1050 4200 1300 4200
-Wire Wire Line
-	1050 4300 1300 4300
 Wire Wire Line
 	1050 4400 1300 4400
 Wire Wire Line
@@ -1220,8 +1204,12 @@ Wire Wire Line
 NoConn ~ 1300 3600
 Wire Wire Line
 	1300 3800 1050 3800
-NoConn ~ 2550 3600
-NoConn ~ 2550 3400
+NoConn ~ 1800 3600
+NoConn ~ 1800 3400
 Text GLabel 1050 3800 0    50   Input ~ 0
 D38
+Text Notes 3450 3800 2    50   ~ 0
+PWM
+Text Notes 3450 3900 2    50   ~ 0
+PWM
 $EndSCHEMATC
