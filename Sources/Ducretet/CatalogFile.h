@@ -30,7 +30,7 @@ class CatalogFile
         void   writeRating(unsigned long clipPosition, int rating);
         // Private Member Variables
         File          FichierIndex;
-        unsigned int  CatalogSize=10;
+        unsigned long CatalogSize=10;
 
 };
 

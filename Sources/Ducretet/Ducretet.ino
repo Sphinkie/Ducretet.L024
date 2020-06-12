@@ -16,9 +16,9 @@
  *   There’s a small performance overhead for this extra work. However, printing strings 
  *   over Serial or to a LCD is a really slow process, so a few extra clock cycles really won’t matter.
  *
- *************************************************************************************************** 
- * 0.1  19/02/2020  version initiale - Basée sur RADIAL-V. Read ID3 tags in MP3 file.
-  *************************************************************************************************** 
+ * ************************************************************************************************** 
+ * 0.5  11/06/2020  Gestion de LED selon le BEAT
+ * **************************************************************************************************
 */
 
 #include "Ducretet.h"
@@ -27,6 +27,7 @@
 #include "SelfReturnButton.h"
 #include "Catalog.h"
 #include "MusicPlayer.h"
+#include "Rythmic.h"
 //#include "RemoteDisplay.h"
 #include "Bouchon.h"
 
@@ -80,15 +81,20 @@ Catalog            Catalogue;
 Rotary             ModeButton(MODE_1,MODE_2,MODE_3,MODE_4); 
 CapButton          TuneButton(TUNE_OUT,TUNE_IN);
 Bouchon  RemoteTFT;  // RemoteDisplay      
+Rythmic            Beat_ISR;
 
 //SelfReturnButton   PromoteButton(PROMOTE, &ISR_PromoteButton);
 //SelfReturnButton   AgainButton(AGAIN,     &ISR_AgainButton);
 //SelfReturnButton   NextButton(NEXT,       &ISR_NextButton);
 
-volatile int       Action = _IDLE;          // variable de type volatile, utilisable par les ISR
+volatile int       Action = _IDLE;          // variable volatile (stockée en RAM et pas dans un registre), utilisable par les ISR
 String             MusicFile;               // ID du clip MP3 en cours
 String             NextMusicFile;           // ID du prochain clip MP3 à jouer
 
+//storage variables for ISR
+ boolean toggle1 = false;
+boolean toggle2 = false;
+byte    toggle3 = 0;
 
 // *******************************************************************************
 // The setup function runs once when you press reset or power the board
@@ -105,7 +111,7 @@ void setup()
     while (!Serial) { ; } // wait for serial port to connect. Needed for native USB port only
   
     Serial.println(F("================================="));
-    Serial.println(F("==    DUCRETET     v0.4        =="));
+    Serial.println(F("==    DUCRETET     v0.5        =="));
     Serial.println(F("================================="));
     Serial.print  (F("CPU Frequency: ")); Serial.print(F_CPU/1000000); Serial.println(F(" MHz"));
     Serial.print  (F("Free RAM: "));      Serial.print(FreeRam(),DEC); Serial.println(F(" bytes"));
@@ -125,7 +131,9 @@ void setup()
     // ------------------------------------------------------------
     MP3Player.initialize();
     digitalWrite(LED_1,HIGH);   // Eteint la Led témoin SPI BUSY
-
+    pinMode(23, OUTPUT);
+    pinMode(25, OUTPUT);
+    
     // ------------------------------------------------------------
     // Initalise les autres objets
     // ------------------------------------------------------------
@@ -146,6 +154,7 @@ void setup()
     RemoteTFT.setSlavePresent(USE_TWO_ARDUINO);
 */
     MP3Player.playTrack("NOISE");   // On commence par jouer Noise
+    Beat_ISR.setBeat(121);
 }
 
 
@@ -302,6 +311,17 @@ void loop()
                         break; 
   }
 */                       
+
+/*  if (toggle1)
+  {
+    digitalWrite(23,HIGH);
+    toggle1 = false;
+  }
+  else
+  {
+    digitalWrite(23,LOW);
+    toggle1 = true;
+  }*/
   // --------------------------------------------------------------
   // Temporisation de la boucle
   // --------------------------------------------------------------
@@ -416,3 +436,63 @@ void ISR_PromoteButton()
     PromoteButton.setStatus(true);
 }
 */
+
+
+// *******************************************************************************
+// timer1 interrupt toggles LED pin 
+// (takes two cycles for full wave: toggle high then toggle low)
+// *******************************************************************************
+ISR(TIMER1_COMPA_vect)
+{
+/*
+  if (toggle2)
+  {
+    digitalWrite(25,HIGH);
+    toggle2 = false;
+  }
+  else
+  {
+    digitalWrite(25,LOW);
+    toggle2 = true;
+  }
+  */
+  toggle3++;
+  switch (toggle3)
+  {
+    case 1:
+        digitalWrite(23,LOW);  // (fast) 4 temps
+        digitalWrite(25,LOW);  // mesure
+        break;
+    case 2:
+        digitalWrite(23,HIGH);
+        digitalWrite(25,LOW);
+        break;
+    case 3:
+        digitalWrite(23,LOW);  // (fast) 4 temps
+        digitalWrite(25,HIGH);
+        break;
+    case 4:
+        digitalWrite(23,HIGH);
+        digitalWrite(25,HIGH);
+        break;
+    case 5:
+        digitalWrite(23,LOW);  // (fast) 4 temps
+        digitalWrite(25,LOW);  // demi-mesure
+        break;
+    case 6:
+        digitalWrite(23,HIGH);
+        digitalWrite(25,HIGH);
+        break;
+    case 7:
+        digitalWrite(23,LOW);  // (fast) 4 temps
+        digitalWrite(25,HIGH);
+        break;
+    case 8:
+        digitalWrite(23,HIGH);
+        digitalWrite(25,HIGH);
+        toggle3=0;
+        break;
+  }
+  
+}
+  
