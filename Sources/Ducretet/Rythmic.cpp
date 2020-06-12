@@ -1,6 +1,35 @@
 /* *******************************************************************************
  *  
- ********************************************************************************/
+ * Cette classe déclenche des Interruptions à une fréquence donnée.
+ * 
+ * startBeat/stopBeat = utilise le Timer1
+ * 
+ *  https://oscarliang.com/arduino-timer-and-interrupt-tutorial/
+ *  
+Timer0:
+  Timer0 is a 8bit timer.
+  UNO : PWM on Pins 5 and 6  are controlled by timer0
+  MEGA: PWM on Pins 4 and 13 are controlled by timer0
+  In the Arduino world, timer0 is used for functions like delay(), millis() and micros().
+  If you change Timer0 registers, this may influence the Arduino timer function. So you should know what you are doing.
+Timer1:
+  Timer1 is a 16bit timer.
+  UNO : PWM on Pins 9 and 10 are controlled by timer1
+  MEGA: PWM on Pins 11 and 12 are controlled by timer1
+  In the Arduino world, the Servo library uses timer1 on Arduino Uno.
+Timer2:
+  Timer2 is a 8bit timer.
+  UNO : PWM on Pins 11 and 3 are controlled by timer2
+  MEGA: PWM on Pins 9 and 10 are controlled by timer2
+  In the Arduino world, the tone() function uses timer2.
+Timer3, Timer4, Timer5: 
+  Timer 3,4,5 are only available on Arduino Mega boards. 
+  These timers are all 16bit timers. 
+  MEGA: PWM on Pin 2,3,5    are controlled by timer 3
+  MEGA: PWM on Pin 6,7,8    are controlled by timer 4
+  MEGA: PWM on Pin 44,45,46 are controlled by timer 5
+  In the Arduino world, the Servo library uses timer5 on Arduino Mega.
+ * ********************************************************************************/
 #include "Arduino.h"
 #include "Rythmic.h"
 
@@ -42,8 +71,6 @@ void  Rythmic::setFrequency(int frequency)
  *    parameter = BeatPerMinute (mesure du tempo).
  *    Le timer se déclenchera 4 fois par mesure.
  * *******************************************************************************
- * Note sur timer0:
- *     est utilisé par les fonctions système delay() et millis().
  * Note sur timer1:
  *     compteur 16bits => match register = 65.536 max
  *     prescaler max = 1024
@@ -66,7 +93,7 @@ void  Rythmic::setFrequency(int frequency)
  * on calcule donc sa valeur: MatchRegister + 1 = 16M / 256 / DesiredInterruptFrequency
  * (si on veut être précis, le +1 prend en compte la RAZ du compteur).
  * ******************************************************************************* */
-void  Rythmic::setBeat(int beat)
+void  Rythmic::startBeat(int beat)
 {
     const float scaled_freq = 16000000 /256 *60 /4;
 
@@ -77,10 +104,15 @@ void  Rythmic::setBeat(int beat)
     TCCR1B = 0;                // set entire TIMER1 TCCR1B register to 0
     TCNT1  = 0;                // initialize TIMER1 counter value to 0
     OCR1A = match;             // set CompareRegister 
-    TCCR1B |= (1 << WGM12);    // Turn On CTC mode
+    TCCR1B |= (1 << WGM12);    // turn ON the CTC mode
     TCCR1B |= (1 << CS12);     // Set CS12 bit for 256 prescaler
     // TCCR1B |= (1 << CS12) | (1 << CS10);       // Set CS12 and CS10 bits for 1024 prescaler
     TIMSK1 |= (1 << OCIE1A);   // enable timer compare interrupt
     interrupts();              // activer toutes les interruptions
-  
+}
+
+void  Rythmic::stopBeat()
+{
+    TCCR1B |= (1 << WGM12);    // turn OFF the CTC mode
+    TIMSK1 |= (1 << OCIE1A);   // disable timer compare interrupt 
 }
