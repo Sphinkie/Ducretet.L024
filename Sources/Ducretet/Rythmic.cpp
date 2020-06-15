@@ -39,7 +39,11 @@ Timer3, Timer4, Timer5:
 // *******************************************************************************
 Rythmic::Rythmic()
 {
-  this->match = 31250;   // par defaut: 2 Hz
+  this->match = 8080;   // par defaut: 116 BPM
+  pinMode(23, OUTPUT);
+  pinMode(25, OUTPUT);
+  digitalWrite(23,HIGH);
+  digitalWrite(25,HIGH);
 }
 
 // *******************************************************************************
@@ -61,7 +65,7 @@ void  Rythmic::setFrequency(int frequency)
   TCNT2  = 0;               // initialize TIMER2 counter value to 0
   OCR2A  = 249;             // set CompareRegister to (16MHz /8000 /8) -1   (must be <256)
   TCCR2A |= (1 << WGM21);   // turn on CTC mode
-  TCCR2B |= (1 << CS21);    // Set CS21 bit for 8 prescaler
+  TCCR2B |= (1 << CS21);    // set CS21 bit for 8 prescaler
   TIMSK2 |= (1 << OCIE2A);  // enable timer compare interrupt
   sei();                    // allow interrupts
 }
@@ -95,24 +99,92 @@ void  Rythmic::setFrequency(int frequency)
  * ******************************************************************************* */
 void  Rythmic::startBeat(int beat)
 {
-    const float scaled_freq = 16000000 /256 *60 /4;
-
-    match = int(scaled_freq/beat);
+    const float scaled_freq = 16000000 /256 *60 /4;     // = 937500.00
+    match = uint16_t(scaled_freq/beat);
+    Serial.print(F("ISR match counter ")); Serial.println(match);
 
     noInterrupts();            // désactiver toutes les interruptions
     TCCR1A = 0;                // set entire TIMER1 TCCR1A register to 0
     TCCR1B = 0;                // set entire TIMER1 TCCR1B register to 0
     TCNT1  = 0;                // initialize TIMER1 counter value to 0
     OCR1A = match;             // set CompareRegister 
-    TCCR1B |= (1 << WGM12);    // turn ON the CTC mode
-    TCCR1B |= (1 << CS12);     // Set CS12 bit for 256 prescaler
-    // TCCR1B |= (1 << CS12) | (1 << CS10);       // Set CS12 and CS10 bits for 1024 prescaler
-    TIMSK1 |= (1 << OCIE1A);   // enable timer compare interrupt
+    TCCR1B |= bit(WGM12);      // turn ON the CTC mode
+    TCCR1B |= bit(CS12);       // set CS12 bit for 256 prescaler
+    // TCCR1B |= (1 << CS12) | (1 << CS10);       // set CS12 and CS10 bits for 1024 prescaler
+    TIMSK1 |= bit(OCIE1A);     // enable timer "Compare" interrupt
     interrupts();              // activer toutes les interruptions
 }
 
+/* *******************************************************************************
+ * Stoppe le TIMER1
+ * *******************************************************************************
+ * TIMSK1 register = Timer1 Interrupt MaSK
+ * TOIE1 bit       = Timer1 Overflow Interrupt Enable
+ * OCIE1A bit      = Timer1 Output Compare Match Interrupt Enable
+ * *******************************************************************************
+ * "Compare interrupt" est générée lorsque le compteur atteint la valeur du match register.
+ * "Overflow interrupt" est générée lorsque le compteur déborde 
+ * *******************************************************************************
+ *    Pour positionner le bit à 1 : TIMSK1 |= bit(OCIE1A);
+ *    Pour positionner le bit à 0 : TIMSK1 &= ~bit (OCIE1A);
+ * ******************************************************************************* */
 void  Rythmic::stopBeat()
 {
-    TCCR1B |= (1 << WGM12);    // turn OFF the CTC mode
-    TIMSK1 |= (1 << OCIE1A);   // disable timer compare interrupt 
+    Serial.println("stopBeat"); 
+    cli();                    // stop interrupts
+    TIMSK1 &= ~bit(OCIE1A);   // disable timer "Compare" interrupt 
+    sei();                    // allow interrupts
+    digitalWrite(23,HIGH);
+    digitalWrite(25,HIGH);
 }
+
+
+
+//storage variables for ISR
+volatile byte    beat_tempo = 0;
+
+// *******************************************************************************
+// timer1 interrupt toggles LED pin 
+// (takes two cycles for full wave: toggle high then toggle low)
+// *******************************************************************************
+ISR(TIMER1_COMPA_vect)
+{
+  beat_tempo++;
+  switch (beat_tempo)
+  {
+    case 1:
+        digitalWrite(23,LOW);  // (fast) 4 temps
+        digitalWrite(25,LOW);  // mesure
+        break;
+    case 2:
+        digitalWrite(23,HIGH);
+        digitalWrite(25,LOW);
+        break;
+    case 3:
+        digitalWrite(23,LOW);  // (fast) 4 temps
+        digitalWrite(25,HIGH);
+        break;
+    case 4:
+        digitalWrite(23,HIGH);
+        digitalWrite(25,HIGH);
+        break;
+    case 5:
+        digitalWrite(23,LOW);  // (fast) 4 temps
+        digitalWrite(25,LOW);  // demi-mesure
+        break;
+    case 6:
+        digitalWrite(23,HIGH);
+        digitalWrite(25,HIGH);
+        break;
+    case 7:
+        digitalWrite(23,LOW);  // (fast) 4 temps
+        digitalWrite(25,HIGH);
+        break;
+    case 8:
+        digitalWrite(23,HIGH);
+        digitalWrite(25,HIGH);
+        beat_tempo=0;
+        break;
+  }
+}
+  

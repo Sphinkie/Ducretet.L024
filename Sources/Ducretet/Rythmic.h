@@ -14,8 +14,8 @@ class Rythmic
     void stopBeat();
 
   private:
-    int match;
-  
+    unsigned int match;
+ 
 };
 
 #endif

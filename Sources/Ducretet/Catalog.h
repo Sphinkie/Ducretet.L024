@@ -40,7 +40,7 @@ class Catalog : CatalogFile
         // recupération des infos du clip sélectionné
         String getSelectedClipID();
         String getSelectedClipYear();
-        String getSelectedClipBeat();
+        int    getSelectedClipBeat();
         String getSelectedClipGenre();
         String getSelectedClipRating();
 

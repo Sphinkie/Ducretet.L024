@@ -36,6 +36,32 @@ Ce [wiki officiel](https://github.com/olikraus/u8g2/wiki) décrit l'utilisation 
 - Pine coating: VCC, GND, SCL, SDA
 - Dimensions : 36 x 34 x 3mm
 
+## Librairies
+
+Plueirsu librairies arduino peuvent être utiliséespor piloter ce module!
+
+* **AdaFruit** : librairie graphique générale **Adafruit_GFX** et librairie couche-basse **Adafruit_11366**.
+
+* **Sparkfun** : librairie **Micro_OLED**.
+
+* **Oliver Kraus** : librairie **u8g2lib** (texte+graphiques) ou librairie **u8x8** (polices 8x8 seulement). 
+
+* U8g2
+
+  - Includes all graphics procedures (line/box/circle draw).
+  - Supports many fonts. (Almost) no restriction on the font height.
+  - Requires some memory in the microcontroller to render the display.
+
+* U8x8
+
+  - Text output only (character) device.
+
+  - Only fonts allowed with fixed size per character (8x8 pixel).
+
+  - Writes directly to the display. No buffer in the microcontroller required.
+
+    J'ai retenu **U8g2** qui comporte davantages de capacités en ce qui concerne les polices de caractères.
+
 ### Documentation
 
 [Free eBook for download](http://bibliothek.az-delivery.de)

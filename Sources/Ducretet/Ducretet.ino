@@ -91,10 +91,6 @@ volatile int       Action = _IDLE;          // variable volatile (stockée en RA
 String             MusicFile;               // ID du clip MP3 en cours
 String             NextMusicFile;           // ID du prochain clip MP3 à jouer
 
-//storage variables for ISR
- boolean toggle1 = false;
-boolean toggle2 = false;
-byte    toggle3 = 0;
 
 // *******************************************************************************
 // The setup function runs once when you press reset or power the board
@@ -131,9 +127,7 @@ void setup()
     // ------------------------------------------------------------
     MP3Player.initialize();
     digitalWrite(LED_1,HIGH);   // Eteint la Led témoin SPI BUSY
-    pinMode(23, OUTPUT);
-    pinMode(25, OUTPUT);
-    
+            
     // ------------------------------------------------------------
     // Initalise les autres objets
     // ------------------------------------------------------------
@@ -153,8 +147,8 @@ void setup()
     Serial.println(F("================================="));
     RemoteTFT.setSlavePresent(USE_TWO_ARDUINO);
 */
-    MP3Player.playTrack("NOISE");   // On commence par jouer Noise
-    Beat_ISR.setBeat(121);
+    MusicFile="NOISE";
+    MP3Player.playTrack(MusicFile);   // On commence par jouer Noise
 }
 
 
@@ -202,6 +196,7 @@ void loop()
     if (!MP3Player.isPlaying())      // S'il n'y a pas de morceau en cours, on en joue un.
     {
         Serial.println(F("No clip playing. Taking the next one."));
+        Beat_ISR.stopBeat();
         Catalogue.takeClip();             // On prend ce qu'on a pu trouver. Le Next devient le Courant.
         MusicFile = Catalogue.getSelectedClipID();
         MP3Player.playTrack(MusicFile);   // Et on le joue (éventuellement, cela peut être Noise).
@@ -242,19 +237,20 @@ void loop()
             Serial.println(F("  Display Year+Genre+Beat from Catalog"));
             if (MusicFile == "NOISE") 
             {
-               RemoteTFT.printYear(" ");
                RemoteTFT.printGenre(" ");
+               RemoteTFT.printYear(" ");
                RemoteTFT.printBeat(" ");
             }
             else
             {
-                RemoteTFT.printYear(Catalogue.getSelectedClipYear());
+                int beat = Catalogue.getSelectedClipBeat();
                 RemoteTFT.printGenre(Catalogue.getSelectedClipGenre());
-                RemoteTFT.printBeat(Catalogue.getSelectedClipBeat());
+                RemoteTFT.printYear(Catalogue.getSelectedClipYear());
+                RemoteTFT.printBeat(String(beat));
+                Beat_ISR.startBeat(beat);
             }
             break;
     case 5: // On determine le nombre d'étoiles et on l'affiche.
-            Serial.println(F("  Display Rating"));
             if (MusicFile == "NOISE") 
               RemoteTFT.printStars("-");
             else
@@ -436,63 +432,3 @@ void ISR_PromoteButton()
     PromoteButton.setStatus(true);
 }
 */
-
-
-// *******************************************************************************
-// timer1 interrupt toggles LED pin 
-// (takes two cycles for full wave: toggle high then toggle low)
-// *******************************************************************************
-ISR(TIMER1_COMPA_vect)
-{
-/*
-  if (toggle2)
-  {
-    digitalWrite(25,HIGH);
-    toggle2 = false;
-  }
-  else
-  {
-    digitalWrite(25,LOW);
-    toggle2 = true;
-  }
-  */
-  toggle3++;
-  switch (toggle3)
-  {
-    case 1:
-        digitalWrite(23,LOW);  // (fast) 4 temps
-        digitalWrite(25,LOW);  // mesure
-        break;
-    case 2:
-        digitalWrite(23,HIGH);
-        digitalWrite(25,LOW);
-        break;
-    case 3:
-        digitalWrite(23,LOW);  // (fast) 4 temps
-        digitalWrite(25,HIGH);
-        break;
-    case 4:
-        digitalWrite(23,HIGH);
-        digitalWrite(25,HIGH);
-        break;
-    case 5:
-        digitalWrite(23,LOW);  // (fast) 4 temps
-        digitalWrite(25,LOW);  // demi-mesure
-        break;
-    case 6:
-        digitalWrite(23,HIGH);
-        digitalWrite(25,HIGH);
-        break;
-    case 7:
-        digitalWrite(23,LOW);  // (fast) 4 temps
-        digitalWrite(25,HIGH);
-        break;
-    case 8:
-        digitalWrite(23,HIGH);
-        digitalWrite(25,HIGH);
-        toggle3=0;
-        break;
-  }
-  
-}
-  

@@ -16,6 +16,7 @@ class Media
         // Getters
         int    getYear();
         int    getBeat();
+        String getBeatString();
         String getID();
         String getGenre();
         int    getRating();

@@ -38,8 +38,8 @@ void Catalog::setNewRequestedValues(int tuning)
 // *******************************************************************************
 void Catalog::takeClip()
 {
-  CurrentMedia=NextMediaToPlay;       // Take clip
-  NextMediaToPlay.fillWith("",0);     // NOISE
+  CurrentMedia = this->NextMediaToPlay;       // Take clip
+  NextMediaToPlay.fillWith("",0);             // NOISE
   Serial.println("takeClip: "+CurrentMedia.getID());
   SearchInProgress=true;              // On continue la recherche là où elle s'était arrêtée.
 }
@@ -51,8 +51,13 @@ void Catalog::takeClip()
 String Catalog::getSelectedClipID()     { return CurrentMedia.getID(); }
 String Catalog::getSelectedClipGenre()  { return CurrentMedia.getGenre(); }
 String Catalog::getSelectedClipYear()   { return String(CurrentMedia.getYear()); }
-String Catalog::getSelectedClipBeat()   { return String(CurrentMedia.getBeat()); }
 String Catalog::getSelectedClipRating() { return String(CurrentMedia.getRating()); }
+int    Catalog::getSelectedClipBeat()   
+{
+  int beat = CurrentMedia.getBeat();
+  if (beat==0) return 116;
+  else return(beat);
+}
 
 
 /* *******************************************************************************
