@@ -77,7 +77,9 @@
 //U8G2_SSD1306_128X64_VCOMH0_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);	// same as the NONAME variant, but maximizes setContrast() range
 //U8G2_SSD1306_128X64_ALT0_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);	// same as the NONAME variant, but may solve the "every 2nd line skipped" problem
 //U8G2_SH1106_128X64_NONAME_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);
-//U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+
+U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+
 //U8G2_SH1106_128X64_VCOMH0_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);		// same as the NONAME variant, but maximizes setContrast() range
 //U8G2_SH1106_128X64_WINSTAR_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);		// same as the NONAME variant, but uses updated SH1106 init sequence
 //U8G2_SH1106_72X40_WISE_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);
@@ -274,8 +276,8 @@
 
 // End of constructor list
 
-void setup(void) {
-
+void setup(void) 
+{
   /* U8g2 Project: SSD1306 Test Board */
   //pinMode(10, OUTPUT);
   //pinMode(9, OUTPUT);
@@ -303,11 +305,13 @@ void setup(void) {
 
 uint8_t m = 24;
 
-void loop(void) {
+void loop(void) 
+{
   char m_str[3];
   strcpy(m_str, u8x8_u8toa(m, 2));		/* convert m to a string with two digits */
   u8g2.firstPage();
-  do {
+  do 
+  {
     u8g2.setFont(u8g2_font_logisoso62_tn);
     u8g2.drawStr(0,63,"9");
     u8g2.drawStr(33,63,":");
@@ -318,4 +322,3 @@ void loop(void) {
   if ( m == 60 )
     m = 0;
 }
-
