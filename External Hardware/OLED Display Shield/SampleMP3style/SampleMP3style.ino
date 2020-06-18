@@ -58,80 +58,81 @@ void displayGenre()
 
 
 /* ****************************************************************************************************
- * Affiche du titre aligné à gauche. A faire avant de commencer le scrolling.
- * ****************************************************************************************************   
- *        ecran        mémoire       ecrasement ecran
- *    [...128...]  ....128....   [..................
- *    The house o  f the Risin   g Sun 
+   Affiche du titre aligné à gauche. A faire avant de commencer le scrolling.
+ * ****************************************************************************************************
+          ecran        mémoire       ecrasement ecran
+      [...128...]  ....128....   [..................
+      The house o  f the Risin   g Sun
  * **************************************************************************************************** */
 void displayTitle(char* text)
 {
-    int pos = 2;
-    u8g2.setFont(u8g2_font_profont22_mr);
+  int pos = 2;
+  u8g2.setFont(u8g2_font_profont22_tf);
 
-    // on definit la substring à afficher
-    char sub_text[16];
-    memcpy(sub_text, &text[0], 15 );
-    sub_text[15] = '\0';
-  
-    u8g2.clearBuffer();
-    u8g2.setCursor(6, 4);
-    u8g2.print(u8g2.getUTF8Width(sub_text));
-    u8g2.setCursor(90, 4);
-    u8g2.print(u8g2.getUTF8Width(text));
-    u8g2.drawUTF8(pos, 32, sub_text);
-    u8g2.sendBuffer();
+  // on definit la substring à afficher
+  char sub_text[16];
+  memcpy(sub_text, &text[0], 15 );
+  sub_text[15] = '\0';
+
+  u8g2.clearBuffer();
+  u8g2.setCursor(6, 4);
+  u8g2.print(u8g2.getUTF8Width(sub_text));
+  u8g2.setCursor(90, 4);
+  u8g2.print(u8g2.getUTF8Width(text));
+  u8g2.drawUTF8(pos, 32, sub_text);
+  u8g2.sendBuffer();
 }
 
 /* ****************************************************************************************************
- * Affiche du titre centré
- * ****************************************************************************************************   
+   Affichage du titre centré
+ * ****************************************************************************************************
  * **************************************************************************************************** */
 void displayTitleCentered(char* text)
 {
-    int pos = 2;
-    u8g2.setFont(u8g2_font_profont22_mr);
+  Serial.println("displayTitleCentered");
+  int pos = 2;
+  u8g2.setFont(u8g2_font_profont22_tf);
 
-    // on definit la substring à afficher (devrait etre à width)
-    char sub_text[16];
-    memcpy(sub_text, &text[0], 15 );
-    sub_text[15] = '\0';
-    u8g2_uint_t width = u8g2.getUTF8Width(text);        // calculate the pixel width of the text 
-    u8g2_uint_t sub_width = u8g2.getUTF8Width(sub_text);             // taille de substring restant à afficher 
+  // on definit la substring à afficher (devrait etre à width)
+  char sub_text[16];
+  memcpy(sub_text, &text[0], 15 );
+  sub_text[15] = '\0';
+  u8g2_uint_t width = u8g2.getUTF8Width(text);        // calculate the pixel width of the text
+  u8g2_uint_t sub_width = u8g2.getUTF8Width(sub_text);             // taille de substring restant à afficher
 
-    // on part de l'hypothèse que le texte est moins large que l'écran (width < 128)
-    pos = (128-width)/2;
-    u8g2.clearBuffer();
-    u8g2.setCursor(6, 4);
-    u8g2.print(width);
-    u8g2.setCursor(90, 4);
-    u8g2.print(sub_width);
-    u8g2.drawUTF8(pos, 32, sub_text);
-    u8g2.sendBuffer();
+  // on part de l'hypothèse que le texte est moins large que l'écran (width < 128)
+  pos = (128 - width) / 2;
+  u8g2.clearBuffer();
+  u8g2.setCursor(6, 4);
+  u8g2.print(width);
+  u8g2.setCursor(90, 4);
+  u8g2.print(sub_width);
+  u8g2.drawUTF8(pos, 32, sub_text);
+  u8g2.sendBuffer();
 }
 
 
 
 /* ****************************************************************************************************
- * Scrolling pour les polices à taille fixe (ici 12 pixels de large)
- * ****************************************************************************************************   
- *        ecran        mémoire       ecrasement ecran
- *    [...128...]  ....128....   [..................
- *    The house o  f the Risin   g Sun 
+   Scrolling pour les polices à taille fixe (ici 12 pixels de large)
+ * ****************************************************************************************************
+   On utilise une substring, car si le texte dépasse 256 pixels, il revient écraser l'affichage.
+   Taille de la substing = 15 char = 15*12 pixels = 180 pixels.
+          ecran        mémoire       ecrasement ecran
+      [...128...]  ....128....   [..................
+      The house o  f the Risin   g Sun
  * **************************************************************************************************** */
 void displayScrollingTitle(char* text)
 {
-/*  u8g2_uint_t offset;       // current offset for the scrolling text */
-  u8g2_uint_t width;        // pixel width of the scrolling text (must be lesser than 128 unless U8G2_16BIT is defined
-/*  u8g2_uint_t sub_width; */
-
+  Serial.println("displayScrollingTitle");
   // On détermine la taille
-  u8g2.setFont(u8g2_font_profont22_mr);
-/*  width = u8g2.getUTF8Width(text);        // calculate the pixel width of the text */
+  u8g2.setFont(u8g2_font_profont22_tf);
+  const byte char_width = 12;             // pour cette police, les caractères ont une largeur de 12 pixels
 
-  const byte char_width=12;               // pour cette police, les caractères sont uen largeur de 12 pixels
+  /* en UTF8 les caractères accentués sont sur 2 octets et commencent par 0xFFC3. Ex: "é" = 0xC3A9
+  */
+
   int pos = 0;
-/*  int pos_fin = pos+width; */
   byte text_len = strlen(text);
   byte first_visible_char = 0;
 
@@ -139,35 +140,52 @@ void displayScrollingTitle(char* text)
   char sub_text[16];
   memcpy(sub_text, &text[first_visible_char], 15 );
   sub_text[15] = '\0';
-/*  sub_width = u8g2.getUTF8Width(sub_text);             // taille de substring restant à afficher */
+
+  /* dumps */
+  Serial.print("text    : ");
+  for (byte i = 0; i < 16; i++){Serial.print(text[i], HEX);Serial.print(" ");} Serial.println();
+  Serial.print("sub_text: ");
+  for (byte i = 0; i < 16; i++){Serial.print(sub_text[i], HEX);Serial.print(" ");} Serial.println();
+
 
   // on fait venir le texte par la droite
   do {
-    if (pos>=0)
+    if (pos >= 0)
       first_visible_char = 0;
-    // un caractère vient de sortir de l'écran
+      
+    // Si un caractère vient de sortir de l'écran (pos est négatif)
     else if (pos == -char_width)
     {
-      // on avance la substring de 1 caractère
-      first_visible_char += 1;
+      // Serial.print("Going out: ");Serial.println(sub_text[0], HEX);
+      // si le caractère était un prefixe UTF8
+      if (sub_text[0] == 0xFFC3)
+      {
+        // Serial.println("UTF8 prefix: << exiting 2 bytes.");
+        // on avance la substring de 2 bytes
+        first_visible_char += 2;
+      }
+      // Autre caractère:
+      else
+      {
+        // on avance la substring de 1 byte
+        first_visible_char += 1;
+      }
       memcpy(sub_text, &text[first_visible_char], 15 );
       sub_text[15] = '\0';
-      // on avance la position de la substring de 12 pixels (largeur du caractère)
-      pos += char_width;
+      for (byte i = 0; i < 15; i++){Serial.print(sub_text[i], HEX);Serial.print(" ");} Serial.println();
+      // on repositionne de la substring
+      pos = 0;
     }
-/*    sub_width = u8g2.getUTF8Width(sub_text);        // calculate the pixel width of the text */  
     u8g2.clearBuffer();
-/*    u8g2.setCursor(6, 4);
-    u8g2.print(pos);
+/*  u8g2.setCursor(6, 4);
+    u8g2.print(u8g2.getUTF8Width(sub_text));
     u8g2.setCursor(90, 4);
-    u8g2.print(sub_width); */
+    u8g2.print(u8g2.getUTF8Width(text));*/
     u8g2.drawUTF8(pos, 32, sub_text);
     u8g2.sendBuffer();
-    // on décale la position d'un pixel vers la gauche
-    pos--;
-/*    pos_fin = pos + width;*/
     delay(10);        // petite tempo
-  } 
+    pos--;            // on décale la position d'un pixel vers la gauche
+  }
   // on arrete le scroll quand il ne reste aucun caractère visible
   while (first_visible_char < text_len);
 }
@@ -175,69 +193,108 @@ void displayScrollingTitle(char* text)
 
 /* ****************************************************************************************************
  * Scrolling pour les polices à taille proportionelle
- * ****************************************************************************************************   
- *        ecran        mémoire       ecrasement ecran
- *    [...128...]  ....128....   [..................
- *    The house o  f the Risin   g Sun 
+ * ****************************************************************************************************
+ * Résultat saccadé quoique l'on fasse. getWidth ne renvoie pas toujours la bonne valeur...
+ * Peut-etre en raison de la transparence de la police?
+ * ****************************************************************************************************
+   On utilise une substring, car si le texte dépasse 256 pixels, il revient écraser l'affichage.
+   Taille de la substring 15 char => on peut utiliser des polices ayant entre 8 et 17 pixels de large.
+   Taille de la substring 14 char => on peut utiliser des polices ayant entre 9 et 18 pixels de large.
+          ecran        mémoire       ecrasement ecran
+      [...128...]  ....128....   [..................
+      The house o  f the Risin   g Sun
  * **************************************************************************************************** */
 void displayScrollingTitleProp(char* text)
 {
-  u8g2_uint_t offset;       // current offset for the scrolling text
+  Serial.println("displayScrollingTitleProp");
   u8g2_uint_t width;        // pixel width of the scrolling text (must be lesser than 128 unless U8G2_16BIT is defined
   u8g2_uint_t sub_width;
+  byte        char_width;   // largeur d'un caractère en pixels (non constant)
 
-  // On détermine la taille
-  u8g2.setFont(u8g2_font_profont22_mr);
+  u8g2.setFont(u8g2_font_helvR18_tf);     // Lucida: pas très jolie u8g2_font_luRS19_tf
   width = u8g2.getUTF8Width(text);        // calculate the pixel width of the text
 
-  const byte char_width=12;               // pour cette police, les caractères sont uen largeur de 12 pixels
   int pos = 0;
-  int pos_fin = pos+width;
-  byte text_len = strlen(text)-1;
+  byte text_len = strlen(text);
 
+  // On definit la substring qui sera affichée
   char sub_text[16];
   byte first_visible_char = 0;
   memcpy(sub_text, &text[first_visible_char], 15 );
   sub_text[15] = '\0';
-  sub_width = u8g2.getUTF8Width(sub_text);        // calculate the pixel width of the text
+  sub_width = u8g2.getUTF8Width(sub_text);        // largeur du texte affichable
+  // les fonction de la librairie u8g2 donnent la largeur en pixels d'une chaine, mais pas celle d'un caractère.
+  // il nous faut donc tester une chaine d'une seule lettre (de 1 ou 2 octets, selon s'il est accentué ou pas.)
+  char first_letter[3];
+  strncpy(first_letter, sub_text, 2);   
+  if (first_letter[0]!=0xFFC3) first_letter[1]='\0';  // si ce n'est pas un caractere accentué, on n'a pas besoin du 2eme octet;
+  first_letter[2]='\0';
+  char_width = u8g2.getUTF8Width(first_letter)+1;       // largeur du premier caractère
+  /* dumps */
+  Serial.print("text: ");
+  for (byte i = 0; i < 15; i++) {    Serial.print(text[i], HEX);    Serial.print(" ");  } Serial.println();
+  Serial.print("sub_text: ");
+  for (byte i = 0; i < 15; i++) {    Serial.print(sub_text[i], HEX);    Serial.print(" ");  } Serial.println();
+  Serial.print("first_letter: ");
+  for (byte i = 0; i < 3; i++)  {    Serial.print(first_letter[i], HEX);    Serial.print(" ");  } Serial.println();
 
   // on fait venir le texte par la droite
   do {
-    if (pos>=0)
+    if (pos >= 0)
       first_visible_char = 0;
-    else if (pos == -12)
+      
+    // Si un caractère vient de sortir de l'écran (pos est négatif)
+    // la problématque est de connaitre la largeur en pixels du caractère qui vient de sortir
+    else if (pos == -char_width)
+    
     {
-      first_visible_char +=1;
-      pos += 12;
+      Serial.print("Going out: ");Serial.println(sub_text[0], HEX);
+      // si le caractère était un prefixe UTF8
+      if (sub_text[0] == 0xFFC3)
+      {
+        Serial.println("UTF8 prefix: << exiting 2 bytes.");
+        // on avance la substring de 2 bytes
+        first_visible_char += 2;
+      }
+      // Autre caractère:
+      else
+      {
+        // on avance la substring de 1 byte
+        first_visible_char += 1;
+      }
+      memcpy(sub_text, &text[first_visible_char], 15 );
+      sub_text[15] = '\0';
+      for (byte i = 0; i < 15; i++){Serial.print(sub_text[i], HEX);Serial.print(" ");} Serial.println();
+      // on examine la première lettre
+      strncpy(first_letter, sub_text, 2);   
+      if (first_letter[0]!=0xFFC3) first_letter[1]='\0';  // si ce n'est pas un caractère accentué, on n'a pas besoin du 2eme octet;
+      first_letter[2]='\0';
+
+      char_width = u8g2.getUTF8Width(first_letter)   +1;  // patch de la largeur
+      Serial.print("first_letter: '"); 
+      Serial.print(first_letter); 
+      Serial.print("' : "); 
+      for (byte i = 0; i < 3; i++)  {Serial.print(first_letter[i], HEX);Serial.print(" ");} Serial.println();
+      Serial.print("width= ");Serial.println(char_width);
+
+      // on repositionne de la substring
+      pos = 0;
     }
-    memcpy(sub_text, &text[first_visible_char], 15 );
-    sub_text[15] = '\0';
-    sub_width = u8g2.getUTF8Width(sub_text);        // calculate the pixel width of the text
-     
+
     u8g2.clearBuffer();
-    u8g2.setCursor(6, 4);
-    u8g2.print(pos);
-    u8g2.setCursor(90, 4);
-    u8g2.print(sub_width);
     u8g2.drawUTF8(pos, 32, sub_text);
     u8g2.sendBuffer();
-    delay(40);
-    pos--;
-    pos_fin = pos + width;
-  } 
+    delay(10);
+    pos -= 1;
+  }
+  // on arrete le scroll quand il ne reste aucun caractère visible
   while (first_visible_char < text_len);
 
-//while( x < 128 );    // draw again until the complete display is filled
-    
-/*  offset-=1;              // scroll by one pixel
-  if ( (u8g2_uint_t)offset < (u8g2_uint_t)-width )  
-    offset = 0;             // start over again
-*/
 }
 
 
 /* ****************************************************************************************************
-    Anime une étoile
+ *  Fait grossir une étoile (taille 2 à taille 5)
  * **************************************************************************************************** */
 void animStar(int pos)
 {
@@ -253,12 +310,10 @@ void animStar(int pos)
   drawStar(pos, 5.0);
   u8g2.sendBuffer();
   delay(120);
-  //  drawStar(pos,6.0);
-  //  u8g2.sendBuffer();
 }
 
 /* ****************************************************************************************************
-    dessine une étoile
+ *  dessine une étoile, de la taille donnée
  * **************************************************************************************************** */
 void drawStar(int pos, float a)
 {
@@ -280,7 +335,7 @@ void drawStar(int pos, float a)
 
 
 /* ****************************************************************************************************
-    Texte de 2 lignes dans un cadre
+ *  Texte de 2 lignes dans un cadre
  * **************************************************************************************************** */
 void displayAlbum()
 {
@@ -292,7 +347,7 @@ void displayAlbum()
 }
 
 /* ****************************************************************************************************
-    Texte de 2 lignes dans un cadre
+ *  Texte de 2 lignes dans un cadre
  * **************************************************************************************************** */
 void displayArtist()
 {
@@ -304,7 +359,7 @@ void displayArtist()
 }
 
 /* ****************************************************************************************************
-
+ * Affiche un texte en gros
  * **************************************************************************************************** */
 void displayYear()
 {
@@ -318,7 +373,7 @@ void displayYear()
 }
 
 /* ****************************************************************************************************
-    Menubox en haut
+    Menubox en haut. Texte sur fond blanc.
  * **************************************************************************************************** */
 void displayMenu()
 {
@@ -341,10 +396,10 @@ void displayMenu()
 */
 
 /* ****************************************************************************************************
-    dessine une courbe polaire
-    r² = a²cos2Th + sqr(b4-a4sin²22Th)  (pour les calculs intermédiaires: F1 + F2)
-    Th = Théta (varie entre 0 et pi/2, par 96 pas)
-   on fait varier b entre 0 et 2*a
+ *   dessine une courbe polaire, de parametre 'b'
+ *   r² = a²cos2Th + sqr(b4-a4sin²22Th)  (pour les calculs intermédiaires: F1 + F2)
+ *   Th = Théta (varie entre 0 et pi/2, par 96 pas)
+ *  on fait varier b entre 0 et 2*a
  * **************************************************************************************************** */
 void drawCurve(int b)
 {
@@ -381,9 +436,9 @@ void drawCurve(int b)
 
 
 /* ****************************************************************************************************
-    Dessine une courbe de Jarre. voir p280.
-     x = cos3t + sin4t
-     y = sint + cos2t + 2
+ * Dessine une courbe de Jarre. voir p280.
+ *    x = cos3t + sin4t
+ *    y = sint + cos2t + 2
  * **************************************************************************************************** */
 void drawJarre(int pixel_len = 4, int pixel_speed = 0)
 {
@@ -405,7 +460,7 @@ void drawJarre(int pixel_len = 4, int pixel_speed = 0)
 
 
 /* ****************************************************************************************************
- * Dessine une barre animée de largeur = sint + sin2t
+ *  Dessine une barre animée de largeur = sint + sin2t. Pas très fluide.
  * **************************************************************************************************** */
 void drawBar()
 {
@@ -414,33 +469,51 @@ void drawBar()
     u8g2.clearBuffer();
     float x = abs(sin(t) + sin(2 * t));
     // u8g2.drawBox(64-20*x, 30, 40 * x, 6); // lent
-    u8g2.drawHLine(64-20*x, 30, 40*x);
+    u8g2.drawHLine(64 - 20 * x, 30, 40 * x);
     u8g2.sendBuffer();
   }
 }
 
 
 /* ****************************************************************************************************
- * Dessine des points qui s'echappent vers les bords
+ *  Dessine des points qui s'echappent vers les bords
  * **************************************************************************************************** */
 void drawFlyingPixels()
 {
   // A animer avec deux ISR pour être en rythme et avoir plusieurs points en même temps.
   // ISR1 = beat: debut d'une séquence: creation de points
   // ISR2 = régulière : avancement des points et refresh display
-  for (int t=1; t<64; t+=1)
+  // debut de l'annimation: un rond qui grossit
+    u8g2.clearBuffer();
+    u8g2.drawDisc(64, 30,3);
+    u8g2.sendBuffer();
+    delay(40);
+    u8g2.clearBuffer();
+    u8g2.drawCircle(64,30,4);
+    u8g2.sendBuffer();
+    delay(40);
+    u8g2.clearBuffer();
+    u8g2.drawCircle(64,30,6);
+    u8g2.sendBuffer();
+    delay(40);
+    u8g2.clearBuffer();
+    u8g2.drawEllipse(64,30,9,7);
+    u8g2.sendBuffer();
+    delay(40);
+  
+  for (int t = 10; t < 64; t += 1)
   {
-      u8g2.clearBuffer();
-      u8g2.drawPixel(64 + t, 30);
-      u8g2.drawPixel(64 - t, 30);
-      u8g2.sendBuffer();
-      if (t<10) t+=1; // un peu de dynamisme au début
+    u8g2.clearBuffer();
+    u8g2.drawPixel(64 + t, 30);
+    u8g2.drawPixel(64 - t, 30);
+    u8g2.sendBuffer();
+    if (t < 40) t += 1; // un peu de dynamisme au début
   }
 }
 
 
 /* ****************************************************************************************************
-    Animation courbe
+ *  Animation courbe
  * **************************************************************************************************** */
 void animCurve()
 {
@@ -456,13 +529,15 @@ void animCurve()
 
 
 /* ****************************************************************************************************
-    SETUP
+ *  SETUP
  * **************************************************************************************************** */
 void setup(void)
 {
+    Serial.println("** start **");
   // begin() function will reset, configure, clear and disable power save mode of the display
   u8g2.begin();
   u8g2_prepare();
+  Serial.begin(115200);
 }
 
 
@@ -471,8 +546,12 @@ void setup(void)
  * **************************************************************************************************** */
 void loop(void)
 {
+  Serial.println("** ***** **");
+    
   // Effacement
   u8g2_prepare();
+
+  char title[64];
 
   /*
     // Affiche une image
@@ -481,96 +560,98 @@ void loop(void)
     u8g2.sendBuffer();
     delay(3*time_delay);
   */
-/*
-  // Affiche des points fuyants vers les bords
-  for (int i=10; i<50; i+=10)
-  {
-    drawFlyingPixels();
-    delay(i);
-  }
   
-    // trace un pixel animé le long d'une courbe
-    drawJarre();
-    // Affiche une courbe animée
-    animCurve();
-    // Affiche une barre animée
-    animBar();
+    // Affiche des points fuyants vers les bords
+    for (int i=10; i<50; i+=10)
+    {
+      drawFlyingPixels();
+      delay(i);
+    }
+/*
+      // trace un pixel animé le long d'une courbe
+      drawJarre();
+      // Affiche une courbe animée
+      animCurve();
+      // Affiche une barre animée
+      animBar();
+*/
 
-    // anime 3 étoiles
-    u8g2.clearBuffer();
-    u8g2.drawRFrame(2, 20, 124, 32, 7);
-    animStar(1);
-    animStar(2);
-    animStar(3);
-    delay(time_delay);
+/*      
+      // anime 3 étoiles
+      u8g2.clearBuffer();
+      u8g2.drawRFrame(2, 20, 124, 32, 7);
+      animStar(1);
+      animStar(2);
+      animStar(3);
+      delay(time_delay);
 
-    // Affiche l'année
-    u8g2.clearBuffer();
-    displayMenu();
-    displayYear();
-    u8g2.sendBuffer();
-    delay(time_delay);
+      // Affiche l'année
+      u8g2.clearBuffer();
+      displayMenu();
+      displayYear();
+      u8g2.sendBuffer();
+      delay(time_delay);
 
-    // Efface l'année
-    u8g2.clearBuffer();
-    displayMenu();
-    u8g2.sendBuffer();
-    delay(time_delay);
+      // Efface l'année
+      u8g2.clearBuffer();
+      displayMenu();
+      u8g2.sendBuffer();
+      delay(time_delay);
 
-    // Album
-    u8g2.clearBuffer();
-    displayMenu();
-    displayAlbum();
-    u8g2.sendBuffer();
-    delay(time_delay);
+      // Album
+      u8g2.clearBuffer();
+      displayMenu();
+      displayAlbum();
+      u8g2.sendBuffer();
+      delay(time_delay);
 
-    // Artist
-    u8g2.clearBuffer();
-    displayMenu();
-    displayArtist();
-    u8g2.sendBuffer();
-    delay(time_delay);
-*/  
+      // Artist
+      u8g2.clearBuffer();
+      displayMenu();
+      displayArtist();
+      u8g2.sendBuffer();
+      delay(time_delay);
+
   //displayMenu();
 
   // Titre (centré)
-  char* title = "Bom Bom";               // 84   (7 chars) = 12 pixel/char avec cette police
   displayTitleCentered(title);
   delay(time_delay);
+  */
 
-
-  // Titre (déroulant)
-  title = "Bom Bom";                      // 84   (7 chars) = 12 pixel/char avec cette police
+  // Titres déroulants
+  /*
+  strcpy(title,"Un éléphant blanc");              // (16 chars)
   displayTitle(title);
   delay(time_delay);
   displayScrollingTitle(title);
   delay(time_delay);
+
+  strcpy(title,"Le cinquième élément");  // (20 chars)
+  displayTitle(title);
+  delay(time_delay);
+  displayScrollingTitleProp(title);
+  delay(time_delay);
+  */
   
-  title = "Hop Hop Hop";                  // 132  (11 chars)
+  /*
+  strcpy(title,"Sons and Daughters");       // 216  (18 chars) = 128+90
   displayTitle(title);
   delay(time_delay);
   displayScrollingTitle(title);
   delay(time_delay);
 
-  title = "Sons and Daughters";           // 216  (18 chars) = 128+90
+  strcpy(title,"The house of the Rising Sun");  // 324  (27 chars) = 128+128+68
   displayTitle(title);
   delay(time_delay);
   displayScrollingTitle(title);
   delay(time_delay);
 
-  title = "The house of the Rising Sun";  // 324  (27 chars) = 128+128+68
-  displayTitle(title);
+  // Genre (1 ligne / centré)
+  u8g2.clearBuffer();
+  displayMenu();
+  displayGenre();
+  u8g2.sendBuffer();
   delay(time_delay);
-  displayScrollingTitle(title);
-  delay(time_delay);
-
-
-
-    // Genre (1 ligne / centré)
-    u8g2.clearBuffer();
-    displayMenu();
-    displayGenre();
-    u8g2.sendBuffer();
-    delay(time_delay);
-
+*/
 }
