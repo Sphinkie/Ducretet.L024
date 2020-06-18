@@ -56,41 +56,183 @@ void displayGenre()
   u8g2.drawRFrame(2, 20, 124, 34, 7);
 }
 
-/* ****************************************************************************************************
 
+/* ****************************************************************************************************
+ * Affiche du titre aligné à gauche. A faire avant de commencer le scrolling.
+ * ****************************************************************************************************   
+ *        ecran        mémoire       ecrasement ecran
+ *    [...128...]  ....128....   [..................
+ *    The house o  f the Risin   g Sun 
  * **************************************************************************************************** */
-void displayTitle()
+void displayTitle(char* text)
+{
+    int pos = 2;
+    u8g2.setFont(u8g2_font_profont22_mr);
+
+    // on definit la substring à afficher
+    char sub_text[16];
+    memcpy(sub_text, &text[0], 15 );
+    sub_text[15] = '\0';
+  
+    u8g2.clearBuffer();
+    u8g2.setCursor(6, 4);
+    u8g2.print(u8g2.getUTF8Width(sub_text));
+    u8g2.setCursor(90, 4);
+    u8g2.print(u8g2.getUTF8Width(text));
+    u8g2.drawUTF8(pos, 32, sub_text);
+    u8g2.sendBuffer();
+}
+
+/* ****************************************************************************************************
+ * Affiche du titre centré
+ * ****************************************************************************************************   
+ * **************************************************************************************************** */
+void displayTitleCentered(char* text)
+{
+    int pos = 2;
+    u8g2.setFont(u8g2_font_profont22_mr);
+
+    // on definit la substring à afficher (devrait etre à width)
+    char sub_text[16];
+    memcpy(sub_text, &text[0], 15 );
+    sub_text[15] = '\0';
+    u8g2_uint_t width = u8g2.getUTF8Width(text);        // calculate the pixel width of the text 
+    u8g2_uint_t sub_width = u8g2.getUTF8Width(sub_text);             // taille de substring restant à afficher 
+
+    // on part de l'hypothèse que le texte est moins large que l'écran (width < 128)
+    pos = (128-width)/2;
+    u8g2.clearBuffer();
+    u8g2.setCursor(6, 4);
+    u8g2.print(width);
+    u8g2.setCursor(90, 4);
+    u8g2.print(sub_width);
+    u8g2.drawUTF8(pos, 32, sub_text);
+    u8g2.sendBuffer();
+}
+
+
+
+/* ****************************************************************************************************
+ * Scrolling pour les polices à taille fixe (ici 12 pixels de large)
+ * ****************************************************************************************************   
+ *        ecran        mémoire       ecrasement ecran
+ *    [...128...]  ....128....   [..................
+ *    The house o  f the Risin   g Sun 
+ * **************************************************************************************************** */
+void displayScrollingTitle(char* text)
+{
+/*  u8g2_uint_t offset;       // current offset for the scrolling text */
+  u8g2_uint_t width;        // pixel width of the scrolling text (must be lesser than 128 unless U8G2_16BIT is defined
+/*  u8g2_uint_t sub_width; */
+
+  // On détermine la taille
+  u8g2.setFont(u8g2_font_profont22_mr);
+/*  width = u8g2.getUTF8Width(text);        // calculate the pixel width of the text */
+
+  const byte char_width=12;               // pour cette police, les caractères sont uen largeur de 12 pixels
+  int pos = 0;
+/*  int pos_fin = pos+width; */
+  byte text_len = strlen(text);
+  byte first_visible_char = 0;
+
+  // On definit la substring qui sera affichée
+  char sub_text[16];
+  memcpy(sub_text, &text[first_visible_char], 15 );
+  sub_text[15] = '\0';
+/*  sub_width = u8g2.getUTF8Width(sub_text);             // taille de substring restant à afficher */
+
+  // on fait venir le texte par la droite
+  do {
+    if (pos>=0)
+      first_visible_char = 0;
+    // un caractère vient de sortir de l'écran
+    else if (pos == -char_width)
+    {
+      // on avance la substring de 1 caractère
+      first_visible_char += 1;
+      memcpy(sub_text, &text[first_visible_char], 15 );
+      sub_text[15] = '\0';
+      // on avance la position de la substring de 12 pixels (largeur du caractère)
+      pos += char_width;
+    }
+/*    sub_width = u8g2.getUTF8Width(sub_text);        // calculate the pixel width of the text */  
+    u8g2.clearBuffer();
+/*    u8g2.setCursor(6, 4);
+    u8g2.print(pos);
+    u8g2.setCursor(90, 4);
+    u8g2.print(sub_width); */
+    u8g2.drawUTF8(pos, 32, sub_text);
+    u8g2.sendBuffer();
+    // on décale la position d'un pixel vers la gauche
+    pos--;
+/*    pos_fin = pos + width;*/
+    delay(10);        // petite tempo
+  } 
+  // on arrete le scroll quand il ne reste aucun caractère visible
+  while (first_visible_char < text_len);
+}
+
+
+/* ****************************************************************************************************
+ * Scrolling pour les polices à taille proportionelle
+ * ****************************************************************************************************   
+ *        ecran        mémoire       ecrasement ecran
+ *    [...128...]  ....128....   [..................
+ *    The house o  f the Risin   g Sun 
+ * **************************************************************************************************** */
+void displayScrollingTitleProp(char* text)
 {
   u8g2_uint_t offset;       // current offset for the scrolling text
   u8g2_uint_t width;        // pixel width of the scrolling text (must be lesser than 128 unless U8G2_16BIT is defined
+  u8g2_uint_t sub_width;
 
-//  const char* text = "The house of the Rising Sun";  // largeur 268 (recouvrement à partir de "ng Sun")
-//  const char* text = "Bom bom bom";  // largeur 132  (dépasse légèrement des 128: "m")
-  const char* text = "Sons and Daughters";  // largeur 216  (dépasse des 128: "aughters")
+  // On détermine la taille
   u8g2.setFont(u8g2_font_profont22_mr);
+  width = u8g2.getUTF8Width(text);        // calculate the pixel width of the text
 
-  width = u8g2.getUTF8Width(text);    // calculate the pixel width of the text
+  const byte char_width=12;               // pour cette police, les caractères sont uen largeur de 12 pixels
+  int pos = 0;
+  int pos_fin = pos+width;
+  byte text_len = strlen(text)-1;
 
-  u8g2.setCursor(10, 10);
-  u8g2.setFont(u8g2_font_9x18B_mn);
-  u8g2.print(width);
+  char sub_text[16];
+  byte first_visible_char = 0;
+  memcpy(sub_text, &text[first_visible_char], 15 );
+  sub_text[15] = '\0';
+  sub_width = u8g2.getUTF8Width(sub_text);        // calculate the pixel width of the text
 
-char subbuff[5];
-memcpy( subbuff, &text[0], 4 );
-subbuff[4] = '\0';
+  // on fait venir le texte par la droite
+  do {
+    if (pos>=0)
+      first_visible_char = 0;
+    else if (pos == -12)
+    {
+      first_visible_char +=1;
+      pos += 12;
+    }
+    memcpy(sub_text, &text[first_visible_char], 15 );
+    sub_text[15] = '\0';
+    sub_width = u8g2.getUTF8Width(sub_text);        // calculate the pixel width of the text
+     
+    u8g2.clearBuffer();
+    u8g2.setCursor(6, 4);
+    u8g2.print(pos);
+    u8g2.setCursor(90, 4);
+    u8g2.print(sub_width);
+    u8g2.drawUTF8(pos, 32, sub_text);
+    u8g2.sendBuffer();
+    delay(40);
+    pos--;
+    pos_fin = pos + width;
+  } 
+  while (first_visible_char < text_len);
 
-  u8g2.setFont(u8g2_font_profont22_mr);
-  u8g2.drawUTF8(2, 30, text);   // A dérouler
-
-//while( x < u8g2.getDisplayWidth() );    // draw again until the complete display is filled
+//while( x < 128 );    // draw again until the complete display is filled
     
-  offset-=1;              // scroll by one pixel
+/*  offset-=1;              // scroll by one pixel
   if ( (u8g2_uint_t)offset < (u8g2_uint_t)-width )  
     offset = 0;             // start over again
-  delay(10);
-  
-  u8g2.sendBuffer();
-
+*/
 }
 
 
@@ -389,13 +531,43 @@ void loop(void)
     u8g2.sendBuffer();
     delay(time_delay);
 */  
-  // Titre (déroulant)
-  u8g2.clearBuffer();
   //displayMenu();
-  displayTitle();
-  delay(5*time_delay);
+
+  // Titre (centré)
+  char* title = "Bom Bom";               // 84   (7 chars) = 12 pixel/char avec cette police
+  displayTitleCentered(title);
+  delay(time_delay);
+
+
+  // Titre (déroulant)
+  title = "Bom Bom";                      // 84   (7 chars) = 12 pixel/char avec cette police
+  displayTitle(title);
+  delay(time_delay);
+  displayScrollingTitle(title);
+  delay(time_delay);
+  
+  title = "Hop Hop Hop";                  // 132  (11 chars)
+  displayTitle(title);
+  delay(time_delay);
+  displayScrollingTitle(title);
+  delay(time_delay);
+
+  title = "Sons and Daughters";           // 216  (18 chars) = 128+90
+  displayTitle(title);
+  delay(time_delay);
+  displayScrollingTitle(title);
+  delay(time_delay);
+
+  title = "The house of the Rising Sun";  // 324  (27 chars) = 128+128+68
+  displayTitle(title);
+  delay(time_delay);
+  displayScrollingTitle(title);
+  delay(time_delay);
+
+
 
     // Genre (1 ligne / centré)
+    u8g2.clearBuffer();
     displayMenu();
     displayGenre();
     u8g2.sendBuffer();
