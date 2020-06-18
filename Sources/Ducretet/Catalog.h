@@ -39,7 +39,7 @@ class Catalog : CatalogFile
         void   searchClipForRequestedRating();
         // recupération des infos du clip sélectionné
         String getSelectedClipID();
-        String getSelectedClipYear();
+        int    getSelectedClipYear();
         int    getSelectedClipBeat();
         String getSelectedClipGenre();
         String getSelectedClipRating();

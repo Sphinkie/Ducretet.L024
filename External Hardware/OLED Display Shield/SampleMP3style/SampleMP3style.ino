@@ -1,5 +1,6 @@
-/*
-*/
+/* ****************************************************************************************************
+ * Programme pour expérimenter les différentes possibilités graphiques de l'afficheur OLED
+ * **************************************************************************************************** */
 
 #include <U8g2lib.h>
 #include <Wire.h>
@@ -7,17 +8,18 @@
 
 #define time_delay 2000
 
-/*  Next, object called u8g2 is created, with the following line of code:
-  U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
-  The created object represents the screen itself and it is used to control the
-  screen. The U8g2 library can be used for many other OLED screens, thus
-  there are many constructors in the sketch examples from the library.
+/*
+  Creation de l'objet u8g2 avec les paramètres correspondants à un écran avec chipset SH1106.
 */
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
-// U8G2_R0   No rotation, landscape
-// Use U8X8_PIN_NONE if there is no switch connected to the pin
+// U8G2_R0           = No rotation, landscape
+// Use U8X8_PIN_NONE = there is no switch connected to the pin
+// _F_               = Full buffer mode
+
+
 
 /* ****************************************************************************************************
+ * Initialisations
  * **************************************************************************************************** */
 void u8g2_prepare()
 {

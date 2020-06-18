@@ -48,9 +48,9 @@ void Catalog::takeClip()
 // *******************************************************************************
 // Renvoie les infos du clip courant (après un Take)
 // *******************************************************************************
-String Catalog::getSelectedClipID()     { return CurrentMedia.getID(); }
+String Catalog::getSelectedClipID()     { return CurrentMedia.getID();    }
 String Catalog::getSelectedClipGenre()  { return CurrentMedia.getGenre(); }
-String Catalog::getSelectedClipYear()   { return String(CurrentMedia.getYear()); }
+int    Catalog::getSelectedClipYear()   { return CurrentMedia.getYear();  }
 String Catalog::getSelectedClipRating() { return String(CurrentMedia.getRating()); }
 int    Catalog::getSelectedClipBeat()   
 {

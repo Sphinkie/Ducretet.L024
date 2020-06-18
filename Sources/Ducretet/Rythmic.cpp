@@ -37,13 +37,16 @@ Timer3, Timer4, Timer5:
 // *******************************************************************************
 // Constructor 
 // *******************************************************************************
-Rythmic::Rythmic()
+Rythmic::Rythmic(byte led1, byte led2)
 {
   this->match = 8080;   // par defaut: 116 BPM
-  pinMode(23, OUTPUT);
-  pinMode(25, OUTPUT);
-  digitalWrite(23,HIGH);
-  digitalWrite(25,HIGH);
+  this->led_beat = led1;
+  this->led_fast = led2;
+
+  pinMode(led_beat, OUTPUT);
+  pinMode(led_fast, OUTPUT);
+  digitalWrite(led_beat,HIGH);  // OFF
+  digitalWrite(led_fast,HIGH);  // OFF
 }
 
 // *******************************************************************************
@@ -131,11 +134,11 @@ void  Rythmic::startBeat(int beat)
 void  Rythmic::stopBeat()
 {
     Serial.println("stopBeat"); 
-    cli();                    // stop interrupts
-    TIMSK1 &= ~bit(OCIE1A);   // disable timer "Compare" interrupt 
-    sei();                    // allow interrupts
-    digitalWrite(23,HIGH);
-    digitalWrite(25,HIGH);
+    cli();                        // stop interrupts
+    TIMSK1 &= ~bit(OCIE1A);       // disable timer "Compare" interrupt 
+    sei();                        // allow interrupts
+    digitalWrite(led_beat,HIGH);  // OFF
+    digitalWrite(led_fast,HIGH);  // OFF
 }
 
 
@@ -153,36 +156,36 @@ ISR(TIMER1_COMPA_vect)
   switch (beat_tempo)
   {
     case 1:
-        digitalWrite(23,LOW);  // (fast) 4 temps
-        digitalWrite(25,LOW);  // mesure
+        digitalWrite(LED_4,LOW);  // mesure
+        digitalWrite(LED_3,LOW);  // (fast) 4 temps
         break;
     case 2:
-        digitalWrite(23,HIGH);
-        digitalWrite(25,LOW);
+        digitalWrite(led_beat,LOW);
+        digitalWrite(led_fast,HIGH);
         break;
     case 3:
-        digitalWrite(23,LOW);  // (fast) 4 temps
-        digitalWrite(25,HIGH);
+        digitalWrite(led_beat,HIGH);
+        digitalWrite(led_fast,LOW);  // (fast) 4 temps
         break;
     case 4:
-        digitalWrite(23,HIGH);
-        digitalWrite(25,HIGH);
+        digitalWrite(led_beat,HIGH);
+        digitalWrite(led_fast,HIGH);
         break;
     case 5:
-        digitalWrite(23,LOW);  // (fast) 4 temps
-        digitalWrite(25,LOW);  // demi-mesure
+        digitalWrite(led_beat,LOW);  // demi-mesure
+        digitalWrite(led_fast,LOW);  // (fast) 4 temps
         break;
     case 6:
-        digitalWrite(23,HIGH);
-        digitalWrite(25,HIGH);
+        digitalWrite(led_beat,HIGH);
+        digitalWrite(led_fast,HIGH);
         break;
     case 7:
-        digitalWrite(23,LOW);  // (fast) 4 temps
-        digitalWrite(25,HIGH);
+        digitalWrite(led_beat,HIGH);
+        digitalWrite(led_fast,LOW);  // (fast) 4 temps
         break;
     case 8:
-        digitalWrite(23,HIGH);
-        digitalWrite(25,HIGH);
+        digitalWrite(led_beat,HIGH);
+        digitalWrite(led_fast,HIGH);
         beat_tempo=0;
         break;
   }
