@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Configuration pour que GitHub-Linguit détecte bien le langage 
+External*/* linguist-vendored
+docs/* linguist-documentation
+*.h linguist-language=C++
