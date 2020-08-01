@@ -48,23 +48,7 @@ void u8g2_prepare()
 
 
 /* ****************************************************************************************************
-
- * **************************************************************************************************** */
-void displayGenre()
-{
-  // Famille des fontes Lucida: 08 - 10 - 12 - 13 - 14 - 16 - 18 - 19 - 24
-  u8g2.setFont(u8g2_font_luIS14_tf);
-  u8g2.drawStr(10, 30, "Rock n'Roll");   // A centrer
-  u8g2.drawRFrame(2, 20, 124, 34, 7);
-}
-
-
-/* ****************************************************************************************************
-   Affiche du titre aligné à gauche. A faire avant de commencer le scrolling.
- * ****************************************************************************************************
-          ecran        mémoire       ecrasement ecran
-      [...128...]  ....128....   [..................
-      The house o  f the Risin   g Sun
+ * Affiche du titre aligné à gauche. A faire avant de commencer le scrolling.
  * **************************************************************************************************** */
 void displayTitle(char* text)
 {
@@ -77,22 +61,37 @@ void displayTitle(char* text)
   sub_text[15] = '\0';
 
   u8g2.clearBuffer();
-  u8g2.setCursor(6, 4);
-  u8g2.print(u8g2.getUTF8Width(sub_text));
-  u8g2.setCursor(90, 4);
-  u8g2.print(u8g2.getUTF8Width(text));
+  //u8g2.setCursor(6, 4);
+  //u8g2.print(u8g2.getUTF8Width(sub_text));
+  //u8g2.setCursor(90, 4);
+  //u8g2.print(u8g2.getUTF8Width(text));
   u8g2.drawUTF8(pos, 32, sub_text);
   u8g2.sendBuffer();
 }
 
 /* ****************************************************************************************************
+ * Affiche du titre aligné à gauche. A faire avant de commencer le scrolling à police propotionnelle.
+ * **************************************************************************************************** */
+void displayTitleProp(char* text)
+{
+  int pos = 2;
+  u8g2.setFont(u8g2_font_helvR18_tf);
+  // on definit la substring à afficher
+  char sub_text[16];
+  memcpy(sub_text, &text[0], 15 );
+  sub_text[15] = '\0';
+  u8g2.clearBuffer();
+  u8g2.drawUTF8(pos, 32, sub_text);
+  u8g2.sendBuffer();
+}
+
+
+/* ****************************************************************************************************
    Affichage du titre centré
- * ****************************************************************************************************
  * **************************************************************************************************** */
 void displayTitleCentered(char* text)
 {
   Serial.println("displayTitleCentered");
-  int pos = 2;
   u8g2.setFont(u8g2_font_profont22_tf);
 
   // on definit la substring à afficher (devrait etre à width)
@@ -114,7 +113,6 @@ void displayTitleCentered(char* text)
 }
 
 
-
 /* ****************************************************************************************************
    Scrolling pour les polices à taille fixe (ici 12 pixels de large)
  * ****************************************************************************************************
@@ -131,8 +129,7 @@ void displayScrollingTitle(char* text)
   u8g2.setFont(u8g2_font_profont22_tf);
   const byte char_width = 12;             // pour cette police, les caractères ont une largeur de 12 pixels
 
-  /* en UTF8 les caractères accentués sont sur 2 octets et commencent par 0xFFC3. Ex: "é" = 0xC3A9
-  */
+  /* en UTF8 les caractères accentués sont sur 2 octets et commencent par 0xFFC3. Ex: "é" = 0xC3A9   */
 
   int pos = 0;
   byte text_len = strlen(text);
@@ -143,12 +140,13 @@ void displayScrollingTitle(char* text)
   memcpy(sub_text, &text[first_visible_char], 15 );
   sub_text[15] = '\0';
 
-  /* dumps */
+  /* 
+  //dumps 
   Serial.print("text    : ");
   for (byte i = 0; i < 16; i++){Serial.print(text[i], HEX);Serial.print(" ");} Serial.println();
   Serial.print("sub_text: ");
   for (byte i = 0; i < 16; i++){Serial.print(sub_text[i], HEX);Serial.print(" ");} Serial.println();
-
+  */
 
   // on fait venir le texte par la droite
   do {
@@ -291,15 +289,17 @@ void displayScrollingTitleProp(char* text)
   }
   // on arrete le scroll quand il ne reste aucun caractère visible
   while (first_visible_char < text_len);
-
 }
 
 
 /* ****************************************************************************************************
- *  Fait grossir une étoile (taille 2 à taille 5)
+ *  Fait grossir une étoile (taille 1 à taille 4)
  * **************************************************************************************************** */
 void animStar(int pos)
 {
+  drawStar(pos, 1.0);
+  u8g2.sendBuffer();
+  delay(40);
   drawStar(pos, 2.0);
   u8g2.sendBuffer();
   delay(40);
@@ -307,9 +307,6 @@ void animStar(int pos)
   u8g2.sendBuffer();
   delay(40);
   drawStar(pos, 4.0);
-  u8g2.sendBuffer();
-  delay(40);
-  drawStar(pos, 5.0);
   u8g2.sendBuffer();
   delay(120);
 }
@@ -320,7 +317,7 @@ void animStar(int pos)
 void drawStar(int pos, float a)
 {
   int x0 = pos * 36 - 8;
-  int y0 = 35;
+  int y0 = 40;
   float sa  = a * 0.9510;  // sin(2pi/5)
   float ca  = a * 0.3090;  // cos(2pi/5)
   float s2a = a * 0.5878;  // sin(2x2pi/5)
@@ -337,38 +334,39 @@ void drawStar(int pos, float a)
 
 
 /* ****************************************************************************************************
- *  Texte de 2 lignes dans un cadre
+ *
  * **************************************************************************************************** */
-void displayAlbum()
+void displayGenre()
 {
   // Famille des fontes Lucida: 08 - 10 - 12 - 13 - 14 - 16 - 18 - 19 - 24
-  u8g2.setFont(u8g2_font_luRS10_tf);
-  u8g2.drawStr(6, 26, "Tout ce qui brille");
-  u8g2.drawUTF8(6, 42, "(éèàùêç)");  // 30 char max
-  u8g2.drawRFrame(2, 18, 124, 44, 7);
+  u8g2.setFont(u8g2_font_luIS14_tf);
+  u8g2.drawStr(4, 30, "Lucida IS 14");
+  u8g2.drawRFrame(2, 20, 124, 34, 7);
 }
 
 /* ****************************************************************************************************
  *  Texte de 2 lignes dans un cadre
  * **************************************************************************************************** */
-void displayArtist()
+void displayDualLine(uint8_t* font, char* line1, char* line2)
 {
-  // Famille des fontes DaFont: 10
-  u8g2.setFont(u8g2_font_DigitalDisco_tf);
-  u8g2.drawStr(6, 26, " The Papas & ");
-  u8g2.drawStr(6, 42, "   The Mamas");  // 30 char max
+  u8g2.clearBuffer();
+  displayMenu();
+  u8g2.setFont(font);
+  u8g2.drawStr(6, 26, line1);
+  u8g2.drawUTF8(6, 42, line2);
   u8g2.drawRFrame(2, 18, 124, 44, 7);
-}
+  u8g2.sendBuffer();
+ }
 
 /* ****************************************************************************************************
  * Affiche un texte en gros
  * **************************************************************************************************** */
-void displayYear()
+void displayNumbers(uint8_t* font)
 {
   const char* text = "1964";
 
   // font numérique Old Standard = 18 - 21 - 26 - 29 - 35 - 41
-  u8g2.setFont(u8g2_font_osb29_tn);   // u8g2_font_ncenB24_tn
+  u8g2.setFont(font);   // u8g2_font_ncenB24_tn   u8g2_font_osb29_tn
   u8g2.setFontMode(0);                // enable transparent mode, which is faster
   u8g2.drawStr(20, 20, text);         // draw the text
 
@@ -380,9 +378,12 @@ void displayYear()
 void displayMenu()
 {
   u8g2.drawBox(0, 0, 128, 14);
-  u8g2.setFont(u8g2_font_halftone_tf);
+  u8g2.setFont(u8g2_font_DigitalDisco_tf); 
+  // u8g2_font_DigitalDisco_tf (17 char on a line) - très lisible
+  // u8g2_font_halftone_tf     (18 char on a line) - très discret (grisé sur fond blanc)
+  // u8g2_font_profont12_tf    (21 char on a line) - trop fin
   u8g2.setDrawColor(0);
-  u8g2.drawStr(2, 0, "  Genre: rock");
+  u8g2.drawStr(2, 0, "u8g2_font_DigitalDisco_tf");
   u8g2.setDrawColor(1);
 }
 
@@ -548,8 +549,7 @@ void setup(void)
  * **************************************************************************************************** */
 void loop(void)
 {
-  Serial.println("** ***** **");
-    
+   
   // Effacement
   u8g2_prepare();
 
@@ -577,11 +577,10 @@ void loop(void)
       // Affiche une barre animée
       animBar();
 */
-
-/*      
+   
       // anime 3 étoiles
       u8g2.clearBuffer();
-      u8g2.drawRFrame(2, 20, 124, 32, 7);
+      u8g2.drawRFrame(2, 18, 124, 44, 7);
       animStar(1);
       animStar(2);
       animStar(3);
@@ -590,70 +589,62 @@ void loop(void)
       // Affiche l'année
       u8g2.clearBuffer();
       displayMenu();
-      displayYear();
+      displayNumbers(u8g2_font_ncenB24_tn);
       u8g2.sendBuffer();
-      delay(time_delay);
+      delay(3*time_delay);
 
-      // Efface l'année
+      // Affiche l'année
       u8g2.clearBuffer();
       displayMenu();
+      displayNumbers(u8g2_font_osb29_tn);
       u8g2.sendBuffer();
-      delay(time_delay);
+      delay(3*time_delay);
 
-      // Album
+      // Police 12 sur 2 lignes
+      displayDualLine(u8g2_font_luRS10_tf,"Lucida","RS 10");
+      delay(3*time_delay);
+      displayDualLine(u8g2_font_DigitalDisco_tf,"Digital","Disco 10");  // police DaFont 10
+      delay(3*time_delay);
+      displayDualLine(u8g2_font_profont16_tf,"Pro Font","16");          // police monotype
+      delay(3*time_delay);
+      displayDualLine(u8g2_font_helvR12_tf,"Helvetica","R 12");         // police proportionelle
+      delay(3*time_delay);
+      displayDualLine(u8g2_font_helvR12_tf,"Helvetica","R 12");         // police proportionelle
+      delay(3*time_delay);
+      displayDualLine(u8g2_font_helvR12_tf,"Helvetica","R 12");         // police proportionelle
+      delay(3*time_delay);
+      displayDualLine(u8g2_font_helvR12_tf,"Helvetica","R 12");         // police proportionelle
+      delay(3*time_delay);
+      
+      // u8g2_font_ncenR12_tf                "Adobe X11": joli. Mais avec serif
+      // u8g2_font_cupcakemetoyourleader_tr  Style SF. (pas de tf)
+
+      // Police 14 sur 1 ligne
       u8g2.clearBuffer();
       displayMenu();
-      displayAlbum();
+      displayGenre();
       u8g2.sendBuffer();
+      delay(3*time_delay);
+
+      // Titre (centré)
+      strcpy(title,"Profont22");
+      displayTitleCentered(title);
       delay(time_delay);
-
-      // Artist
-      u8g2.clearBuffer();
-      displayMenu();
-      displayArtist();
-      u8g2.sendBuffer();
-      delay(time_delay);
-
-  //displayMenu();
-
-  // Titre (centré)
-  displayTitleCentered(title);
-  delay(time_delay);
-  */
+  
 
   // Titres déroulants
-  /*
-  strcpy(title,"Un éléphant blanc");              // (16 chars)
+  
+  strcpy(title,"Déroulant à police monotype");
   displayTitle(title);
   delay(time_delay);
   displayScrollingTitle(title);
   delay(time_delay);
 
-  strcpy(title,"Le cinquième élément");  // (20 chars)
-  displayTitle(title);
+  strcpy(title,"Déroulant à police proportionelle");
+  displayTitleProp(title);
   delay(time_delay);
   displayScrollingTitleProp(title);
   delay(time_delay);
-  */
   
-  /*
-  strcpy(title,"Sons and Daughters");       // 216  (18 chars) = 128+90
-  displayTitle(title);
-  delay(time_delay);
-  displayScrollingTitle(title);
-  delay(time_delay);
 
-  strcpy(title,"The house of the Rising Sun");  // 324  (27 chars) = 128+128+68
-  displayTitle(title);
-  delay(time_delay);
-  displayScrollingTitle(title);
-  delay(time_delay);
-
-  // Genre (1 ligne / centré)
-  u8g2.clearBuffer();
-  displayMenu();
-  displayGenre();
-  u8g2.sendBuffer();
-  delay(time_delay);
-*/
 }

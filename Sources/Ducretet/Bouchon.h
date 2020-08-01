@@ -1,12 +1,17 @@
 
 
-#ifndef BOUCHONCLASS_H_INCLUDED
-#define BOUCHONCLASS_H_INCLUDED
+#ifndef BOUCHON_H_INCLUDED
+#define BOUCHON_H_INCLUDED
 
 class Bouchon
 {
     public:
+        // ------------------------- 
+        // Constructeurs
+        // ------------------------- 
         Bouchon(byte dummy=0) {};
+        Bouchon(byte p1, byte p2) {};
+        Bouchon(byte p1, byte p2, byte p3, byte p4) {};
         // ------------------------- 
         // Bouchon pour Sparfun MP3 player
         // ------------------------- 
@@ -67,9 +72,49 @@ class Bouchon
         String getTitle()                 {return "Title";};
         String getArtist()                {return "Artist";};
         String getAlbum()                 {return "Album";};
-
-        
-        private:
+        // ------------------------- 
+        // Bouchon Rotary Button
+        // ------------------------- 
+        int    readPosition()           {return 1;}
+        int    getValue()               {return 1;}
+        int    getLastValue()           {return 1;}
+        bool   hasChanged()             {return false;}
+        // ------------------------- 
+        // Bouchon Capacitor Button
+        // ------------------------- 
+        int    readValue(bool debug = false) {return 1;};
+        void   dischargeCapacitor()          {};
+        // ------------------------- 
+        // Bouchon Catalog
+        // ------------------------- 
+        void   setNewRequestedValues(int t)   {Plexi.setTuning(200);};
+        void   takeClip()                     {};
+        void   removeStar()                   {};
+        void   addStar()                      {};
+        void   initSearchForRequestedYear()   {};
+        void   initSearchForRequestedBeat()   {};
+        void   initSearchForRequestedGenre()  {};
+        void   initSearchForRequestedRating() {};
+        void   selectRandomClip()             {};
+        void   searchClipForRequestedYear()   {};
+        void   searchClipForRequestedBeat()   {};
+        void   searchClipForRequestedGenre()  {};
+        void   searchClipForRequestedRating() {};
+        String getSelectedClipID()            {return "DUMMY";};
+        int    getSelectedClipYear()          {return (2020);};
+        int    getSelectedClipBeat()          {return (120);};
+        String getSelectedClipGenre()         {return "Chanson";};
+        String getSelectedClipRating()        {return "5";};
+        Plexiglass    Plexi;
+        // ------------------------- 
+        // Bouchon Rythmic
+        // ------------------------- 
+        void setFrequency(int frequency)      {};
+        void startBeat(int beat)              {};
+        void stopBeat()                       {};
+    
+                
+    private:
         uint16_t  MonoMode=0;
         uint16_t  DifferentialOutput=0;
         uint8_t   EarSpeaker=0;
@@ -77,4 +122,4 @@ class Bouchon
         int       Step=1;
 };
 
-#endif // BOUCHONCLASS_H_INCLUDED
+#endif // BOUCHON_H_INCLUDED

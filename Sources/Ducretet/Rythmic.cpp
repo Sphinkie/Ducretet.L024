@@ -31,18 +31,18 @@ Timer3, Timer4, Timer5:
   In the Arduino world, the Servo library uses timer5 on Arduino Mega.
  * ********************************************************************************/
 #include "Arduino.h"
+#include "Ducretet.h"
 #include "Rythmic.h"
 
+const byte led_beat = LED_4;  // 23;
+const byte led_fast = LED_3;  // 25;
 
 // *******************************************************************************
 // Constructor 
 // *******************************************************************************
-Rythmic::Rythmic(byte led1, byte led2)
+Rythmic::Rythmic()
 {
   this->match = 8080;   // par defaut: 116 BPM
-  this->led_beat = led1;
-  this->led_fast = led2;
-
   pinMode(led_beat, OUTPUT);
   pinMode(led_fast, OUTPUT);
   digitalWrite(led_beat,HIGH);  // OFF
@@ -147,7 +147,8 @@ void  Rythmic::stopBeat()
 volatile byte    beat_tempo = 0;
 
 // *******************************************************************************
-// timer1 interrupt toggles LED pin 
+// TIMER1 interrupt routine
+// *******************************************************************************
 // (takes two cycles for full wave: toggle high then toggle low)
 // *******************************************************************************
 ISR(TIMER1_COMPA_vect)
@@ -156,8 +157,8 @@ ISR(TIMER1_COMPA_vect)
   switch (beat_tempo)
   {
     case 1:
-        digitalWrite(LED_4,LOW);  // mesure
-        digitalWrite(LED_3,LOW);  // (fast) 4 temps
+        digitalWrite(led_beat,LOW);  // mesure
+        digitalWrite(led_fast,LOW);  // (fast) 4 temps
         break;
     case 2:
         digitalWrite(led_beat,LOW);

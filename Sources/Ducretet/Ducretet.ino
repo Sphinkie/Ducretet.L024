@@ -18,9 +18,7 @@
  *
  * ************************************************************************************************** 
  * 0.5  11/06/2020  Gestion de LED selon le BEAT
- * **************************************************************************************************
-*/
-
+ * ************************************************************************************************** */
 #include "Ducretet.h"
 #include "RotaryButton.h"
 #include "CapButton.h"
@@ -28,60 +26,19 @@
 #include "Catalog.h"
 #include "MusicPlayer.h"
 #include "Rythmic.h"
-//#include "RemoteDisplay.h"
+#include "RemoteDisplay.h"
 #include "Bouchon.h"
-
-// *******************************************************************************
-// Mapping du cablage
-// *******************************************************************************
-
-// ------------------ Pour MP3 Shield
-// Midi_In              //      NOT USED    (MP3 shield) avec hardware interrupt
-// GPIO                 //      GPIO        (MP3 shield)
-//#define MP3_RESET     //      NOT USED    (MP3 shield) VS1053 reset pin (unused!)
-#define MP3_DREQ   3    // D3   DataRequest (MP3 shield) avec hardware interrupt 1. VS1053 Data REQuest, ideally an Interrupt pin.
-#define SD_CS      4    // D4   SD CS       (MP3 shield) SD-Card chip select pin
-#define MP3_DCS    6    // D6   MP3 Data CS (MP3 shield) VS1053 Data/Command S  elect pin (output)
-#define MP3_CS     7    // D7   MP3 CS      (MP3 shield) VS1053 Chip Select pin (output)
-
-#define AGAIN      2    // D2   Digital In     avec hardware interrupt 0
-#define NEXT       18   // D18  Digital In     avec hardware interrupt 5
-#define PROMOTE    19   // D19  Digital In     avec hardware interrupt 4
-
-// ------------------ Pour I2C
-#define FM_SDIO    20   // D20 I2C Bus - Digital In/out avec hardware interrupt 3
-#define FM_SCLK    21   // D21 I2C Bus - Digital In/out avec hardware interrupt 2
-
-#define MODE_4     22   // D22  input   C-MODE-4    bouton Mode
-#define MODE_3     24   // D24  input   C-MODE-3    bouton Mode
-#define MODE_2     26   // D26  input   C-MODE-2    bouton Mode
-#define MODE_1     28   // D28  input   C-MODE-1    bouton Mode
-#define SPARE1     37   // D37  Spare1 Connector
-#define SPARE_LED  43   // D43  input   SPARE LED (connector JP5)
-#define LED_1      45   // D  output  LED
-#define LED_2      47   // D47  output  LED
-#define SPARE2     49   // D49  Spare2 Connector
-
-// ------------------ Pour SPI
-#define SPI_MISO   50    // D50  input  
-#define SPI_MOSI   51    // D51  output 
-#define SPI_SCLK   52    // D52  output 
-#define SPI_SS     53    // D53  input  (configuré en output car Master)
-
-#define TUNE_OUT   A8    // Analog output for bouton Tune (charge pin): Créneaux de 5v.
-#define TUNE_IN    A9    // Analog input for bouton Tune: Read value
-
-
 
 // *******************************************************************************
 // variables globales
 // *******************************************************************************
+
 MusicPlayer        MP3Player(MP3_CS, MP3_DCS, MP3_DREQ, SD_CS);
 Catalog            Catalogue;
 Rotary             ModeButton(MODE_1,MODE_2,MODE_3,MODE_4); 
 CapButton          TuneButton(TUNE_OUT,TUNE_IN);
-Bouchon  RemoteTFT;  // RemoteDisplay      
 Rythmic            Beat_ISR;
+RemoteDisplay      RemoteTFT;
 
 //SelfReturnButton   PromoteButton(PROMOTE, &ISR_PromoteButton);
 //SelfReturnButton   AgainButton(AGAIN,     &ISR_AgainButton);
@@ -90,6 +47,7 @@ Rythmic            Beat_ISR;
 volatile int       Action = _IDLE;          // variable volatile (stockée en RAM et pas dans un registre), utilisable par les ISR
 String             MusicFile;               // ID du clip MP3 en cours
 String             NextMusicFile;           // ID du prochain clip MP3 à jouer
+
 
 
 // *******************************************************************************
@@ -112,21 +70,20 @@ void setup()
     Serial.print  (F("CPU Frequency: ")); Serial.print(F_CPU/1000000); Serial.println(F(" MHz"));
     Serial.print  (F("Free RAM: "));      Serial.print(FreeRam(),DEC); Serial.println(F(" bytes"));
 
-    pinMode(LED_1, OUTPUT); // Led SPI BUSY (Catalog accede à la carte SD)
+    pinMode(LED_1, OUTPUT);    // Led SPI BUSY (Catalog accede à la carte SD)
     pinMode(LED_2, OUTPUT);
+    digitalWrite(LED_1,LOW);   // Allume la Led témoin SPI BUSY
   
+    // ------------------------------------------------------------
+    // Initalise le bus I2C et l'ecran OLED
+    // ------------------------------------------------------------
+    RemoteTFT.initialize();
+    RemoteTFT.clearScreen();
 
-/*
-    // ------------------------------------------------------------
-    // Initalise le bus I2C
-    // ------------------------------------------------------------
-    RemoteTFT.initI2C();
-*/
     // ------------------------------------------------------------
     // Initalise le Shield Sparkfun MP3 player
     // ------------------------------------------------------------
     MP3Player.initialize();
-    digitalWrite(LED_1,HIGH);   // Eteint la Led témoin SPI BUSY
             
     // ------------------------------------------------------------
     // Initalise les autres objets
@@ -135,20 +92,13 @@ void setup()
     TuneButton.initialize();
     Action = _IDLE;
 
-/*  // -----------------------------------------------------------------------------
-    // On attend que l'Arduino SLAVE soit prêt sur le bus I2C (status 0x01 = READY)
-    // -----------------------------------------------------------------------------
-    Serial.println(F("Waiting I2C Slave ready..."));
-    while (SlaveArduinoStatus!=0)
-    {
-       SlaveArduinoStatus=RemoteTFT.requestStatus();
-       delay(100);
-    }
-    Serial.println(F("================================="));
-    RemoteTFT.setSlavePresent(USE_TWO_ARDUINO);
-*/
+    // ------------------------------------------------------------
+    // On commence par jouer Noise
+    // ------------------------------------------------------------
     MusicFile="NOISE";
-    MP3Player.playTrack(MusicFile);   // On commence par jouer Noise
+    MP3Player.playTrack(MusicFile);   
+
+    digitalWrite(LED_1,HIGH);   // Eteint la Led témoin SPI BUSY
 }
 
 
@@ -197,24 +147,24 @@ void loop()
     {
         Serial.println(F("No clip playing. Taking the next one."));
         Beat_ISR.stopBeat();
-        Catalogue.takeClip();             // On prend ce qu'on a pu trouver. Le Next devient le Courant.
+        Catalogue.takeClip();                       // On prend ce qu'on a pu trouver. Le Next devient le Courant.
         MusicFile = Catalogue.getSelectedClipID();
-        MP3Player.playTrack(MusicFile);   // Et on le joue (éventuellement, cela peut être Noise).
+        MP3Player.playTrack(MusicFile);             // Et on le joue (éventuellement, cela peut être Noise).
     }
 
     // --------------------------------------------------------------
     // Etapes que l'on fait lorsque l'on commence à jouer un MP3:
     // --------------------------------------------------------------
     int Step = MP3Player.getStep();
+    const int DELAY = 50;   // ms
+    const int F = 5;
     switch (Step)
     {
-      case 2: // On affiche le mode en cours.
-            RemoteTFT.clearBackground();
+      case 2*F: // On affiche le mode en cours.
+            RemoteTFT.clearScreen();
             displayRequestedMode();
             break;
-      case 3: // On affiche les infos du clip issues du fichier MP3
-            Serial.println(F("  Display ID3 tags"));
-            // RemoteTFT.printLog(MusicFile);
+      case 3*F: // On affiche la recherche en cours (le cas échéant)
             if (MusicFile == "NOISE") 
             {
                switch (ModeButton.getValue())
@@ -226,42 +176,57 @@ void loop()
                    case RANDOM: RemoteTFT.printTitle(F("Rech. aléatoire"));      break;
                }
             }
-            else
-            {
-               RemoteTFT.printTitle(MP3Player.getTitle());
-               RemoteTFT.printArtist(MP3Player.getArtist());
-               RemoteTFT.printAlbum(MP3Player.getAlbum());
-            }
+      case 10*F: // On affiche le TITRE
+            RemoteTFT.printTitle(MP3Player.getTitle());
             break;
-    case 4: // On affiche la suite des infos du clip issues du fichier Catalog
-            Serial.println(F("  Display Year+Genre+Beat from Catalog"));
-            if (MusicFile == "NOISE") 
-            {
-               RemoteTFT.printGenre(" ");
-               RemoteTFT.printYear(" ");
-               RemoteTFT.printBeat(" ");
-            }
-            else
+      case 12*F: // On fait scroller le TITRE
+            RemoteTFT.startScrolling();
+            break;
+      case 15*F:
+      case 41*F:
+            // Affiche l'ARTISTE (tag MP3)
+            RemoteTFT.stopScrolling();
+            RemoteTFT.printGenre(Catalogue.getSelectedClipGenre());
+            break;
+     case 24*F:
+            // Efface
+            RemoteTFT.clearText();
+            break;
+     case 4*F:
+            // Affiche l'ANNEE (Catalog)
+            RemoteTFT.printYear(Catalogue.getSelectedClipYear());
+            break;
+     case 29*F:
+            // Efface
+            RemoteTFT.clearText();
+            break;
+      case 30*F:
+            // Affiche le GENRE (Catalog)
+            RemoteTFT.printArtist(MP3Player.getArtist());
+            break;
+      case 40*F:
+            // Affiche le BEAT (Catalog)
+            if (MusicFile == "NOISE") RemoteTFT.printBeat(" ");
+            else 
             {
                 int beat = Catalogue.getSelectedClipBeat();
-                RemoteTFT.printGenre(Catalogue.getSelectedClipGenre());
-                RemoteTFT.printYear(Catalogue.getSelectedClipYear());
                 RemoteTFT.printBeat(String(beat));
-                Beat_ISR.startBeat(beat);
-            }
+//                Beat_ISR.startBeat(beat);
+            }            
             break;
-    case 5: // On determine le nombre d'étoiles et on l'affiche.
-            if (MusicFile == "NOISE") 
-              RemoteTFT.printStars("-");
-            else
-              RemoteTFT.printStars(Catalogue.getSelectedClipRating());
+    case 45*F:
+            // Affiche le RATING (Catalog)
+            if (MusicFile == "NOISE") RemoteTFT.printStars("-");
+            else RemoteTFT.printStars(Catalogue.getSelectedClipRating());
             break;
-    case 12: // on surveille la RAM consommée
+    case 50*F: // on surveille la RAM consommée
             Serial.print(F("Free RAM (bytes)= ")); Serial.println(FreeRam(), DEC);
-            // On baisse l'intensité de l'affichage
-            RemoteTFT.setBacklight(false);
             break;
-    case 15: // STOP (DEBUG)
+    case 55*F: // On affiche le TITRE
+            RemoteTFT.printTitle(MP3Player.getTitle());
+            break;
+
+    case 16*F: // STOP (DEBUG)
             /* MP3Player.stopTrack(); */
             break;
    }
@@ -308,20 +273,13 @@ void loop()
   }
 */                       
 
-/*  if (toggle1)
-  {
-    digitalWrite(23,HIGH);
-    toggle1 = false;
-  }
-  else
-  {
-    digitalWrite(23,LOW);
-    toggle1 = true;
-  }*/
   // --------------------------------------------------------------
   // Temporisation de la boucle
   // --------------------------------------------------------------
-  delay(1000);  // 1 sec
+  if (RemoteTFT.titleScrolling)
+      RemoteTFT.scroll();
+  else
+     delay(DELAY);
 }
 
 
@@ -369,7 +327,8 @@ void searchNextClip()
 }
 
 // *******************************************************************************
-//Affiche le mode demandé
+// Affiche le mode demandé
+// Sur OLED : 17 char max.
 // *******************************************************************************
 void displayRequestedMode()
 {
@@ -377,28 +336,28 @@ void displayRequestedMode()
     String ModeMessage;
     switch (ModeButton.getValue())
     {
-       case RATING: 
+       case RATING:   // 19 chars
                 ModeMessage = F("Musique favorite "); 
                 ModeMessage += String(Catalogue.Plexi.Rating);
                 ModeMessage += F("*");
                 break;
-         case YEAR: 
-                ModeMessage = F("    Années ");
+         case YEAR:   // 16 chars
+                ModeMessage = F("Années ");
                 ModeMessage += String(Catalogue.Plexi.RangeStart);
                 ModeMessage += "-";
                 ModeMessage += String(Catalogue.Plexi.RangeEnd);
-                 break;
-         case BEAT:
+                break;
+         case BEAT:     // 10 chars
                 ModeMessage = "Tempo: " + Catalogue.Plexi.Beat;            
                 break;
-         case GENRE:
-                ModeMessage = "Genre: " + Catalogue.Plexi.Genre;            
+         case GENRE:    
+                ModeMessage = Catalogue.Plexi.Genre;            
                 break;
-         case RANDOM: 
-                ModeMessage = "   Musique aleatoire";
+         case RANDOM:   // 17 chars
+                ModeMessage = "Musique aleatoire";
                 break;
     }
-    RemoteTFT.printLog(ModeMessage);
+    RemoteTFT.setHeader(ModeMessage);
 }
 
 /*

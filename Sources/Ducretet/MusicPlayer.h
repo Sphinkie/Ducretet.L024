@@ -8,7 +8,7 @@
 
 #include "Adafruit_VS1053.h"
 
-#define  MAX_STEP  60     // Nombre d'étapes gérées par le mini-séquenceur
+#define  MAX_STEP  6000    // Nombre d'étapes gérées par le mini-séquenceur
 
 class MusicPlayer : public Adafruit_VS1053_FilePlayer
 {
