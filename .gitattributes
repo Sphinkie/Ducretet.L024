@@ -2,6 +2,7 @@
 * text=auto
 
 # Configuration pour que GitHub-Linguit détecte bien le langage 
-External*/* linguist-vendored
+Extern*/* linguist-vendored
 docs/* linguist-documentation
 *.h linguist-language=C++
+*.ino linguist-language=Arduino
