@@ -5,4 +5,4 @@
 Extern*/* linguist-vendored
 docs/* linguist-documentation
 *.h linguist-language=C++
-*.ino linguist-language=Arduino
+*.ino linguist-language=C++
