@@ -42,6 +42,17 @@ void RemoteDisplay::clearScreen()
 
 
 /* *******************************************************************************
+ * Eface l'écran, mais laisse le Header visible.
+ * ******************************************************************************* */
+void RemoteDisplay::clearText()
+{
+   u8g2.clearBuffer();
+   this->addHeader();
+   u8g2.sendBuffer();
+}
+
+
+/* *******************************************************************************
  * Affiche le Titre du morceau
  * *******************************************************************************
  * 128 pixels = 10.6 chars (avec police u8g2_font_profont22_tf)
@@ -78,14 +89,13 @@ void RemoteDisplay::printTitle(String titleString)
   // On affiche le texte
   u8g2.clearBuffer();
   u8g2.drawUTF8(titlePos, 32, titleSubText);
-  u8g2.sendBuffer();
-
-  
+  u8g2.sendBuffer(); 
 }
 
 
 /* *******************************************************************************
- * Affiche l'artiste sur une ou deux lignes
+ * Affiche l'Artiste sur une ou deux lignes
+ * u8g2_font_helvR12_tf : police Helvetica fine et lisible
  * ******************************************************************************* */
 void RemoteDisplay::printArtist(String texte)
 {
@@ -109,10 +119,10 @@ void RemoteDisplay::printArtist(String texte)
    }
    // On centre les textes
    u8g2.setFont(u8g2_font_helvR12_tf);
+   u8g2.setFontMode(1);                // 0:pour police _mx (faster) / 1:pour police _tx
    byte pos1 = (128 - u8g2.getUTF8Width(line1)) / 2;
    byte pos2 = (128 - u8g2.getUTF8Width(line2)) / 2;
 
-   u8g2.setFontMode(1);                // 0:pour police _mx (faster) / 1:pour police _tx
    u8g2.clearBuffer();
    u8g2.drawStr(pos1, 26, line1);
    u8g2.drawStr(pos2, 42, line2);
@@ -120,9 +130,7 @@ void RemoteDisplay::printArtist(String texte)
    this->addHeader();
    u8g2.sendBuffer();
 
-   Serial.println("printFramedText: "+texte);
-   Serial.println(line1);
-   Serial.println(line2);
+   Serial.print("printArtist: "); Serial.print(line1); Serial.print("/");  Serial.println(line2);
 
 }
 
@@ -130,69 +138,94 @@ void RemoteDisplay::printArtist(String texte)
 /* *******************************************************************************
  * Affiche l'année (sauf si 0)
  * u8g2_font_ncenB24_tn      : Possible aussi, mais un peu moins joli.
- * u8g2_font_osb26_tn        : "Old Standard" Bold. Existe en 18 - 21 - 26 - 29
+ * u8g2_font_osb26_tn        : "Old Standard Bold". Existe en 18 - 21 - 26 - 29
  * ******************************************************************************* */
 void RemoteDisplay::printYear(int value)
 {
-   Serial.println("printYear: "+String(value));
+   Serial.println("printYear: " + String(value));
   
    if (value!=0)
    {
       char texte[5];   
       itoa (value, texte, 10);          // base 10
       u8g2.clearBuffer();
-      u8g2.setFont(u8g2_font_ncenB24_tn);
-      u8g2.setFontMode(1);              // 0:pour police _mx (faster) / 1:pour police _tx
-      u8g2.drawStr(22, 24, texte);      // draw the text
-      u8g2.drawRFrame(2, 18, 124, 44, 7);
-      this->addHeader();
+      u8g2.setFont(u8g2_font_osb26_tn);
+      u8g2.setFontMode(1);                // 0:pour police _mx (faster) / 1:pour police _tx
+      u8g2.drawStr(22, 24, texte);        // Draw the text
+      u8g2.drawRFrame(2, 18, 124, 44, 7); // Trace un rectangle
+      this->addHeader();                  // Ajoute le bandeau
       u8g2.sendBuffer();
    }
 }
 
 /* *******************************************************************************
- * 
+ * Affiche le beat dans le cadre : "116 bpm".
  * ******************************************************************************* */
 void RemoteDisplay::printBeat(String texte)
-{}
+{
+  this->printFramedText(texte + " bpm");
+}
 
 /* *******************************************************************************
- * Affiche le Genre de musique. Centré sur 1 ligne. 
- * u8g2_font_DigitalDisco_tf
+ * Affiche le Genre de musique dans le cadre.
  * ******************************************************************************* */
-void RemoteDisplay::printGenre(String GenreString)
+void RemoteDisplay::printGenre(String texte)
+{
+  this->printFramedText(texte);
+}
+
+
+/* *******************************************************************************
+ * Affiche le texte, dans un cadre, centré sur 1 ligne, et avec le bandeau.
+ * Tronqué à 16 chars.
+ * u8g2_font_helvR12_tf         : police Helvetica fine et lisible
+ * u8g2_font_profont22_tf       : assez gros
+ * ******************************************************************************* */
+void RemoteDisplay::printFramedText(String to_print)
 {
    const byte MAX_LINE_LEN = 16;    // Nb max de charactères dans le rectangle (par ligne)
    char texte[32];
    byte textePos;
    
-   Serial.println("printGenre: "+String(GenreString));
-   GenreString.toCharArray(texte, MAX_LINE_LEN);
-   u8g2.setFont(u8g2_font_Pixellari_tf); 
+   Serial.println("printFramedText: " + to_print);
+   to_print.toCharArray(texte, MAX_LINE_LEN);
+   u8g2.setFont(u8g2_font_profont22_tf); 
+   u8g2.setFontMode(1);                   // 0:pour police _mx (faster) / 1:pour police _tx
    textePos = (128 - u8g2.getUTF8Width(texte)) / 2;
    u8g2.clearBuffer();
-   u8g2.drawStr(textePos, 32, texte);
-   u8g2.drawRFrame(2, 18, 124, 44, 7);      
-   this->addHeader();
+   u8g2.drawStr(textePos, 32, texte);     // Draw the text
+   u8g2.drawRFrame(2, 18, 124, 44, 7);    // Trace un rectangle      
+   this->addHeader();                     // Ajoute le bandeau
    u8g2.sendBuffer();
 }
 
 /* *******************************************************************************
+ * Trace un rectangle aux coins arrondis
+ * ******************************************************************************* */
+void RemoteDisplay::addFrame()
+{
+     u8g2.drawRFrame(2, 18, 124, 44, 7);
+}
+
+
+/* *******************************************************************************
  * Mémorise le texte à afficher dans le header. Tronque à 17. 
+ * (Note: Préparer avec la même police que pour l'affichage).
  * ******************************************************************************* */
 void RemoteDisplay::setHeader(String texte)
 {
-  texte.toCharArray(this->header,17);
-  u8g2.setFont(u8g2_font_Pixellari_tf); 
-  headerPos = (128 - u8g2.getUTF8Width(this->header)) / 2;
+  texte.toCharArray(this->header, 17);
+  u8g2.setFont(u8g2_font_DigitalDisco_tf); 
+  this->headerPos = (128 - u8g2.getUTF8Width(this->header)) / 2;
 }
 
 /* *******************************************************************************
  * Dessine un header avec le texte prévu. Noir sur fond blanc.
  * *******************************************************************************
- *  u8g2_font_DigitalDisco_tf (17 char on a line) - très lisible (daFont)
+ *  u8g2_font_DigitalDisco_tf (17 char on a line) - très lisible (daFont) Lettres rondes.
  *  u8g2_font_halftone_tf     (18 char on a line) - très discret (grisé sur fond blanc)
  *  u8g2_font_profont12_tf    (21 char on a line) - trop fin
+ *  u8g2_font_Pixellari_tf     police assez petite
  * ******************************************************************************* */
 void RemoteDisplay::addHeader()
 {
@@ -203,23 +236,76 @@ void RemoteDisplay::addHeader()
   u8g2.setDrawColor(1);
 }
 
-void RemoteDisplay::printStars(String texte)
-{}
-
-
 /* *******************************************************************************
- * Eface l'écran, mais laisse le Header visible.
+ * Affiche les étoiles du Rating
  * ******************************************************************************* */
-void RemoteDisplay::clearText()
+void RemoteDisplay::printStars(int stars)
 {
+   Serial.println("printStars: " + String(stars));
+   stars = 5;
    u8g2.clearBuffer();
-   this->addHeader();
+   for (int i = 0; i<stars; i++)
+     this->drawStar(i+1, 4.0);
+   this->addFrame();      // Ajoute le cadre
+   this->addHeader();     // Ajoute le bandeau
    u8g2.sendBuffer();
 }
 
+/* *******************************************************************************
+ * Anime les étoiles du Rating, en les faisant grossir une-à-une.
+ * ******************************************************************************* */
+void RemoteDisplay::startStarAnimation(int stars)
+{
+   stars = 3;
+   Serial.println("startStarAnimation: " + String(stars));
+   current_star_size = 0.5;
+   current_animated_star = 1;
+   max_animated_star = stars;
+   u8g2.clearBuffer();
+   this->addFrame();      // Ajoute le cadre
+   this->addHeader();     // Ajoute le bandeau
+}
+void RemoteDisplay::animStars()
+{
+   // Tant qu'on n'a pas atteint la taille maximum, on augmente la taille.
+   if (current_star_size<4) 
+      current_star_size += 1.0;
+   else
+   {
+      // Sinon, l'étoile a fini de grossir, on passe à la star suivante.
+     if (current_animated_star < max_animated_star) current_animated_star += 1;
+     current_star_size = 1.0;
+   }
+   // On trace le sprite
+   this->drawStar(current_animated_star, current_star_size);
+   u8g2.sendBuffer();
+}
+
+/* ****************************************************************************************************
+ *  Dessine une étoile à 5 branches.
+ *  @param pos : position de l'étoile (de 1 à 5)
+ *  @param a : Taille de l'étoile (longueur en pixels des branches). Taille min=1. Taille max=4.
+ * **************************************************************************************************** */
+void RemoteDisplay::drawStar(int pos, float a)
+{
+  int x0 = pos * 26 - 8;
+  int y0 = 40;
+  float sa  = a * 0.9510;  // sin(2pi/5)
+  float ca  = a * 0.3090;  // cos(2pi/5)
+  float s2a = a * 0.5878;  // sin(2x2pi/5)
+  float c2a = a * 0.8090;  // cos(2x2pi/5)
+  // Triangle du haut
+  u8g2.drawTriangle(x0 - a, y0,    x0, y0 - 3 * a,         x0 + a, y0);
+  // triangles lateraux
+  u8g2.drawTriangle(x0, y0 - 3 * ca, x0 + 3 * sa, y0 - 3 * ca,   x0, y0 + a);
+  u8g2.drawTriangle(x0, y0 - 3 * ca, x0 - 3 * sa, y0 - 3 * ca,   x0, y0 + a);
+  // triangles pieds
+  u8g2.drawTriangle(x0 + a, y0,    x0 + 3 * s2a, y0 + 3 * c2a, x0, y0 + a);
+  u8g2.drawTriangle(x0 - a, y0,    x0 - 3 * s2a, y0 + 3 * c2a, x0, y0 + a);
+}
 
 /* *******************************************************************************
- * 
+ * Gestion du scrolling: Un peu trop lent pour être agréable à lire.
  * ******************************************************************************* */
 void  RemoteDisplay::startScrolling()
 {
@@ -228,6 +314,7 @@ void  RemoteDisplay::startScrolling()
 }
 void  RemoteDisplay::stopScrolling()
 {
+  Serial.println("stopScrolling");
   titleScrolling = false;
 }
 void  RemoteDisplay::scroll()

@@ -3,6 +3,7 @@
  *   DUCRETET L.024
  *
  * Software pour la radio vintage DUCRETET L.024
+ * Target : Arduino MEGA or MEGA2560
  *
  * Pilotage par Arduino-Uno d'un player MP3 et d'un afficheur
  *
@@ -65,7 +66,7 @@ void setup()
     while (!Serial) { ; } // wait for serial port to connect. Needed for native USB port only
   
     Serial.println(F("================================="));
-    Serial.println(F("==    DUCRETET     v0.5        =="));
+    Serial.println(F("==    DUCRETET     v0.5-a      =="));
     Serial.println(F("================================="));
     Serial.print  (F("CPU Frequency: ")); Serial.print(F_CPU/1000000); Serial.println(F(" MHz"));
     Serial.print  (F("Free RAM: "));      Serial.print(FreeRam(),DEC); Serial.println(F(" bytes"));
@@ -155,16 +156,15 @@ void loop()
     // --------------------------------------------------------------
     // Etapes que l'on fait lorsque l'on commence à jouer un MP3:
     // --------------------------------------------------------------
-    int Step = MP3Player.getStep();
-    const int DELAY = 50;   // ms
-    const int F = 5;
-    switch (Step)
+    const int DELAY = 40;   // ms
+    const int F = 10;       // Permet de regler le delai entre les affichages (F=10 => 3sec)
+    switch (MP3Player.getStep())
     {
-      case 2*F: // On affiche le mode en cours.
+     case 1*F: // On affiche le mode en cours.
             RemoteTFT.clearScreen();
             displayRequestedMode();
             break;
-      case 3*F: // On affiche la recherche en cours (le cas échéant)
+     case 2*F: // On affiche la recherche en cours (le cas échéant)
             if (MusicFile == "NOISE") 
             {
                switch (ModeButton.getValue())
@@ -172,63 +172,85 @@ void loop()
                    case FAV: RemoteTFT.printTitle(F("Rech. parmi les favoris")); break;
                    case YEAR: RemoteTFT.printTitle(F("Rech. par année"));        break;
                    case BEAT: RemoteTFT.printTitle(F("Rech. par tempo"));        break;
-                   case GENRE: RemoteTFT.printTitle(F("Rech. par genre"));       break;
+                   case GENRE: RemoteTFT.printArtist(F("Rech. par genre"));       break;
                    case RANDOM: RemoteTFT.printTitle(F("Rech. aléatoire"));      break;
                }
             }
-      case 10*F: // On affiche le TITRE
-            RemoteTFT.printTitle(MP3Player.getTitle());
             break;
-      case 12*F: // On fait scroller le TITRE
-            RemoteTFT.startScrolling();
-            break;
-      case 15*F:
-      case 41*F:
-            // Affiche l'ARTISTE (tag MP3)
-            RemoteTFT.stopScrolling();
-            RemoteTFT.printGenre(Catalogue.getSelectedClipGenre());
-            break;
-     case 24*F:
-            // Efface
-            RemoteTFT.clearText();
-            break;
-     case 4*F:
-            // Affiche l'ANNEE (Catalog)
+     case 3*F:   // Affiche l'ANNEE (Catalog)
             RemoteTFT.printYear(Catalogue.getSelectedClipYear());
             break;
-     case 29*F:
-            // Efface
-            RemoteTFT.clearText();
-            break;
-      case 30*F:
+     case 4*F:
             // Affiche le GENRE (Catalog)
+            RemoteTFT.printGenre(Catalogue.getSelectedClipGenre());
+            break;
+     case 5*F:
+            // Affiche l'ARTISTE (tag MP3)
             RemoteTFT.printArtist(MP3Player.getArtist());
             break;
-      case 40*F:
+     case 6*F:
+            // Affiche le RATING (Catalog)
+            if (MusicFile == "NOISE") RemoteTFT.printStars(0);
+            else RemoteTFT.printStars(Catalogue.getSelectedClipRating());
+            break;
+      case 7*F:
             // Affiche le BEAT (Catalog)
-            if (MusicFile == "NOISE") RemoteTFT.printBeat(" ");
-            else 
+            if (MusicFile != "NOISE") 
             {
                 int beat = Catalogue.getSelectedClipBeat();
                 RemoteTFT.printBeat(String(beat));
+            }            
+            break;
+     case 9*F:
+            // On affiche le TITRE
+            RemoteTFT.printTitle(MP3Player.getTitle());
+            break;
+     case 10*F: // On fait scroller le TITRE
+            RemoteTFT.startScrolling();
+            break;
+     case 11*F:
+            // Fait clignoter le BEAT (Catalog)
+            if (MusicFile != "NOISE")
+            {
+                int beat = Catalogue.getSelectedClipBeat();
 //                Beat_ISR.startBeat(beat);
             }            
             break;
-    case 45*F:
-            // Affiche le RATING (Catalog)
-            if (MusicFile == "NOISE") RemoteTFT.printStars("-");
-            else RemoteTFT.printStars(Catalogue.getSelectedClipRating());
+     case 19*F:
+            RemoteTFT.stopScrolling();            
+            break;
+     case 20*F: // On affiche le debut du TITRE en fixe
+            RemoteTFT.printTitle(MP3Player.getTitle());
             break;
     case 50*F: // on surveille la RAM consommée
             Serial.print(F("Free RAM (bytes)= ")); Serial.println(FreeRam(), DEC);
             break;
-    case 55*F: // On affiche le TITRE
-            RemoteTFT.printTitle(MP3Player.getTitle());
-            break;
-
-    case 16*F: // STOP (DEBUG)
+    case 21*F: // STOP (DEBUG)
+            RemoteTFT.printStars(5);
             /* MP3Player.stopTrack(); */
             break;
+
+    case 25*F: 
+            RemoteTFT.startStarAnimation(5);
+            break;
+    case 25*F+1:
+    case 25*F+2:
+    case 25*F+3:
+    case 25*F+4:
+    case 25*F+5:
+    case 25*F+6:
+    case 25*F+7:
+    case 25*F+8:
+    case 25*F+9:
+    case 25*F+10:
+    case 25*F+11:
+    case 25*F+12:
+    case 25*F+13:
+    case 25*F+14:
+            // stars animation
+            RemoteTFT.animStars();
+            break;
+            
    }
 
 /*       
@@ -351,7 +373,7 @@ void displayRequestedMode()
                 ModeMessage = "Tempo: " + Catalogue.Plexi.Beat;            
                 break;
          case GENRE:    
-                ModeMessage = Catalogue.Plexi.Genre;            
+                ModeMessage = "> " + Catalogue.Plexi.Genre + " <";
                 break;
          case RANDOM:   // 17 chars
                 ModeMessage = "Musique aleatoire";

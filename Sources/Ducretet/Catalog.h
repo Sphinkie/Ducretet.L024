@@ -37,12 +37,12 @@ class Catalog : CatalogFile
         void   searchClipForRequestedBeat();
         void   searchClipForRequestedGenre();
         void   searchClipForRequestedRating();
-        // recupération des infos du clip sélectionné
+        // Récupération des infos du clip sélectionné
         String getSelectedClipID();
         int    getSelectedClipYear();
         int    getSelectedClipBeat();
         String getSelectedClipGenre();
-        String getSelectedClipRating();
+        int    getSelectedClipRating();
 
     private:              
         //long   searchClipInCatalog(long starting_position, Media &first_media, SearchType search_type, String requested_value);

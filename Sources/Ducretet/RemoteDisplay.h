@@ -19,11 +19,13 @@ class RemoteDisplay
     void printBeat(String texte);
     void printTitle(String texte);
     void printGenre(String texte);
-    void printStars(String texte);
     void printArtist(String texte);
+    void printStars(int stars);
+    void startStarAnimation(int stars);
+    void animStars();
+    
     
     void setHeader(String texte);
-    void addHeader();
     
     void startScrolling();
     void stopScrolling();
@@ -40,8 +42,17 @@ class RemoteDisplay
     bool titleScrolling=false;
     
   private:
+    void addFrame();
+    void addHeader();
+    void printFramedText(String to_print);
+    void drawStar(int pos, float a);
+    
     char header[24];
     byte headerPos=0;
+    // Gestion de l'animation des stars
+    byte max_animated_star = 0;
+    byte current_animated_star = 1;
+    float current_star_size = 0.5;
     // Gestion du titre déroulant
     bool scrollableTitle=false;
     byte titlePos = 0;                    // son vrai type est : u8g2_uint_t

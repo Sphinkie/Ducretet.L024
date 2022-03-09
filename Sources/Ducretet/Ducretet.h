@@ -2,6 +2,7 @@
  *  
  *   DUCRETET L.024
  *
+ *  Target : Arduino MEGA or MEGA2560
  ************************************************************************************************ */
 
 #ifndef DUCRETET_H_INCLUDED
