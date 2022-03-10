@@ -1,5 +1,6 @@
 /* *******************************************************************************
  * REMOTE DISPLAY
+ * Ecran 128x64
  * ******************************************************************************* */
 #include "Arduino.h"
 #include "RemoteDisplay.h"
@@ -40,7 +41,6 @@ void RemoteDisplay::clearScreen()
    u8g2.sendBuffer();
 }
 
-
 /* *******************************************************************************
  * Eface l'écran, mais laisse le Header visible.
  * ******************************************************************************* */
@@ -50,7 +50,6 @@ void RemoteDisplay::clearText()
    this->addHeader();
    u8g2.sendBuffer();
 }
-
 
 /* *******************************************************************************
  * Affiche le Titre du morceau
@@ -94,46 +93,85 @@ void RemoteDisplay::printTitle(String titleString)
 
 
 /* *******************************************************************************
+ * Affiche le beat dans le cadre : "116 bpm".
+ * ******************************************************************************* */
+void RemoteDisplay::printBeat(String texte)
+{
+  this->printFramedText(texte + " bpm");
+}
+
+/* *******************************************************************************
+ * Affiche le Genre de musique dans le cadre.
+ * ******************************************************************************* */
+void RemoteDisplay::printGenre(String texte)
+{
+  this->printFramedText(texte);
+}
+
+/* *******************************************************************************
+ * Affiche le mode de recherche dans un rectangle blanc.
+ * ******************************************************************************* */
+void RemoteDisplay::printMode(String texte)
+{
+   // On centre les textes
+   u8g2.setFont(u8g2_font_koleeko_tf);
+   u8g2.setFontMode(1);   // 0:pour police _mx (faster) / 1:pour police _tx
+   u8g2.clearBuffer();
+   u8g2.drawRBox(0, 10, 128, 44, 7);   // x0, y0, w, h, r
+   u8g2.setDrawColor(0);
+   this->drawDualLineText(texte);
+   u8g2.setDrawColor(1);
+   u8g2.sendBuffer();
+}
+
+/* *******************************************************************************
  * Affiche l'Artiste sur une ou deux lignes
  * u8g2_font_helvR12_tf : police Helvetica fine et lisible
+ * u8g2_font_helvR10_tf : police Helvetica fine et lisible
  * ******************************************************************************* */
 void RemoteDisplay::printArtist(String texte)
 {
+   // On centre les textes
+   u8g2.setFont(u8g2_font_helvR10_tf);
+   u8g2.setFontMode(1);                // 0:pour police _mx (faster) / 1:pour police _tx
+   u8g2.clearBuffer();
+   this->drawDualLineText(texte);
+   this->addFrame();
+   this->addHeader();
+   u8g2.sendBuffer();
+}
+
+/* *******************************************************************************
+ * Affiche un texte sur une ou deux lignes.
+ * La police doit être positionnée avant l'appel.
+ * ******************************************************************************* */
+void RemoteDisplay::drawDualLineText(String texte)
+{
+   const byte MAX_LINE_LEN = 16;    // Nb max de charactères dans le rectangle (par ligne)
    char line1[20];
    char line2[20];
-   byte longeurTitre = texte.length();
-   const byte MAX_LINE_LEN = 16;    // Nb max de charactères dans le rectangle (par ligne)
+   byte longeurTexte = texte.length();
 
-   if (longeurTitre < MAX_LINE_LEN)
+   // Si le texte est court, il tient sur une ligne.
+   if (longeurTexte < MAX_LINE_LEN)
    {
         texte.toCharArray(line1, MAX_LINE_LEN);
         strcpy(line2, " ");
    }
-   // Sinon, le texte tient sur deux lignes: il faut trouver où tronquer.
+   // Sinon, le texte tient sur deux lignes: on charhe un espace où couper.
    else
    {
-      byte cissure=longeurTitre;
+      byte cissure = longeurTexte;
       while (cissure>MAX_LINE_LEN) cissure = texte.lastIndexOf(' ',cissure-1);
       texte.toCharArray(line1, cissure+1);   // [0..cissure]
       texte.substring(cissure+1).toCharArray(line2, MAX_LINE_LEN);
    }
-   // On centre les textes
-   u8g2.setFont(u8g2_font_helvR12_tf);
-   u8g2.setFontMode(1);                // 0:pour police _mx (faster) / 1:pour police _tx
    byte pos1 = (128 - u8g2.getUTF8Width(line1)) / 2;
    byte pos2 = (128 - u8g2.getUTF8Width(line2)) / 2;
-
-   u8g2.clearBuffer();
    u8g2.drawStr(pos1, 26, line1);
    u8g2.drawStr(pos2, 42, line2);
-   //u8g2.drawRFrame(2, 18, 124, 44, 7);
-   this->addHeader();
-   u8g2.sendBuffer();
-
-   Serial.print("printArtist: "); Serial.print(line1); Serial.print("/");  Serial.println(line2);
-
+   Serial.print("printDualLines: "); Serial.print(line1); Serial.print("|");  Serial.println(line2);
 }
-
 
 /* *******************************************************************************
  * Affiche l'année (sauf si 0)
@@ -150,30 +188,13 @@ void RemoteDisplay::printYear(int value)
       itoa (value, texte, 10);          // base 10
       u8g2.clearBuffer();
       u8g2.setFont(u8g2_font_osb26_tn);
-      u8g2.setFontMode(1);                // 0:pour police _mx (faster) / 1:pour police _tx
-      u8g2.drawStr(22, 24, texte);        // Draw the text
-      u8g2.drawRFrame(2, 18, 124, 44, 7); // Trace un rectangle
-      this->addHeader();                  // Ajoute le bandeau
+      u8g2.setFontMode(1);           // 0:pour police _mx (faster) / 1:pour police _tx
+      u8g2.drawStr(22, 24, texte);   // Draw the text
+      this->addFrame();              // Ajoute le cadre
+      this->addHeader();             // Ajoute le bandeau
       u8g2.sendBuffer();
    }
 }
-
-/* *******************************************************************************
- * Affiche le beat dans le cadre : "116 bpm".
- * ******************************************************************************* */
-void RemoteDisplay::printBeat(String texte)
-{
-  this->printFramedText(texte + " bpm");
-}
-
-/* *******************************************************************************
- * Affiche le Genre de musique dans le cadre.
- * ******************************************************************************* */
-void RemoteDisplay::printGenre(String texte)
-{
-  this->printFramedText(texte);
-}
-
 
 /* *******************************************************************************
  * Affiche le texte, dans un cadre, centré sur 1 ligne, et avec le bandeau.
@@ -194,19 +215,19 @@ void RemoteDisplay::printFramedText(String to_print)
    textePos = (128 - u8g2.getUTF8Width(texte)) / 2;
    u8g2.clearBuffer();
    u8g2.drawStr(textePos, 32, texte);     // Draw the text
-   u8g2.drawRFrame(2, 18, 124, 44, 7);    // Trace un rectangle      
-   this->addHeader();                     // Ajoute le bandeau
+   this->addFrame();      // Ajoute le cadre
+   this->addHeader();     // Ajoute le bandeau
    u8g2.sendBuffer();
 }
 
 /* *******************************************************************************
- * Trace un rectangle aux coins arrondis
+ * Trace un rectangle aux coins arrondis.
  * ******************************************************************************* */
 void RemoteDisplay::addFrame()
 {
-     u8g2.drawRFrame(2, 18, 124, 44, 7);
+   // u8g2.drawRFrame(2, 18, 124, 44, 7);
+   u8g2.drawRFrame(0, 20, 128, 44, 7);       // xo, yo, lg, h, r
 }
-
 
 /* *******************************************************************************
  * Mémorise le texte à afficher dans le header. Tronque à 17. 
@@ -252,19 +273,24 @@ void RemoteDisplay::printStars(int stars)
 }
 
 /* *******************************************************************************
- * Anime les étoiles du Rating, en les faisant grossir une-à-une.
+ * Initialise l'animations des étoiles de Rating.
  * ******************************************************************************* */
 void RemoteDisplay::startStarAnimation(int stars)
 {
-   stars = 3;
+   stars = 5;   // TESTS
    Serial.println("startStarAnimation: " + String(stars));
-   current_star_size = 0.5;
+   current_star_size = 1.0;
    current_animated_star = 1;
    max_animated_star = stars;
    u8g2.clearBuffer();
    this->addFrame();      // Ajoute le cadre
    this->addHeader();     // Ajoute le bandeau
 }
+
+/* *******************************************************************************
+ * Anime les étoiles du Rating, en les faisant grossir une-à-une.
+ * Appelé N fois.
+ * ******************************************************************************* */
 void RemoteDisplay::animStars()
 {
    // Tant qu'on n'a pas atteint la taille maximum, on augmente la taille.
@@ -288,7 +314,7 @@ void RemoteDisplay::animStars()
  * **************************************************************************************************** */
 void RemoteDisplay::drawStar(int pos, float a)
 {
-  int x0 = pos * 26 - 8;
+  int x0 = pos * 24 - 8;
   int y0 = 40;
   float sa  = a * 0.9510;  // sin(2pi/5)
   float ca  = a * 0.3090;  // cos(2pi/5)

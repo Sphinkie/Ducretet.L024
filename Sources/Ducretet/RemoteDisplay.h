@@ -17,6 +17,7 @@ class RemoteDisplay
     
     void printYear(int value);
     void printBeat(String texte);
+    void printMode(String texte);
     void printTitle(String texte);
     void printGenre(String texte);
     void printArtist(String texte);
@@ -45,6 +46,7 @@ class RemoteDisplay
     void addFrame();
     void addHeader();
     void printFramedText(String to_print);
+    void drawDualLineText(String texte);
     void drawStar(int pos, float a);
     
     char header[24];

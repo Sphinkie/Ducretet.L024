@@ -49,6 +49,7 @@ volatile int       Action = _IDLE;          // variable volatile (stockée en RA
 String             MusicFile;               // ID du clip MP3 en cours
 String             NextMusicFile;           // ID du prochain clip MP3 à jouer
 
+bool               AnimInProgress=false;
 
 
 // *******************************************************************************
@@ -66,7 +67,7 @@ void setup()
     while (!Serial) { ; } // wait for serial port to connect. Needed for native USB port only
   
     Serial.println(F("================================="));
-    Serial.println(F("==    DUCRETET     v0.5-a      =="));
+    Serial.println(F("==    DUCRETET     v0.5        =="));
     Serial.println(F("================================="));
     Serial.print  (F("CPU Frequency: ")); Serial.print(F_CPU/1000000); Serial.println(F(" MHz"));
     Serial.print  (F("Free RAM: "));      Serial.print(FreeRam(),DEC); Serial.println(F(" bytes"));
@@ -158,42 +159,46 @@ void loop()
     // --------------------------------------------------------------
     const int DELAY = 40;   // ms
     const int F = 10;       // Permet de regler le delai entre les affichages (F=10 => 3sec)
+    
     switch (MP3Player.getStep())
     {
-     case 1*F: // On affiche le mode en cours.
+     case 1*F: 
+            // On affiche le mode en cours.
             RemoteTFT.clearScreen();
             displayRequestedMode();
+            AnimInProgress=false;
             break;
-     case 2*F: // On affiche la recherche en cours (le cas échéant)
+     case 2*F: 
+            // On affiche la recherche en cours (le cas échéant)
             if (MusicFile == "NOISE") 
             {
                switch (ModeButton.getValue())
                {
-                   case FAV: RemoteTFT.printTitle(F("Rech. parmi les favoris")); break;
-                   case YEAR: RemoteTFT.printTitle(F("Rech. par année"));        break;
-                   case BEAT: RemoteTFT.printTitle(F("Rech. par tempo"));        break;
-                   case GENRE: RemoteTFT.printArtist(F("Rech. par genre"));       break;
-                   case RANDOM: RemoteTFT.printTitle(F("Rech. aléatoire"));      break;
+                   case FAV:    RemoteTFT.printMode(F("Rech. parmi les favoris")); break;
+                   case YEAR:   RemoteTFT.printMode(F("Rech. par année"));         break;
+                   case BEAT:   RemoteTFT.printMode(F("Rech. par tempo"));         break;
+                   case GENRE:  RemoteTFT.printMode(F("Rech. par genre"));         break;
+                   case RANDOM: RemoteTFT.printMode(F("Rech. aléatoire"));         break;
                }
             }
             break;
-     case 3*F:   // Affiche l'ANNEE (Catalog)
+     case 3*F:   
+            // Affiche l'ANNEE (Catalog)
             RemoteTFT.printYear(Catalogue.getSelectedClipYear());
             break;
      case 4*F:
             // Affiche le GENRE (Catalog)
             RemoteTFT.printGenre(Catalogue.getSelectedClipGenre());
             break;
-     case 5*F:
-            // Affiche l'ARTISTE (tag MP3)
-            RemoteTFT.printArtist(MP3Player.getArtist());
-            break;
      case 6*F:
-            // Affiche le RATING (Catalog)
-            if (MusicFile == "NOISE") RemoteTFT.printStars(0);
-            else RemoteTFT.printStars(Catalogue.getSelectedClipRating());
+            // Fait clignoter le BEAT (Catalog)
+            if (MusicFile != "NOISE")
+            {
+               int beat = Catalogue.getSelectedClipBeat();
+               // Beat_ISR.startBeat(beat);
+            }            
             break;
-      case 7*F:
+     case 7*F:
             // Affiche le BEAT (Catalog)
             if (MusicFile != "NOISE") 
             {
@@ -201,20 +206,54 @@ void loop()
                 RemoteTFT.printBeat(String(beat));
             }            
             break;
-     case 9*F:
+     case 8*F:
+            // Affiche l'ARTISTE (tag MP3)
+            RemoteTFT.printArtist(MP3Player.getArtist());
+            break;
+    case 10*F: 
+            // Affiche le RATING (Catalog)
+            if (MusicFile != "NOISE") 
+            {
+              // RemoteTFT.printStars(Catalogue.getSelectedClipRating());
+              // Begin Star animation
+              RemoteTFT.startStarAnimation(5);
+              AnimInProgress=true;
+            }
+            break;
+    case 10*F+1:  // star 1
+    case 10*F+2:
+    case 10*F+3:
+    case 10*F+4:  // star 2
+    case 10*F+5:
+    case 10*F+6:
+    case 10*F+7:
+    case 10*F+8:  // star 3
+    case 10*F+9:
+    case 10*F+10:
+    case 10*F+11:
+    case 10*F+12:  // star 4
+    case 10*F+13:
+    case 10*F+14:
+    case 10*F+15:  
+    case 10*F+16:  // star 5
+    case 10*F+17:
+    case 10*F+18:
+    case 10*F+20:
+    //case 10*F+21:
+    //case 10*F+22:
+            // Star animation
+            RemoteTFT.animStars();
+            break;
+     case 14*F:
+            // End Star animation
+            AnimInProgress=false;
+            break;
+     case 15*F:
             // On affiche le TITRE
             RemoteTFT.printTitle(MP3Player.getTitle());
             break;
-     case 10*F: // On fait scroller le TITRE
+     case 16*F: // On fait scroller le TITRE
             RemoteTFT.startScrolling();
-            break;
-     case 11*F:
-            // Fait clignoter le BEAT (Catalog)
-            if (MusicFile != "NOISE")
-            {
-                int beat = Catalogue.getSelectedClipBeat();
-//                Beat_ISR.startBeat(beat);
-            }            
             break;
      case 19*F:
             RemoteTFT.stopScrolling();            
@@ -222,35 +261,14 @@ void loop()
      case 20*F: // On affiche le debut du TITRE en fixe
             RemoteTFT.printTitle(MP3Player.getTitle());
             break;
-    case 50*F: // on surveille la RAM consommée
-            Serial.print(F("Free RAM (bytes)= ")); Serial.println(FreeRam(), DEC);
-            break;
     case 21*F: // STOP (DEBUG)
-            RemoteTFT.printStars(5);
             /* MP3Player.stopTrack(); */
             break;
 
-    case 25*F: 
-            RemoteTFT.startStarAnimation(5);
+    case 50*F: 
+            // On surveille la RAM consommée
+            Serial.print(F("Free RAM (bytes)= ")); Serial.println(FreeRam(), DEC);
             break;
-    case 25*F+1:
-    case 25*F+2:
-    case 25*F+3:
-    case 25*F+4:
-    case 25*F+5:
-    case 25*F+6:
-    case 25*F+7:
-    case 25*F+8:
-    case 25*F+9:
-    case 25*F+10:
-    case 25*F+11:
-    case 25*F+12:
-    case 25*F+13:
-    case 25*F+14:
-            // stars animation
-            RemoteTFT.animStars();
-            break;
-            
    }
 
 /*       
@@ -298,8 +316,10 @@ void loop()
   // --------------------------------------------------------------
   // Temporisation de la boucle
   // --------------------------------------------------------------
-  if (RemoteTFT.titleScrolling)
+  if (RemoteTFT.titleScrolling) 
       RemoteTFT.scroll();
+  else if (AnimInProgress) 
+    {}  
   else
      delay(DELAY);
 }
