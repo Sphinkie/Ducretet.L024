@@ -1,6 +1,7 @@
 /* *******************************************************************************
  * REMOTE DISPLAY
  * Ecran 128x64
+ * doc de référence : https://github.com/olikraus/u8g2/wiki/u8g2reference
  * ******************************************************************************* */
 #include "Arduino.h"
 #include "RemoteDisplay.h"
@@ -31,7 +32,6 @@ void RemoteDisplay::initialize()
   u8g2.setFontDirection(0);     // horizontal
 }
 
-
 /* *******************************************************************************
  * Efface l'écran
  * ******************************************************************************* */
@@ -52,15 +52,17 @@ void RemoteDisplay::clearText()
 }
 
 /* *******************************************************************************
- * Affiche le Titre du morceau
+ * Affiche le Titre du morceau. 
+ * A noter que dans les tags MP3, la taille est limitée à 30 chars.
  * *******************************************************************************
  * 128 pixels = 10.6 chars (avec police u8g2_font_profont22_tf)
  * ******************************************************************************* */
-void RemoteDisplay::printTitle(String titleString)
+/*
+ // PrintTitreForHscrolling
+ void RemoteDisplay::printTitle(String titleString)
 {
   Serial.println("printTitle");
   u8g2_uint_t width;                    // Largeur du texte (en pixels)
-//  u8g2_uint_t pos;                      // Position du texte (en pixels)
 
   if (titleString=="NOISE") return;
   
@@ -90,10 +92,122 @@ void RemoteDisplay::printTitle(String titleString)
   u8g2.drawUTF8(titlePos, 32, titleSubText);
   u8g2.sendBuffer(); 
 }
+*/
 
 
 /* *******************************************************************************
- * Affiche le beat dans le cadre : "116 bpm".
+ * Prepare l'animation du titre.
+ * startTitleAnimation() doit être appelé après.
+ * ******************************************************************************* */
+void RemoteDisplay::printAnimatedTitle(String titleString)
+{
+   if (titleString=="NOISE") 
+      this->TitleCDR = "";
+   else
+      this->TitleCDR = titleString;
+}
+
+/* *******************************************************************************
+ * On prépare un mot à animer.
+ * printAnimatedTitle() doit être appelé avant.
+ * animTitle() doit être appelé après (plusieurs fois)
+ * En raison de l'UTF-8, certaines lettres prennent 2 bytes...
+ * D'où un CharArray de [16] pour stocker une String de [10].
+ * ******************************************************************************* */
+void RemoteDisplay::startTitleAnimation()
+{
+   u8g2_uint_t width;               // Largeur du texte (en pixels)
+
+   // S'il n'y a rien a afficher, on sort
+   if (this->TitleCDR.length()==0) return;
+   // On extrait le mot à animer
+   this->cutTitleString();
+   // On determine la position du texte animé
+   u8g2.setFont(u8g2_font_profont22_tf);
+   width = u8g2.getUTF8Width(this->WordText);
+   this->WordX = (128 - width) / 2;
+   this->WordWidth = width;
+   // On active l'animation
+   this->WordStep = 0;
+   this->TitleAnim = true;
+}
+
+/* *******************************************************************************
+ *  Coupe le titre CDR en deux: 
+ *    WordText = le mot à animer
+ *    TitleCDR = le texte restant
+ * ******************************************************************************* */
+void RemoteDisplay::cutTitleString()
+{
+   const byte MAX_LINE_LEN = 10;    // Nb max de charactères par ligne en u8g2_font_profont22_tf
+
+   byte longeurTexte = this->TitleCDR.length();   // Nombre de caractères restants
+   // Si le texte (restant) est court, il tient sur une ligne.
+   if (longeurTexte < MAX_LINE_LEN)
+   {
+      this->TitleCDR.toCharArray(this->WordText, MAX_LINE_LEN);
+      this->TitleCDR = "";    // il ne reste rien à afficher
+   }
+   else
+   {
+      // Si le texte est long, on prend le premier (groupe de) mot(s) de moins de 10 chars.
+      byte cissure = longeurTexte;
+      // On cherche le dernier espace inférent à la longueur de la ligne
+      while (cissure>MAX_LINE_LEN) cissure = TitleCDR.lastIndexOf(' ',cissure-1);
+      // On a trouvé le premier mot
+      this->TitleCDR.toCharArray(this->WordText, cissure+1);
+      // On l'enlève de la string restant à afficher.
+      this->TitleCDR.remove(0, cissure+1);
+   }  
+}
+
+
+/* *******************************************************************************
+ * Animation d'un mot du titre.
+ * startTitleAnimation() doit être appelé avant.
+ * ******************************************************************************* */
+void RemoteDisplay::animTitle()
+{
+  switch (this->WordStep)
+  {
+    case 0:
+            // Step 0: on trace une ligne fine.
+            u8g2.clearBuffer();
+            u8g2.drawHLine(this->WordX, 40, this->WordWidth);
+            this->addHeader();
+            this->WordStep++;
+            break;
+    case 1:
+            // On épaissit la ligne.
+            u8g2.drawHLine(this->WordX, 40-1, this->WordWidth);
+            u8g2.drawHLine(this->WordX, 40+1, this->WordWidth);
+            this->WordStep++;
+            break;
+    case 2:
+            // On épaissit la ligne.
+            u8g2.drawHLine(this->WordX, 40-2, this->WordWidth);
+            u8g2.drawHLine(this->WordX, 40+2, this->WordWidth);
+            this->WordStep++;
+            break;
+    case 3:
+            // Step final: on écrit le mot.
+            u8g2.clearBuffer();
+            u8g2.setFont(u8g2_font_profont22_tf);
+            u8g2.drawUTF8(this->WordX, 40-10, this->WordText);
+            this->WordStep++;
+            this->addHeader();
+            break;
+    case 4:
+            // On stoppe l'animation
+            this->TitleAnim = false;
+            this->WordStep = 0;
+            break;
+  }  
+  u8g2.sendBuffer(); 
+}
+
+/* *******************************************************************************
+ * Affiche le beat dans le cadre. Ex: "116 bpm".
  * ******************************************************************************* */
 void RemoteDisplay::printBeat(String texte)
 {
@@ -109,11 +223,33 @@ void RemoteDisplay::printGenre(String texte)
 }
 
 /* *******************************************************************************
+ * Affiche le titre sur une ou deux lignes (sans cadre).
+ * TODO : Police à confirmer
+ * ******************************************************************************* */
+void RemoteDisplay::printTitle(String texte)
+{
+   if (texte=="NOISE") return;
+   const byte MAX_LINE_LEN = 10;        // Nb max charactères en 'u8g2_font_profont22_tf'
+   byte longeurTexte = texte.length();  // Nombre de caractères
+   
+   // Si le texte est court, on ne touche pas à l'affichage.
+   if (longeurTexte >= MAX_LINE_LEN)
+   {
+      u8g2.clearBuffer();
+      u8g2.setFont(u8g2_font_koleeko_tf);
+      // u8g2.setFontMode(1);
+      this->drawDualLineText(texte);
+      this->addHeader();
+      u8g2.sendBuffer();
+   }
+}
+
+/* *******************************************************************************
  * Affiche le mode de recherche dans un rectangle blanc.
+ * u8g2_font_koleeko_tf   : petite police avec un look SF / Art-Deco
  * ******************************************************************************* */
 void RemoteDisplay::printMode(String texte)
 {
-   // On centre les textes
    u8g2.setFont(u8g2_font_koleeko_tf);
    u8g2.setFontMode(1);   // 0:pour police _mx (faster) / 1:pour police _tx
    u8g2.clearBuffer();
@@ -131,7 +267,6 @@ void RemoteDisplay::printMode(String texte)
  * ******************************************************************************* */
 void RemoteDisplay::printArtist(String texte)
 {
-   // On centre les textes
    u8g2.setFont(u8g2_font_helvR10_tf);
    u8g2.setFontMode(1);                // 0:pour police _mx (faster) / 1:pour police _tx
    u8g2.clearBuffer();
@@ -143,7 +278,7 @@ void RemoteDisplay::printArtist(String texte)
 
 /* *******************************************************************************
  * Affiche un texte sur une ou deux lignes.
- * La police doit être positionnée avant l'appel.
+ * La police doit être positionnée avant l'appel, pour mesurer la largeur du texte.
  * ******************************************************************************* */
 void RemoteDisplay::drawDualLineText(String texte)
 {
@@ -158,7 +293,7 @@ void RemoteDisplay::drawDualLineText(String texte)
         texte.toCharArray(line1, MAX_LINE_LEN);
         strcpy(line2, " ");
    }
-   // Sinon, le texte tient sur deux lignes: on charhe un espace où couper.
+   // Sinon, le texte tient sur deux lignes: on cherche un espace où couper.
    else
    {
       byte cissure = longeurTexte;
@@ -166,6 +301,7 @@ void RemoteDisplay::drawDualLineText(String texte)
       texte.toCharArray(line1, cissure+1);   // [0..cissure]
       texte.substring(cissure+1).toCharArray(line2, MAX_LINE_LEN);
    }
+   // On centre les textes
    byte pos1 = (128 - u8g2.getUTF8Width(line1)) / 2;
    byte pos2 = (128 - u8g2.getUTF8Width(line2)) / 2;
    u8g2.drawStr(pos1, 26, line1);
@@ -189,7 +325,7 @@ void RemoteDisplay::printYear(int value)
       u8g2.clearBuffer();
       u8g2.setFont(u8g2_font_osb26_tn);
       u8g2.setFontMode(1);           // 0:pour police _mx (faster) / 1:pour police _tx
-      u8g2.drawStr(22, 24, texte);   // Draw the text
+      u8g2.drawStr(22, 28, texte);   // Draw the text
       this->addFrame();              // Ajoute le cadre
       this->addHeader();             // Ajoute le bandeau
       u8g2.sendBuffer();
@@ -241,7 +377,8 @@ void RemoteDisplay::setHeader(String texte)
 }
 
 /* *******************************************************************************
- * Dessine un header avec le texte prévu. Noir sur fond blanc.
+ * Dessine un header avec le texte prévu avec setHeader(). 
+ * Noir sur fond blanc.
  * *******************************************************************************
  *  u8g2_font_DigitalDisco_tf (17 char on a line) - très lisible (daFont) Lettres rondes.
  *  u8g2_font_halftone_tf     (18 char on a line) - très discret (grisé sur fond blanc)
@@ -258,12 +395,11 @@ void RemoteDisplay::addHeader()
 }
 
 /* *******************************************************************************
- * Affiche les étoiles du Rating
+ * Affiche les étoiles du Rating dans le cadre.
  * ******************************************************************************* */
 void RemoteDisplay::printStars(int stars)
 {
    Serial.println("printStars: " + String(stars));
-   stars = 5;
    u8g2.clearBuffer();
    for (int i = 0; i<stars; i++)
      this->drawStar(i+1, 4.0);
@@ -277,7 +413,6 @@ void RemoteDisplay::printStars(int stars)
  * ******************************************************************************* */
 void RemoteDisplay::startStarAnimation(int stars)
 {
-   stars = 5;   // TESTS
    Serial.println("startStarAnimation: " + String(stars));
    current_star_size = 1.0;
    current_animated_star = 1;
@@ -285,11 +420,12 @@ void RemoteDisplay::startStarAnimation(int stars)
    u8g2.clearBuffer();
    this->addFrame();      // Ajoute le cadre
    this->addHeader();     // Ajoute le bandeau
+   this->StarAnim=1;
 }
 
 /* *******************************************************************************
  * Anime les étoiles du Rating, en les faisant grossir une-à-une.
- * Appelé N fois.
+ * Appeler 20 fois (4 étapes pour chaque étoile).
  * ******************************************************************************* */
 void RemoteDisplay::animStars()
 {
@@ -305,6 +441,9 @@ void RemoteDisplay::animStars()
    // On trace le sprite
    this->drawStar(current_animated_star, current_star_size);
    u8g2.sendBuffer();
+   // Si on a atteint le step 20, on a fini.
+   if (++this->StarAnim > 20)
+      this->StarAnim=0;
 }
 
 /* ****************************************************************************************************
@@ -331,21 +470,23 @@ void RemoteDisplay::drawStar(int pos, float a)
 }
 
 /* *******************************************************************************
- * Gestion du scrolling: Un peu trop lent pour être agréable à lire.
+ * Gestion du scrolling Horizontal: Un peu trop lent pour être agréable à lire.
  * ******************************************************************************* */
 void  RemoteDisplay::startScrolling()
 {
   Serial.println("startScrolling");
-  if (scrollableTitle)  titleScrolling = true;
+  if (scrollableTitle)  TitleScrolling = true;
 }
+/* ******************************************************************************* */
 void  RemoteDisplay::stopScrolling()
 {
   Serial.println("stopScrolling");
-  titleScrolling = false;
+  TitleScrolling = false;
 }
+/* ******************************************************************************* */
 void  RemoteDisplay::scroll()
 {
-  if (titleScrolling)
+  if (TitleScrolling)
   {
     // Si le debut du texte est visible
     if (titlePos >= 0)

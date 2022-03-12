@@ -18,13 +18,15 @@ class RemoteDisplay
     void printYear(int value);
     void printBeat(String texte);
     void printMode(String texte);
-    void printTitle(String texte);
     void printGenre(String texte);
     void printArtist(String texte);
+    void printTitle(String texte);
+    void printAnimatedTitle(String texte);
+    void startTitleAnimation();
+    void animTitle();
     void printStars(int stars);
     void startStarAnimation(int stars);
     void animStars();
-    
     
     void setHeader(String texte);
     
@@ -32,15 +34,17 @@ class RemoteDisplay
     void stopScrolling();
     void scroll();
 
-    void startTimer3();        // expérimentation des ISR
-    void stopTimer3();         // expérimentation des ISR
-    void printPictoMute() {};  // Radial-V
-    void printPictoFM()   {};  // Radial-V
-    char requestStatus()  {};  // Radial-V
+    void startTimer3();         // expérimentation des ISR
+    void stopTimer3();          // expérimentation des ISR
+    void printPictoMute() {};   // Radial-V
+    void printPictoFM()   {};   // Radial-V
+    char requestStatus()  {};   // Radial-V
     void printAlbum(String texte) {};  // Radial-V
     void setBackgroundImage()     {};  // Radial-V
 
-    bool titleScrolling=false;
+    bool TitleScrolling=false;
+    bool TitleAnim=false;
+    byte StarAnim=0;      // 0 = stopped 
     
   private:
     void addFrame();
@@ -48,7 +52,13 @@ class RemoteDisplay
     void printFramedText(String to_print);
     void drawDualLineText(String texte);
     void drawStar(int pos, float a);
-    
+    void cutTitleString();
+       
+    // Gestion des mots animés
+    String TitleCDR;
+    char WordText[20];
+    byte WordX, WordStep, WordWidth;
+    // Gestion du Header
     char header[24];
     byte headerPos=0;
     // Gestion de l'animation des stars
