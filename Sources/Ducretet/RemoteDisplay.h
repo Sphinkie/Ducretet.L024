@@ -15,6 +15,7 @@ class RemoteDisplay
     void clearText();
     void clearScreen();
     
+    void printLogo();
     void printYear(int value);
     void printBeat(String texte);
     void printMode(String texte);
@@ -50,7 +51,7 @@ class RemoteDisplay
     void addFrame();
     void addHeader();
     void printFramedText(String to_print);
-    void drawDualLineText(String texte);
+    void drawDualLineText(String texte, byte len);
     void drawStar(int pos, float a);
     void cutTitleString();
        

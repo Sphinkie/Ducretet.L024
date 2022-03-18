@@ -98,6 +98,9 @@ void setup()
     MP3Player.playTrack(MusicFile);   
 
     digitalWrite(LED_1,HIGH);   // Eteint la Led témoin SPI BUSY
+    RemoteTFT.printLogo();
+    delay(3000);
+
 }
 
 
@@ -159,12 +162,12 @@ void loop()
     
     switch (MP3Player.getStep())
     {
-     case 1:
+     case 2:
             // On mémorise le mode en cours pour le header.
             RemoteTFT.clearScreen();
             displayRequestedMode();
             break;
-     case 2:
+     case 3:
             // On affiche la recherche en cours (le cas échéant)
             if (MusicFile == "NOISE") 
             {
@@ -368,7 +371,7 @@ void displayRequestedMode()
          case GENRE:    
                 ModeMessage = "> " + Catalogue.Plexi.Genre + " <";
                 break;
-         case RANDOM:   // 17 chars
+         default:   // 17 chars
                 ModeMessage = "Musique aleatoire";
                 break;
     }

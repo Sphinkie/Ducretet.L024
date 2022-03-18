@@ -52,48 +52,40 @@ void RemoteDisplay::clearText()
 }
 
 /* *******************************************************************************
- * Affiche le Titre du morceau. 
- * A noter que dans les tags MP3, la taille est limitée à 30 chars.
- * *******************************************************************************
- * 128 pixels = 10.6 chars (avec police u8g2_font_profont22_tf)
+ * Affiche le SplashScreeen.
+ * Ecran = 128x64
+ * Epaisseur des traits = 3 pixels.
+ * posion 0,0 = Upper-Left
  * ******************************************************************************* */
-/*
- // PrintTitreForHscrolling
- void RemoteDisplay::printTitle(String titleString)
+ void RemoteDisplay::printLogo()
 {
-  Serial.println("printTitle");
-  u8g2_uint_t width;                    // Largeur du texte (en pixels)
+  Serial.println("printLogo");
+  // u8g2.clearBuffer();
+  // Cercle: x0,y0,R
+  u8g2.drawCircle(64, 32, 25);
+  u8g2.drawCircle(64, 32, 24);
+  u8g2.drawCircle(64, 32, 23);
+  // Pied: x0, y0, L
+  #define PIVOT 44    
+  u8g2.drawVLine(64,   PIVOT, 20);
+  u8g2.drawVLine(64-1, PIVOT, 20);
+  u8g2.drawVLine(64+1, PIVOT, 20);
+  // Raccord: x0,y0,R
+  #define RADIUS 5    // Rayon du raccord
+  u8g2.drawCircle(64, PIVOT-RADIUS, RADIUS,   U8G2_DRAW_LOWER_RIGHT | U8G2_DRAW_LOWER_LEFT);
+  u8g2.drawCircle(64, PIVOT-RADIUS, RADIUS+1, U8G2_DRAW_LOWER_RIGHT | U8G2_DRAW_LOWER_LEFT);
+  u8g2.drawCircle(64, PIVOT-RADIUS, RADIUS+2, U8G2_DRAW_LOWER_RIGHT | U8G2_DRAW_LOWER_LEFT);
+  // Branche gauche: x0, y0, x1, y1
+  u8g2.drawLine(64-RADIUS,   PIVOT-RADIUS, 64-3, 0);
+  u8g2.drawLine(64-RADIUS-1, PIVOT-RADIUS, 64-4, 0);
+  u8g2.drawLine(64-RADIUS-2, PIVOT-RADIUS, 64-5, 0);
+  // Branche droite
+  u8g2.drawLine(64+RADIUS,   PIVOT-RADIUS, 64+3, 0);
+  u8g2.drawLine(64+RADIUS+1, PIVOT-RADIUS, 64+4, 0);
+  u8g2.drawLine(64+RADIUS+2, PIVOT-RADIUS, 64+5, 0);
 
-  if (titleString=="NOISE") return;
-  
-  titleLen = titleString.length();
-  titleString.toCharArray(titleText, titleLen);
-  titleString.toCharArray(titleSubText, 16);
-  // En raison de l'UTF-8, certaines lettres prennent 2 bytes...
-  // D'où un CharArray de [16] pour stocker une String de [10].
-
-  u8g2.setFont(u8g2_font_profont22_tf);
-  if (titleLen>10)
-  {
-    // On place le titre à gauche, puis on le fera scroller.
-    titlePos = 0;
-    firstVisibleChar =0;
-    scrollableTitle=true;
-  }
-  else
-  {
-    // On centre le titre
-    width = u8g2.getUTF8Width(titleText);
-    titlePos = (128 - width) / 2;
-    scrollableTitle=false;
-  }
-  // On affiche le texte
-  u8g2.clearBuffer();
-  u8g2.drawUTF8(titlePos, 32, titleSubText);
   u8g2.sendBuffer(); 
 }
-*/
-
 
 /* *******************************************************************************
  * Prepare l'animation du titre.
@@ -139,7 +131,7 @@ void RemoteDisplay::startTitleAnimation()
  * ******************************************************************************* */
 void RemoteDisplay::cutTitleString()
 {
-   const byte MAX_LINE_LEN = 10;    // Nb max de charactères par ligne en u8g2_font_profont22_tf
+   const byte MAX_LINE_LEN = 10;    // Nb max de charactères par ligne en u8g2_font_profont22_tf = 10.6
 
    byte longeurTexte = this->TitleCDR.length();   // Nombre de caractères restants
    // Si le texte (restant) est court, il tient sur une ligne.
@@ -160,7 +152,6 @@ void RemoteDisplay::cutTitleString()
       this->TitleCDR.remove(0, cissure+1);
    }  
 }
-
 
 /* *******************************************************************************
  * Animation d'un mot du titre.
@@ -224,21 +215,21 @@ void RemoteDisplay::printGenre(String texte)
 
 /* *******************************************************************************
  * Affiche le titre sur une ou deux lignes (sans cadre).
- * TODO : Police à confirmer
+ * A noter que dans les tags MP3, la taille du Titre est limitée à 30 chars.
+ * u8g2_font_profont17_tf   : 14 char par ligne
  * ******************************************************************************* */
 void RemoteDisplay::printTitle(String texte)
 {
    if (texte=="NOISE") return;
-   const byte MAX_LINE_LEN = 10;        // Nb max charactères en 'u8g2_font_profont22_tf'
    byte longeurTexte = texte.length();  // Nombre de caractères
    
    // Si le texte est court, on ne touche pas à l'affichage.
-   if (longeurTexte >= MAX_LINE_LEN)
+   if (longeurTexte >= 14)
    {
       u8g2.clearBuffer();
-      u8g2.setFont(u8g2_font_koleeko_tf);
+      u8g2.setFont(u8g2_font_profont17_tf);
       // u8g2.setFontMode(1);
-      this->drawDualLineText(texte);
+      this->drawDualLineText(texte, 14);
       this->addHeader();
       u8g2.sendBuffer();
    }
@@ -255,7 +246,7 @@ void RemoteDisplay::printMode(String texte)
    u8g2.clearBuffer();
    u8g2.drawRBox(0, 10, 128, 44, 7);   // x0, y0, w, h, r
    u8g2.setDrawColor(0);
-   this->drawDualLineText(texte);
+   this->drawDualLineText(texte, 16);
    u8g2.setDrawColor(1);
    u8g2.sendBuffer();
 }
@@ -263,14 +254,14 @@ void RemoteDisplay::printMode(String texte)
 /* *******************************************************************************
  * Affiche l'Artiste sur une ou deux lignes
  * u8g2_font_helvR12_tf : police Helvetica fine et lisible
- * u8g2_font_helvR10_tf : police Helvetica fine et lisible
+ * u8g2_font_helvR10_tf : police Helvetica fine et lisible (16 char par ligne)
  * ******************************************************************************* */
 void RemoteDisplay::printArtist(String texte)
 {
    u8g2.setFont(u8g2_font_helvR10_tf);
    u8g2.setFontMode(1);                // 0:pour police _mx (faster) / 1:pour police _tx
    u8g2.clearBuffer();
-   this->drawDualLineText(texte);
+   this->drawDualLineText(texte, 16);
    this->addFrame();
    this->addHeader();
    u8g2.sendBuffer();
@@ -279,27 +270,28 @@ void RemoteDisplay::printArtist(String texte)
 /* *******************************************************************************
  * Affiche un texte sur une ou deux lignes.
  * La police doit être positionnée avant l'appel, pour mesurer la largeur du texte.
+ * @param texte : texte à afficher
+ * @param len   : Nb max de charactères dans le rectangle (par ligne)
  * ******************************************************************************* */
-void RemoteDisplay::drawDualLineText(String texte)
+void RemoteDisplay::drawDualLineText(String texte, byte len)
 {
-   const byte MAX_LINE_LEN = 16;    // Nb max de charactères dans le rectangle (par ligne)
    char line1[20];
    char line2[20];
    byte longeurTexte = texte.length();
 
    // Si le texte est court, il tient sur une ligne.
-   if (longeurTexte < MAX_LINE_LEN)
+   if (longeurTexte < len)
    {
-        texte.toCharArray(line1, MAX_LINE_LEN);
+        texte.toCharArray(line1, len);
         strcpy(line2, " ");
    }
    // Sinon, le texte tient sur deux lignes: on cherche un espace où couper.
    else
    {
       byte cissure = longeurTexte;
-      while (cissure>MAX_LINE_LEN) cissure = texte.lastIndexOf(' ',cissure-1);
+      while (cissure>len) cissure = texte.lastIndexOf(' ',cissure-1);
       texte.toCharArray(line1, cissure+1);   // [0..cissure]
-      texte.substring(cissure+1).toCharArray(line2, MAX_LINE_LEN);
+      texte.substring(cissure+1).toCharArray(line2, len);
    }
    // On centre les textes
    byte pos1 = (128 - u8g2.getUTF8Width(line1)) / 2;
@@ -361,7 +353,6 @@ void RemoteDisplay::printFramedText(String to_print)
  * ******************************************************************************* */
 void RemoteDisplay::addFrame()
 {
-   // u8g2.drawRFrame(2, 18, 124, 44, 7);
    u8g2.drawRFrame(0, 20, 128, 44, 7);       // xo, yo, lg, h, r
 }
 
