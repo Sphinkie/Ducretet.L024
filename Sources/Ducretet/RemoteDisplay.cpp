@@ -237,7 +237,7 @@ void RemoteDisplay::printTitle(String texte)
 
 /* *******************************************************************************
  * Affiche le mode de recherche dans un rectangle blanc.
- * u8g2_font_koleeko_tf   : petite police avec un look SF / Art-Deco
+ * u8g2_font_koleeko_tf   : width 12 / Height 14 : petite police avec un look SF / Art-Deco
  * ******************************************************************************* */
 void RemoteDisplay::printMode(String texte)
 {
