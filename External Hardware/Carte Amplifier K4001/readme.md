@@ -4,7 +4,7 @@
 
 Module Amplificateur Audio MONO (7W avec HP 4ohms / 4W avec HP 8ohms).
 
-La nouvelle verison de cet amplificateur est le [WSAH4001](https://www.velleman.eu/products/view/?id=461814)  (kit à souder)  ou  le [WMAH4001](https://www.velleman.eu/products/view/?id=461748)  (version montée).
+La nouvelle version de l'amplificateur VM114 est le [WSAH4001](https://www.velleman.eu/products/view/?id=461814)  (kit à souder)  ou  le [WMAH4001](https://www.velleman.eu/products/view/?id=461748)  (version montée).
 
 Ce petit amplificateur a été développé à partir du circuit intégré TDA2003, d'une  puissance maximale de 4Wrms en 4ohm. Ce CI possède une protection  thermique ainsi qu'une protection contre les courts-circuits et les surcharges. Une simple tension continue suffit à l'alimentation. 
 
@@ -20,6 +20,16 @@ Ce petit amplificateur a été développé à partir du circuit intégré TDA200
 - Réponse en fréquence: 20Hz à 20kHz (-3dB)
 - Rapport signal/bruit: 86 dB (pondéré en A)
 - Dimensions: 55 x 35 mm
+
+## Documentation:
+
+* [Notice d'assemblage en anglais à l'aide d'illustrations, photos, etc.](illustrated_assembly_manual_k4001.pdf) 
+* [Notice multilingue pour assemblage du kit](assembly_manual_k4001.pdf)
+
+* [Connection diagram of a 7W amplifier](infosheet_k4001_connection.pdf)
+* [Connection diagram of a 7W amplifier with a volume regulator](https://www.velleman.eu/downloads/0/infosheets/infosheet_k4001_connection_volumereg.pdf)
+* [Connection diagram of a simple supply for the K4001 amplifier, using a transformer, a rectifier and a capacitor.](https://www.velleman.eu/downloads/0/infosheets/infosheet_k4001_supply.pdf)
+
 
 ## Magasins:
 
