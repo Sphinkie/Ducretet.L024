@@ -18,9 +18,9 @@
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2 (U8G2_R0, U8X8_PIN_NONE);
 
 
-/* *******************************************************************************
- * Initialisation de l'afficheur
- * ******************************************************************************* */
+/** *******************************************************************************
+ * Initialisation de l'afficheur.
+ * ********************************************************************************/
 void RemoteDisplay::initialize()
 {
   Serial.println("OLED initialize");
@@ -32,18 +32,18 @@ void RemoteDisplay::initialize()
   u8g2.setFontDirection(0);     // horizontal
 }
 
-/* *******************************************************************************
- * Efface l'écran
- * ******************************************************************************* */
+/** *******************************************************************************
+ * Efface l'écran.
+ * ********************************************************************************/
 void RemoteDisplay::clearScreen()
 {
    u8g2.clearBuffer();
    u8g2.sendBuffer();
 }
 
-/* *******************************************************************************
- * Eface l'écran, mais laisse le Header visible.
- * ******************************************************************************* */
+/** *******************************************************************************
+ * Efface l'écran, mais laisse le Header visible.
+ **********************************************************************************/
 void RemoteDisplay::clearText()
 {
    u8g2.clearBuffer();
@@ -51,12 +51,12 @@ void RemoteDisplay::clearText()
    u8g2.sendBuffer();
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Affiche le SplashScreeen.
- * Ecran = 128x64
+ * Ecran = 128x64.
  * Epaisseur des traits = 3 pixels.
- * posion 0,0 = Upper-Left
- * ******************************************************************************* */
+ * Position 0,0 = Upper-Left.
+ * ********************************************************************************/
  void RemoteDisplay::printLogo()
 {
   Serial.println("printLogo");
@@ -87,10 +87,11 @@ void RemoteDisplay::clearText()
   u8g2.sendBuffer(); 
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Prepare l'animation du titre.
- * startTitleAnimation() doit être appelé après.
- * ******************************************************************************* */
+ * @post startTitleAnimation() doit être appelé après.
+ * @param titleString : Le titre à animer
+ * ********************************************************************************/
 void RemoteDisplay::printAnimatedTitle(String titleString)
 {
    if (titleString=="NOISE") 
@@ -99,13 +100,13 @@ void RemoteDisplay::printAnimatedTitle(String titleString)
       this->TitleCDR = titleString;
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * On prépare un mot à animer.
- * printAnimatedTitle() doit être appelé avant.
- * animTitle() doit être appelé après (plusieurs fois)
  * En raison de l'UTF-8, certaines lettres prennent 2 bytes...
  * D'où un CharArray de [16] pour stocker une String de [10].
- * ******************************************************************************* */
+ * @pre printAnimatedTitle() doit être appelé avant.
+ * @pre animTitle() doit être appelé après (plusieurs fois)
+ * ********************************************************************************/
 void RemoteDisplay::startTitleAnimation()
 {
    u8g2_uint_t width;               // Largeur du texte (en pixels)
@@ -124,11 +125,11 @@ void RemoteDisplay::startTitleAnimation()
    this->TitleAnim = true;
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  *  Coupe le titre CDR en deux: 
  *    WordText = le mot à animer
  *    TitleCDR = le texte restant
- * ******************************************************************************* */
+ * ********************************************************************************/
 void RemoteDisplay::cutTitleString()
 {
    const byte MAX_LINE_LEN = 10;    // Nb max de charactères par ligne en u8g2_font_profont22_tf = 10.6
@@ -153,10 +154,10 @@ void RemoteDisplay::cutTitleString()
    }  
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Animation d'un mot du titre.
- * startTitleAnimation() doit être appelé avant.
- * ******************************************************************************* */
+ * @pre startTitleAnimation() doit être appelé avant.
+ * ********************************************************************************/
 void RemoteDisplay::animTitle()
 {
   switch (this->WordStep)
@@ -197,27 +198,30 @@ void RemoteDisplay::animTitle()
   u8g2.sendBuffer(); 
 }
 
-/* *******************************************************************************
- * Affiche le beat dans le cadre. Ex: "116 bpm".
- * ******************************************************************************* */
+/** *******************************************************************************
+ * Affiche le beat dans le cadre.
+ * @param texte : Le texte à afficher. Ex: "116 bpm".
+ * ********************************************************************************/
 void RemoteDisplay::printBeat(String texte)
 {
   this->printFramedText(texte + " bpm");
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Affiche le Genre de musique dans le cadre.
- * ******************************************************************************* */
+ * @param texte : Le texte à afficher
+ * ********************************************************************************/
 void RemoteDisplay::printGenre(String texte)
 {
   this->printFramedText(texte);
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Affiche le titre sur une ou deux lignes (sans cadre).
  * A noter que dans les tags MP3, la taille du Titre est limitée à 30 chars.
- * u8g2_font_profont17_tf   : 14 char par ligne
- * ******************************************************************************* */
+ * \n\b u8g2_font_profont17_tf   : 14 char par ligne
+ * @param texte : Le texte à afficher
+ * ********************************************************************************/
 void RemoteDisplay::printTitle(String texte)
 {
    if (texte=="NOISE") return;
@@ -235,10 +239,11 @@ void RemoteDisplay::printTitle(String texte)
    }
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Affiche le mode de recherche dans un rectangle blanc.
- * u8g2_font_koleeko_tf   : width 12 / Height 14 : petite police avec un look SF / Art-Deco
- * ******************************************************************************* */
+ * \n\b u8g2_font_koleeko_tf   : width 12 / Height 14 : petite police avec un look SF / Art-Deco
+ * @param texte : Le texte à afficher
+ * ********************************************************************************/
 void RemoteDisplay::printMode(String texte)
 {
    u8g2.setFont(u8g2_font_koleeko_tf);
@@ -251,11 +256,12 @@ void RemoteDisplay::printMode(String texte)
    u8g2.sendBuffer();
 }
 
-/* *******************************************************************************
+/** ******************************************************************************
  * Affiche l'Artiste sur une ou deux lignes
- * u8g2_font_helvR12_tf : police Helvetica fine et lisible
- * u8g2_font_helvR10_tf : police Helvetica fine et lisible (16 char par ligne)
- * ******************************************************************************* */
+ * \n\b u8g2_font_helvR12_tf : police Helvetica fine et lisible
+ * \n\b u8g2_font_helvR10_tf : police Helvetica fine et lisible (16 char par ligne)
+ * @param texte : Le texte à afficher
+ * ********************************************************************************/
 void RemoteDisplay::printArtist(String texte)
 {
    u8g2.setFont(u8g2_font_helvR10_tf);
@@ -267,12 +273,12 @@ void RemoteDisplay::printArtist(String texte)
    u8g2.sendBuffer();
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Affiche un texte sur une ou deux lignes.
  * La police doit être positionnée avant l'appel, pour mesurer la largeur du texte.
- * @param texte : texte à afficher
+ * @param texte : Texte à afficher
  * @param len   : Nb max de charactères dans le rectangle (par ligne)
- * ******************************************************************************* */
+ * ********************************************************************************/
 void RemoteDisplay::drawDualLineText(String texte, byte len)
 {
    char line1[20];
@@ -301,11 +307,12 @@ void RemoteDisplay::drawDualLineText(String texte, byte len)
    Serial.print("printDualLines: "); Serial.print(line1); Serial.print("|");  Serial.println(line2);
 }
 
-/* *******************************************************************************
+/** ******************************************************************************
  * Affiche l'année (sauf si 0)
- * u8g2_font_ncenB24_tn      : Possible aussi, mais un peu moins joli.
- * u8g2_font_osb26_tn        : "Old Standard Bold". Existe en 18 - 21 - 26 - 29
- * ******************************************************************************* */
+ * \n\b u8g2_font_ncenB24_tn      : Possible aussi, mais un peu moins joli.
+ * \n\b u8g2_font_osb26_tn        : "Old Standard Bold". Existe en 18 - 21 - 26 - 29
+ * @param value : Année à afficher
+ * ********************************************************************************/
 void RemoteDisplay::printYear(int value)
 {
    Serial.println("printYear: " + String(value));
@@ -324,12 +331,13 @@ void RemoteDisplay::printYear(int value)
    }
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Affiche le texte, dans un cadre, centré sur 1 ligne, et avec le bandeau.
  * Tronqué à 16 chars.
- * u8g2_font_helvR12_tf         : police Helvetica fine et lisible
- * u8g2_font_profont22_tf       : assez gros
- * ******************************************************************************* */
+ * \n\b u8g2_font_helvR12_tf         : police Helvetica fine et lisible
+ * \n\b u8g2_font_profont22_tf       : assez gros
+ * @param to_print : Texte à afficher
+ * ********************************************************************************/
 void RemoteDisplay::printFramedText(String to_print)
 {
    const byte MAX_LINE_LEN = 16;    // Nb max de charactères dans le rectangle (par ligne)
@@ -348,18 +356,18 @@ void RemoteDisplay::printFramedText(String to_print)
    u8g2.sendBuffer();
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Trace un rectangle aux coins arrondis.
- * ******************************************************************************* */
+ * ********************************************************************************/
 void RemoteDisplay::addFrame()
 {
    u8g2.drawRFrame(0, 20, 128, 44, 7);       // xo, yo, lg, h, r
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Mémorise le texte à afficher dans le header. Tronque à 17. 
- * (Note: Préparer avec la même police que pour l'affichage).
- * ******************************************************************************* */
+ * @remark Préparer avec la même police que pour l'affichage.
+ * ********************************************************************************/
 void RemoteDisplay::setHeader(String texte)
 {
   texte.toCharArray(this->header, 17);
@@ -367,14 +375,14 @@ void RemoteDisplay::setHeader(String texte)
   this->headerPos = (128 - u8g2.getUTF8Width(this->header)) / 2;
 }
 
-/* *******************************************************************************
+/** ******************************************************************************
  * Dessine un header avec le texte prévu avec setHeader(). 
  * Noir sur fond blanc.
  * *******************************************************************************
- *  u8g2_font_DigitalDisco_tf (17 char on a line) - très lisible (daFont) Lettres rondes.
- *  u8g2_font_halftone_tf     (18 char on a line) - très discret (grisé sur fond blanc)
- *  u8g2_font_profont12_tf    (21 char on a line) - trop fin
- *  u8g2_font_Pixellari_tf     police assez petite
+ *  \n\b u8g2_font_DigitalDisco_tf (17 char on a line) - très lisible (daFont) Lettres rondes.
+ *  \n\b u8g2_font_halftone_tf     (18 char on a line) - très discret (grisé sur fond blanc)
+ *  \n\b u8g2_font_profont12_tf    (21 char on a line) - trop fin
+ *  \n\b u8g2_font_Pixellari_tf     police assez petite
  * ******************************************************************************* */
 void RemoteDisplay::addHeader()
 {
@@ -385,9 +393,9 @@ void RemoteDisplay::addHeader()
   u8g2.setDrawColor(1);
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Affiche les étoiles du Rating dans le cadre.
- * ******************************************************************************* */
+ * ********************************************************************************/
 void RemoteDisplay::printStars(int stars)
 {
    Serial.println("printStars: " + String(stars));
@@ -399,9 +407,10 @@ void RemoteDisplay::printStars(int stars)
    u8g2.sendBuffer();
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Initialise l'animations des étoiles de Rating.
- * ******************************************************************************* */
+ * @param stars : Le nombre d'étoiles à afficher
+ * ********************************************************************************/
 void RemoteDisplay::startStarAnimation(int stars)
 {
    Serial.println("startStarAnimation: " + String(stars));
@@ -414,10 +423,10 @@ void RemoteDisplay::startStarAnimation(int stars)
    this->StarAnim=1;
 }
 
-/* *******************************************************************************
+/** *******************************************************************************
  * Anime les étoiles du Rating, en les faisant grossir une-à-une.
  * Appeler 20 fois (4 étapes pour chaque étoile).
- * ******************************************************************************* */
+ * ********************************************************************************/
 void RemoteDisplay::animStars()
 {
    // Tant qu'on n'a pas atteint la taille maximum, on augmente la taille.
@@ -437,11 +446,11 @@ void RemoteDisplay::animStars()
       this->StarAnim=0;
 }
 
-/* ****************************************************************************************************
+/** ****************************************************************************************************
  *  Dessine une étoile à 5 branches.
- *  @param pos : position de l'étoile (de 1 à 5)
+ *  @param pos : Position de l'étoile (de 1 à 5)
  *  @param a : Taille de l'étoile (longueur en pixels des branches). Taille min=1. Taille max=4.
- * **************************************************************************************************** */
+ * *****************************************************************************************************/
 void RemoteDisplay::drawStar(int pos, float a)
 {
   int x0 = pos * 24 - 8;
@@ -460,82 +469,30 @@ void RemoteDisplay::drawStar(int pos, float a)
   u8g2.drawTriangle(x0 - a, y0,    x0 - 3 * s2a, y0 + 3 * c2a, x0, y0 + a);
 }
 
-/* *******************************************************************************
- * Gestion du scrolling Horizontal: Un peu trop lent pour être agréable à lire.
- * ******************************************************************************* */
-void  RemoteDisplay::startScrolling()
-{
-  Serial.println("startScrolling");
-  if (scrollableTitle)  TitleScrolling = true;
-}
-/* ******************************************************************************* */
-void  RemoteDisplay::stopScrolling()
-{
-  Serial.println("stopScrolling");
-  TitleScrolling = false;
-}
-/* ******************************************************************************* */
-void  RemoteDisplay::scroll()
-{
-  if (TitleScrolling)
-  {
-    // Si le debut du texte est visible
-    if (titlePos >= 0)
-    {
-      firstVisibleChar = 0;
-    }  
-    // Si un caractère vient de sortir de l'écran (ie: pos est négatif)
-    else if (titlePos == -char_width)
-    {
-      // si le caractère était un prefixe UTF8
-      if (titleSubText[0] == 0xFFC3)
-      {
-        // on avance la substring de 2 bytes
-        firstVisibleChar += 2;
-      }
-      // Autre caractère:
-      else
-      {
-        // on avance la substring de 1 byte
-        firstVisibleChar += 1;
-      }
-      memcpy(titleSubText, &titleText[firstVisibleChar], 15 );
-      titleSubText[15] = '\0';
-      // on repositionne la substring
-      titlePos = 0;
-    }
-    u8g2.clearBuffer();
-    u8g2.drawUTF8(titlePos, 32, titleSubText);
-    u8g2.sendBuffer();
-    titlePos--;            // on décale la position d'un pixel vers la gauche
-  }
-}
 
 
-
-
-
-/* *******************************************************************************
+/** *******************************************************************************
  * Démarre le timer TIMER3
  * *******************************************************************************
+ * @details
  * Note sur timer3:
- *     compteur 16bits => match register = 65.536 max
- *     prescaler max = 1024
- *     donc sa frequence minimale = 16M/1024/65536 = 0.238 Hz = 4.19 sec
- * Prescaler allowed values: 1,8,64,256,1024
+ * \n      compteur 16bits => match register = 65.536 max
+ * \n      prescaler max = 1024
+ * \n    donc sa frequence minimale = 16M/1024/65536 = 0.238 Hz = 4.19 sec
+ * \n Prescaler allowed values: 1,8,64,256,1024
  * *******************************************************************************
- * cpu frequency       = 16.000.000 (16 MHz)
- * diviseur prescaler  = 256
- * fréquence souhaitée = 25 fois par seconde
+ *    cpu frequency       = 16.000.000 (16 MHz)
+ * \n diviseur prescaler  = 256
+ * \n fréquence souhaitée = 25 fois par seconde
  * *******************************************************************************
- *   Match   25 Hz = 16.000.000/256/25     = 2.500
- *   Match   30 Hz = 16.000.000/256/25     = 2.000
+ *      Match   25 Hz = 16.000.000/256/25     = 2.500
+ * \n   Match   30 Hz = 16.000.000/256/25     = 2.000
  * *******************************************************************************
- * le timer incremente son compteur à 16M/prescaler = 16M/256 = 62500 Hz
- * le timer génère une IT lorsque le compteur atteint la valeur du match register
- * on calcule donc sa valeur: MatchRegister + 1 = 16M / 256 / DesiredInterruptFrequency
+ * Le timer incremente son compteur à 16M/prescaler = 16M/256 = 62500 Hz.
+ * Le timer génère une IT lorsque le compteur atteint la valeur du match register.
+ * On calcule donc sa valeur: MatchRegister + 1 = 16M / 256 / DesiredInterruptFrequency
  * (si on veut être précis, le +1 prend en compte la RAZ du compteur).
- * ******************************************************************************* */
+ * ********************************************************************************/
 void  RemoteDisplay::startTimer3()
 {
     const float scaled_freq = 16000000 /256 /25;
@@ -552,6 +509,9 @@ void  RemoteDisplay::startTimer3()
     interrupts();              // activer toutes les interruptions
 }
 
+/** *******************************************************************************
+ * Stoppe le timer TIMER3
+ * ********************************************************************************/
 void  RemoteDisplay::stopTimer3()
 {
     cli();                        // stop interrupts
@@ -560,9 +520,10 @@ void  RemoteDisplay::stopTimer3()
 }
 
 
-/* *******************************************************************************
- * TIMER3 interrupt routine. Attention: ne supporte pas u8g2.sendBuffer().
- * Déclarer les variables nécessaires en 'volatile'.
+/** *******************************************************************************
+ * TIMER3 interrupt routine. 
+ * @attention Ne supporte pas u8g2.sendBuffer().
+ * @remark Déclarer les variables nécessaires en 'volatile'.
  * ******************************************************************************* */
 ISR(TIMER3_COMPA_vect)
 {

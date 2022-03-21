@@ -10,6 +10,16 @@ Ce petit amplificateur a été développé à partir du circuit intégré TDA200
 
 ![image](ar-amplificateur-bf-7-w-617.jpg)
 
+## Connectique:
+
+- Audio IN = 2 pins = GND + IN
+
+- Power = 2 pins = GND  +V
+
+- Audio OUT = 2 pins = GND + LS
+
+  
+
 ## Caractéristiques:
 
 - Puissance de sortie musicale: 7 W maxi sous 4 ohms.

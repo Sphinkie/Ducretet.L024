@@ -1,8 +1,8 @@
-// *******************************************************************************
-// REMOTE DISPLAY
-//
-// Cet objet envoie des commandes à un écran TFT via un bus I2C.
-// *******************************************************************************
+/** *******************************************************************************
+ * REMOTE DISPLAY
+ *
+ * Cet objet envoie des commandes à un écran TFT via un bus I2C.
+ * ********************************************************************************/
 #ifndef REMOTEDISPLAY_H_INCLUDED
 #define REMOTEDISPLAY_H_INCLUDED
 

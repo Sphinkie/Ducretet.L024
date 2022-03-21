@@ -5,20 +5,21 @@
  * Software pour la radio vintage DUCRETET L.024
  * Target : Arduino MEGA or MEGA2560
  *
- * Pilotage par Arduino-Uno d'un player MP3 et d'un afficheur
+ * Pilotage par Arduino d'un player MP3 et d'un afficheur.
  *
- * Les musiques sont sur la carte SD du player MP3, et doivent etre préparées préalablement 
+ * Les musiques sont sur la carte SD du player MP3, et doivent être préparées préalablement 
  * avec l'utilitaire mp3tag.exe (voir doc).
  *
  * Note:
  *   The F() macro tells the compiler to leave this particular array in PROGMEM (Flash). 
- *   (cela economise de la RAM programme)
+ *   (cela économise de la RAM programme)
  *   Then when it is time to access it, one byte of the data is copied to RAM at a time. 
  *   There’s a small performance overhead for this extra work. However, printing strings 
  *   over Serial or to a LCD is a really slow process, so a few extra clock cycles really won’t matter.
  *
  * ************************************************************************************************** 
  * 0.5  11/06/2020  Gestion de LED selon le BEAT
+ * 0.6  20/03/2022  Gestion de l'écran OLED
  * ************************************************************************************************** */
 #include "Ducretet.h"
 #include "RotaryButton.h"
@@ -49,9 +50,9 @@ volatile int       Action = _IDLE;          // variable volatile (stockée en RA
 String             MusicFile;               // ID du clip MP3 en cours
 String             NextMusicFile;           // ID du prochain clip MP3 à jouer
 
-// *******************************************************************************
-// The setup function runs once when you press reset or power the board
-// *******************************************************************************
+/** *****************************************************************************
+ * The setup function runs once when you press reset or power the board
+ ********************************************************************************/
 void setup() 
 {
     // Dès le début, on met les SlaveSelect du bus SPI au niveau haut, pour qu'ils ne reçoivent pas de messages parasites.
@@ -64,7 +65,7 @@ void setup()
     while (!Serial) { ; } // wait for serial port to connect. Needed for native USB port only
   
     Serial.println(F("================================="));
-    Serial.println(F("==    DUCRETET     v0.5        =="));
+    Serial.println(F("==    DUCRETET     v0.6        =="));
     Serial.println(F("================================="));
     Serial.print  (F("CPU Frequency: ")); Serial.print(F_CPU/1000000); Serial.println(F(" MHz"));
     Serial.print  (F("Free RAM: "));      Serial.print(FreeRam(),DEC); Serial.println(F(" bytes"));
@@ -104,9 +105,9 @@ void setup()
 }
 
 
-// **************************************************************************************************************************************************************
-// The loop function runs over and over again forever
-// **************************************************************************************************************************************************************
+/* *************************************************************************************************************************************************************
+ * The loop function runs over and over again forever
+ * *************************************************************************************************************************************************************/
 void loop() 
 {
 
@@ -301,10 +302,10 @@ void loop()
 }
 
 
-// *******************************************************************************
-// Reinitialisation d'une recherche de clip dans le catalogue
-// Ceci comporte un accès au fichier catalogue
-// *******************************************************************************
+/** *******************************************************************************
+ * Reinitialisation d'une recherche de clip dans le catalogue.
+ * Ceci comporte un accès au fichier catalogue.
+ * ********************************************************************************/
 void initClipSearch()
 {
       Serial.println(F(" >initClipSearch"));
@@ -321,9 +322,9 @@ void initClipSearch()
       digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
 }
 
-// *******************************************************************************
-// Renvoie le prochain clip a jouer (en fonction des boutons Mode et Tuning)
-// *******************************************************************************
+/** *******************************************************************************
+ * Renvoie le prochain clip a jouer (en fonction des boutons Mode et Tuning).
+ * ********************************************************************************/
 void searchNextClip()
 {
     // On lit la position du bouton de reglage, pour le cas où il aurait changé au cours du clip précédent
@@ -344,10 +345,10 @@ void searchNextClip()
     digitalWrite(LED_1,HIGH); // Eteint la Led témoin SPI BUSY
 }
 
-// *******************************************************************************
-// Affiche le mode demandé dans le header.
-// Sur OLED : 17 char max.
-// *******************************************************************************
+/** *******************************************************************************
+ * Affiche le mode demandé dans le header.
+ * Sur OLED : 17 char max.
+ * ********************************************************************************/
 void displayRequestedMode()
 {
     Serial.println(F("  Display Requested Mode"));
