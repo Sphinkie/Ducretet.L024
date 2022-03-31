@@ -11,7 +11,7 @@ La préparation nécessite l'application freeware MP3Tag "*The universal Tag Edi
 Les tags MP3 doivent être bien renseignés, en particulier: **Titre, Artiste, Album, Genre, Année, BPM**.
 Ne pas hésiter à donner des étoiles (*Rating*) aux différents morceaux.
 
-Pour renseigner les BPM, lancer l'utilitaire **Pistonsoft BPM Detector**. Sélection le répertoire des musiques. Attendre qu'il ait fini son analyse.Save.
+Pour renseigner les BPM, lancer l'utilitaire **Pistonsoft BPM Detector**. Sélection le répertoire des musiques. Attendre qu'il ait fini son analyse. Sauvegarder.
 
 ### Préparation
 
@@ -61,4 +61,14 @@ Le Catalogue est trié par Année. Séparateur = *point-virgule*.
 * **radial_transfert.txt** = fichier UTF-16
 * **Catalog.txt** = fichier intermédiaire, non trié par Année.
 * **iconv** = utilitaire de conversion UTF-16 en CodePage CP850
+
+* **Les fichiers *.053** sont des patchs correctifs ("plugins") du chipset audio de la carte MP3 Player Shield, fournis par Sparkfun.
+
+**Pour que les plugIns soient pris en compte à chaque reset du chipset, il faut les placer dans la racine de la carte SD**, sinon un message d'erreur `code 6: Patch was not loaded successfully` apparait au démarrage.
+
+Dans la classe du player MP3 **SFEMP3Shield**, les plugins (surtout `patches.053`) sont chargés automatiquement par la méthode `VSLoadUserCode()` appelée par `begin()`.
+
+Voir aussi la [documentation de référence de la carte MP3 player shield](http://mpflaga.github.io/Sparkfun-MP3-Player-Shield-Arduino-Library/index.html#Plug_Ins).
+
+**A voir si c'est pareil pour le chipset Adafruit**
 
