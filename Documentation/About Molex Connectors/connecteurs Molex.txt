@@ -1,0 +1,45 @@
+
+LES CONNECTEURS MOLEX
+
+Disponibles chez Farnell.
+
+
+===============================
+ Connecteurs blancs
+===============================
+
+Boitier crimp Connecteur		Embase
+femelle					male
+
+2p	22-01-2025 (série KK 2695)	22-27-2021 (série KK 6410)
+3p	22-01-2035 (Série KK 6471)	22-27-2031 (série KK 6410)
+3p	22-01-3037				
+4p	22-01-2045 (Série KK 6471)	22-27-0241 (série KK 6410)
+
+
+
+===============================
+ Connecteurs noirs
+===============================
+
+
+Embase male
+
+2p	17856-0002 (série KK 254)	
+3p	17856-0003 (série KK 254)
+4p	17856-0004 (série KK 254)
+6p	17856-0006 (série KK 254)
+
+Je n'ai pas trouvé les boitiers femelles.
+Normalement les blancs sont compatibles (mais il faut forcer un peu)
+
+
+===============================
+ Connecteurs noirs avec clip
+===============================
+Serie SL 70573
+
+Embase male
+
+4p	70543-0004
+

@@ -1,0 +1,12 @@
+-- ---------------------------------------------------------------------
+-- Adaptation de tension pour bus I2C (5v <--> 3.3v)
+-- ---------------------------------------------------------------------
+
+Donc quelle valeur de pullup? 
+   On peut dire entre 10k et 1k, au pire un peu en-dessous.
+
+* 10k  demande, pour imposer 0, d'écouler un courant de 0.5mA, ce qui reste faible.
+* 4.7k demande 1mA, ce qui est 'dans la moyenne'.
+* 2.7k doit être la recommendation de la spécif (2mA), il me semble.
+* 1k   demande un courant de 5mA. Cela réduit le risque de parasites.
+
