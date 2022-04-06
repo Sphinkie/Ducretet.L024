@@ -1,5 +1,5 @@
-(module HE10-26P (layer F.Cu) (tedit 624A0431)
-  (descr "Connecteur pour nappe 26. Coudé. Pas de 2.54mm.")
+(module HE10-26P (layer F.Cu) (tedit 624DDB33)
+  (descr "Connecteur HE10 pour CI. 26 points. Coudé. Pas de 2.54mm.")
   (fp_text reference REF** (at -14.732 -12.446) (layer F.SilkS)
     (effects (font (size 1.6891 1.6891) (thickness 0.1778)) (justify left bottom))
   )
