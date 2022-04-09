@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 3 3
+Sheet 3 4
 Title ""
 Date ""
 Rev ""
@@ -70,22 +70,22 @@ F 3 "~" H 2150 1500 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Text GLabel 1800 1700 0    50   Input ~ 0
-D44
+D49
 Text GLabel 1800 1800 0    50   Input ~ 0
 D46
 Wire Wire Line
 	1800 1800 2000 1800
 Text GLabel 1800 1900 0    50   Input ~ 0
-D45
+D44
 Wire Wire Line
 	1800 1900 2000 1900
 Text GLabel 1800 1500 0    50   Input ~ 0
-D49
+D45
 Wire Wire Line
 	1800 1500 2000 1500
 Wire Wire Line
 	1800 1700 2000 1700
-Text Notes 1600 1750 2    50   ~ 0
+Text Notes 1600 1550 2    50   ~ 0
 PWM
 Text Notes 1600 1850 2    50   ~ 0
 PWM
@@ -124,7 +124,7 @@ $EndComp
 Wire Wire Line
 	2300 1600 3100 1600
 Text GLabel 1800 1600 0    50   Input ~ 0
-D35
+D47
 Wire Wire Line
 	1800 1600 2000 1600
 $Comp
@@ -214,7 +214,7 @@ $EndComp
 Wire Wire Line
 	1350 5950 1350 6800
 Text GLabel 1650 5950 1    50   Input ~ 0
-D33
+D42
 Wire Wire Line
 	1250 6200 1250 6800
 Wire Wire Line
@@ -532,8 +532,8 @@ L 74xx:74HC14 U?
 U 1 1 625091A0
 P 8400 4400
 AR Path="/625091A0" Ref="U?"  Part="1" 
-AR Path="/624DD375/625091A0" Ref="U1"  Part="1" 
-F 0 "U1" H 8550 4300 50  0000 C CNN
+AR Path="/624DD375/625091A0" Ref="U3"  Part="1" 
+F 0 "U3" H 8550 4300 50  0000 C CNN
 F 1 "74HC14" H 8500 4200 50  0000 C CNN
 F 2 "Package_DIP:DIP-14_W7.62mm_Socket_LongPads" H 8400 4400 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74HC14" H 8400 4400 50  0001 C CNN
@@ -545,8 +545,8 @@ L 74xx:74HC14 U?
 U 7 1 625091A6
 P 9600 5800
 AR Path="/625091A6" Ref="U?"  Part="7" 
-AR Path="/624DD375/625091A6" Ref="U1"  Part="7" 
-F 0 "U1" V 9750 5750 50  0000 L CNN
+AR Path="/624DD375/625091A6" Ref="U3"  Part="7" 
+F 0 "U3" V 9750 5750 50  0000 L CNN
 F 1 "74HC14" V 9450 5650 50  0000 L CNN
 F 2 "Package_DIP:DIP-14_W7.62mm_Socket_LongPads" H 9600 5800 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74HC14" H 9600 5800 50  0001 C CNN
@@ -600,8 +600,8 @@ L 74xx:74HC14 U?
 U 2 1 625091C0
 P 8400 4750
 AR Path="/625091C0" Ref="U?"  Part="2" 
-AR Path="/624DD375/625091C0" Ref="U1"  Part="2" 
-F 0 "U1" H 8550 4650 50  0000 C CNN
+AR Path="/624DD375/625091C0" Ref="U3"  Part="2" 
+F 0 "U3" H 8550 4650 50  0000 C CNN
 F 1 "74HC14" H 8500 4550 50  0000 C CNN
 F 2 "Package_DIP:DIP-14_W7.62mm_Socket_LongPads" H 8400 4750 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74HC14" H 8400 4750 50  0001 C CNN

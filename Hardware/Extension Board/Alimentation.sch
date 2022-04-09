@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 2 3
+Sheet 2 4
 Title ""
 Date ""
 Rev ""
@@ -220,8 +220,8 @@ L Regulator_Linear:LM7812_TO220 U?
 U 1 1 624D4FF9
 P 6600 5300
 AR Path="/624D4FF9" Ref="U?"  Part="1" 
-AR Path="/624BFCA3/624D4FF9" Ref="U3"  Part="1" 
-F 0 "U3" H 6700 5050 50  0000 C CNN
+AR Path="/624BFCA3/624D4FF9" Ref="U1"  Part="1" 
+F 0 "U1" H 6700 5050 50  0000 C CNN
 F 1 "LM7812_TO220" H 6600 5451 50  0000 C CNN
 F 2 "Package_TO_SOT_THT:TO-220-3_Vertical" H 6600 5525 50  0001 C CIN
 F 3 "http://www.fairchildsemi.com/ds/LM/LM7805.pdf" H 6600 5250 50  0001 C CNN
@@ -235,7 +235,7 @@ P 3550 5600
 AR Path="/624D4FFF" Ref="J?"  Part="1" 
 AR Path="/624BFCA3/624D4FFF" Ref="J10"  Part="1" 
 F 0 "J10" H 3600 5700 50  0000 R CNN
-F 1 "CNX_LAMPS" H 3800 5400 50  0000 R CNN
+F 1 "CNX LAMPS" H 3800 5400 50  0000 R CNN
 F 2 "MesModules:Bloc_de_jonction_CI-MPT_2.54mm_01x02" H 3550 5600 50  0001 C CNN
 F 3 "~" H 3550 5600 50  0001 C CNN
 	1    3550 5600

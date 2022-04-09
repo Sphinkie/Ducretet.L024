@@ -1,4 +1,4 @@
-15076588277724322
+15077330823008686
 Battery
 BatteryHolder_Bulgin_BX0036_1xC
 Bulgin Battery Holder, BX0036, Battery Type C (https://www.bulgin.com/products/pub/media/bulgin/data/Battery_holders.pdf)
@@ -44794,21 +44794,21 @@ connector JST VH vertical
 10
 MesModules
 HE10-10P-horizontal
-
+Connecteur HE10 pour CI. 10 points. Coudé. Pas de 2.54mm.
 
 0
 10
 10
 MesModules
 HE10-10P-vertical
-Connecteur HE10 pour nappe. 10 points. Vertical. Pas de 2.54mm.
+Connecteur HE10 pour CI. 10 points. Vertical. Pas de 2.54mm.
 
 0
 10
 10
 MesModules
 HE10-26P
-Connecteur HE10 pour nappe 26 points. Coudé. Pas de 2.54mm.
+Connecteur HE10 pour CI. 26 points. Coudé. Pas de 2.54mm.
 
 0
 26
