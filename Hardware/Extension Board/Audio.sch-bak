@@ -14,48 +14,16 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L Connector_Generic:Conn_01x02 J18
-U 1 1 6250B01A
-P 5500 2150
-F 0 "J18" H 5580 2142 50  0000 L CNN
-F 1 "CNX AUDIO OUT" H 5250 1900 50  0000 L CNN
-F 2 "MesModules:Bloc_de_jonction_CI-MPT_2.54mm_01x02" H 5500 2150 50  0001 C CNN
-F 3 "~" H 5500 2150 50  0001 C CNN
-	1    5500 2150
-	1    0    0    -1  
-$EndComp
-$Comp
 L Connector_Generic:Conn_01x02 J19
 U 1 1 6250B9BC
-P 5500 3050
-F 0 "J19" H 5650 2950 50  0000 C CNN
-F 1 "CNX AUDIO OUT" H 5600 3150 50  0000 C CNN
-F 2 "MesModules:Bloc_de_jonction_CI-MPT_2.54mm_01x02" H 5500 3050 50  0001 C CNN
-F 3 "~" H 5500 3050 50  0001 C CNN
-	1    5500 3050
-	1    0    0    1   
+P 5500 2950
+F 0 "J19" H 5500 2750 50  0000 C CNN
+F 1 "AUDIO OUT" H 5600 3050 50  0000 C CNN
+F 2 "MesModules:Bloc_de_jonction_CI-MPT_2.54mm_01x02" H 5500 2950 50  0001 C CNN
+F 3 "~" H 5500 2950 50  0001 C CNN
+	1    5500 2950
+	1    0    0    -1  
 $EndComp
-$Comp
-L Jumper:Jumper_3_Bridged12 JP3
-U 1 1 6250C230
-P 3500 2500
-F 0 "JP3" V 3454 2567 50  0000 L CNN
-F 1 "Jumper_3" V 3550 1900 50  0000 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 3500 2500 50  0001 C CNN
-F 3 "~" H 3500 2500 50  0001 C CNN
-	1    3500 2500
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	2250 2500 3350 2500
-Wire Wire Line
-	3500 2250 5300 2250
-Wire Wire Line
-	2250 2400 3250 2400
-Wire Wire Line
-	3250 2400 3250 2150
-Wire Wire Line
-	3250 2150 5300 2150
 $Comp
 L Device:R R12
 U 1 1 6250E960
@@ -102,9 +70,7 @@ Wire Wire Line
 Wire Wire Line
 	5200 3050 5200 3450
 Wire Wire Line
-	3900 2950 3500 2950
-Wire Wire Line
-	3500 2950 3500 2750
+	3900 2950 3150 2950
 Connection ~ 3900 2950
 Wire Wire Line
 	5200 3450 3900 3450
@@ -126,17 +92,20 @@ Wire Wire Line
 Connection ~ 3900 3450
 Wire Wire Line
 	3500 3450 3500 3550
-Text Notes 2550 2350 0    50   ~ 0
-Audio- = Pin 1\nAudio+ = Pin 2
+Text Notes 2400 3300 0    50   ~ 0
+Pin 1 = Audio- \nPin 2 = Audio+
 $Comp
 L Connector_Generic:Conn_01x02 J17
 U 1 1 6250A7F9
-P 2050 2400
-F 0 "J17" H 2250 2400 50  0000 C CNN
-F 1 "CNX AUDIO IN" H 2400 2300 50  0000 C CNN
-F 2 "MesModules:Bloc_de_jonction_CI-MPT_2.54mm_01x02" H 2050 2400 50  0001 C CNN
-F 3 "~" H 2050 2400 50  0001 C CNN
-	1    2050 2400
+P 2950 2850
+F 0 "J17" H 2950 2650 50  0000 C CNN
+F 1 "AUDIO IN" H 3000 2950 50  0000 C CNN
+F 2 "MesModules:Bloc_de_jonction_CI-MPT_2.54mm_01x02" H 2950 2850 50  0001 C CNN
+F 3 "~" H 2950 2850 50  0001 C CNN
+	1    2950 2850
 	-1   0    0    -1  
 $EndComp
+NoConn ~ 3150 2850
+Text Notes 5400 3400 0    50   ~ 0
+Pin 1 = Audio+\nPin 2 = GND
 $EndSCHEMATC

@@ -20,8 +20,8 @@ P 3850 3050
 AR Path="/624C86D1" Ref="TP?"  Part="1" 
 AR Path="/624BFCA3/624C86D1" Ref="TP2"  Part="1" 
 F 0 "TP2" H 4100 3100 50  0000 L CNN
-F 1 "TestPoint GND" H 3950 3200 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Loop_D2.54mm_Drill1.5mm_Beaded" H 4050 3050 50  0001 C CNN
+F 1 "GND" H 3950 3200 50  0000 L CNN
+F 2 "TestPoint:TestPoint_Loop_D2.60mm_Drill1.4mm_Beaded" H 4050 3050 50  0001 C CNN
 F 3 "~" H 4050 3050 50  0001 C CNN
 	1    3850 3050
 	1    0    0    -1  
@@ -33,8 +33,8 @@ P 3800 1650
 AR Path="/624C86D7" Ref="TP?"  Part="1" 
 AR Path="/624BFCA3/624C86D7" Ref="TP1"  Part="1" 
 F 0 "TP1" H 4100 1700 50  0000 L CNN
-F 1 "TestPoint VDD" H 3900 1800 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Loop_D2.54mm_Drill1.5mm_Beaded" H 4000 1650 50  0001 C CNN
+F 1 "V IN" H 3900 1800 50  0000 L CNN
+F 2 "TestPoint:TestPoint_Loop_D2.60mm_Drill1.4mm_Beaded" H 4000 1650 50  0001 C CNN
 F 3 "~" H 4000 1650 50  0001 C CNN
 	1    3800 1650
 	1    0    0    -1  
@@ -85,7 +85,7 @@ P 2200 1150
 AR Path="/624C86EF" Ref="J?"  Part="1" 
 AR Path="/624BFCA3/624C86EF" Ref="J9"  Part="1" 
 F 0 "J9" V 2400 1200 50  0000 R CNN
-F 1 "CNX ON_OFF" V 2300 1250 50  0000 R CNN
+F 1 "ON_OFF" V 2300 1250 50  0000 R CNN
 F 2 "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical" H 2200 1150 50  0001 C CNN
 F 3 "~" H 2200 1150 50  0001 C CNN
 	1    2200 1150
@@ -196,8 +196,8 @@ P 3900 4950
 AR Path="/624D4FED" Ref="TP?"  Part="1" 
 AR Path="/624BFCA3/624D4FED" Ref="TP3"  Part="1" 
 F 0 "TP3" H 4150 5000 50  0000 L CNN
-F 1 "TestPoint 6V" H 4000 5100 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Loop_D2.54mm_Drill1.5mm_Beaded" H 4100 4950 50  0001 C CNN
+F 1 "6V" H 4000 5100 50  0000 L CNN
+F 2 "TestPoint:TestPoint_Loop_D2.60mm_Drill1.4mm_Beaded" H 4100 4950 50  0001 C CNN
 F 3 "~" H 4100 4950 50  0001 C CNN
 	1    3900 4950
 	1    0    0    -1  
@@ -248,7 +248,7 @@ P 4500 5600
 AR Path="/624D5005" Ref="J?"  Part="1" 
 AR Path="/624BFCA3/624D5005" Ref="J13"  Part="1" 
 F 0 "J13" H 4550 5700 50  0000 R CNN
-F 1 "CNX_6V" H 4600 5400 50  0000 R CNN
+F 1 "CNX 6V" H 4600 5400 50  0000 R CNN
 F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 4500 5600 50  0001 C CNN
 F 3 "~" H 4500 5600 50  0001 C CNN
 	1    4500 5600
@@ -261,7 +261,7 @@ P 8900 5450
 AR Path="/624D500B" Ref="J?"  Part="1" 
 AR Path="/624BFCA3/624D500B" Ref="J14"  Part="1" 
 F 0 "J14" H 8850 5550 50  0000 L CNN
-F 1 "CNX_12V" H 8750 5250 50  0000 L CNN
+F 1 "CNX 12V" H 8750 5250 50  0000 L CNN
 F 2 "TerminalBlock_MetzConnect:TerminalBlock_MetzConnect_Type011_RT05502HBWC_1x02_P5.00mm_Horizontal" H 8900 5450 50  0001 C CNN
 F 3 "~" H 8900 5450 50  0001 C CNN
 	1    8900 5450
@@ -400,8 +400,8 @@ P 8300 4850
 AR Path="/624D5050" Ref="TP?"  Part="1" 
 AR Path="/624BFCA3/624D5050" Ref="TP4"  Part="1" 
 F 0 "TP4" H 8550 4900 50  0000 L CNN
-F 1 "TestPoint 12V" H 8400 5000 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Loop_D2.54mm_Drill1.5mm_Beaded" H 8500 4850 50  0001 C CNN
+F 1 "12V" H 8400 5000 50  0000 L CNN
+F 2 "TestPoint:TestPoint_Loop_D2.60mm_Drill1.4mm_Beaded" H 8500 4850 50  0001 C CNN
 F 3 "~" H 8500 4850 50  0001 C CNN
 	1    8300 4850
 	1    0    0    -1  
