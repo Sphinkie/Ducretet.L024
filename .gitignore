@@ -2,7 +2,7 @@
 
 # KiCad backup files
 *.sch-bak
-*.pcb-bak
+*.kicad_pcb-bak
 
 # Fichier Gerber
 *.gbr

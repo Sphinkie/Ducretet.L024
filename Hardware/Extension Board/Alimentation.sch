@@ -107,7 +107,7 @@ $EndComp
 Wire Wire Line
 	1950 2500 2200 2500
 Wire Wire Line
-	2200 2500 2200 1350
+	2200 2500 2200 1550
 Wire Wire Line
 	2650 2750 2650 2700
 Wire Wire Line
@@ -540,4 +540,24 @@ F 3 "~" H 2162 5100 50  0001 C CNN
 	1    2150 5100
 	1    0    0    -1  
 $EndComp
+$Comp
+L power:PWR_FLAG #FLG?
+U 1 1 62575958
+P 2150 1550
+AR Path="/62575958" Ref="#FLG?"  Part="1" 
+AR Path="/624BFCA3/62575958" Ref="#FLG?"  Part="1" 
+F 0 "#FLG?" H 2150 1625 50  0001 C CNN
+F 1 "PWR_FLAG" V 2150 1850 50  0000 C CNN
+F 2 "" H 2150 1550 50  0001 C CNN
+F 3 "~" H 2150 1550 50  0001 C CNN
+	1    2150 1550
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	2150 1550 2200 1550
+Connection ~ 2200 1550
+Wire Wire Line
+	2200 1550 2200 1350
+Text Label 2000 2500 0    50   ~ 0
+VSS
 $EndSCHEMATC
