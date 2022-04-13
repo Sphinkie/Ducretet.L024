@@ -38,8 +38,8 @@ A typical pine-lining with an Arduino looks like this:
 
 ### Documents
 
-* [1.3'' OLED I2C Screen ENG](1-3 inch OLED I2C Screen ENG.pdf)
-* [Datasheet](1-3 inch OLED Screen Datasheet.pdf)
+* [1.3'' OLED I2C Screen ENG](1-3_inch_OLED_I2C_Screen_ENG.pdf)
+* [Datasheet](1-3_inch_OLED_Screen_Datasheet.pdf)
 
 ![OLED connector](71zIKn8W7JL._SL1500_.png)
 
