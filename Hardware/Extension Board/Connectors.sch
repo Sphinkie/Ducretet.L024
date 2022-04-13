@@ -280,7 +280,7 @@ Wire Wire Line
 Wire Wire Line
 	2800 6250 2800 5950
 Text GLabel 2800 5950 1    50   BiDi ~ 0
-D40
+D36
 Text Notes 1100 5500 0    50   ~ 0
 Spare connectors
 Wire Notes Line
@@ -359,11 +359,11 @@ F 3 "~" H 7150 1900 50  0001 C CNN
 	1    0    0    1   
 $EndComp
 Text GLabel 5500 1900 0    50   Output ~ 0
-D43
+D39
 Text GLabel 5500 1800 0    50   Output ~ 0
 D41
 Text GLabel 5500 1700 0    50   Output ~ 0
-D39
+D43
 Connection ~ 6400 1700
 Wire Wire Line
 	6400 1700 6950 1700
@@ -841,7 +841,7 @@ AR Path="/62538B2C" Ref="R?"  Part="1"
 AR Path="/624DD375/62538B2C" Ref="R9"  Part="1" 
 F 0 "R9" V 2050 4150 50  0000 C CNN
 F 1 "3M" V 2150 4150 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0414_L11.9mm_D4.5mm_P20.32mm_Horizontal" V 1980 4150 50  0001 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P15.24mm_Horizontal" V 1980 4150 50  0001 C CNN
 F 3 "~" H 2050 4150 50  0001 C CNN
 	1    2050 4150
 	0    1    1    0   

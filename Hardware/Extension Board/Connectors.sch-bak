@@ -214,7 +214,7 @@ $EndComp
 Wire Wire Line
 	1350 5950 1350 6800
 Text GLabel 1650 5950 1    50   Input ~ 0
-D36
+D48
 Wire Wire Line
 	1250 6200 1250 6800
 Wire Wire Line
@@ -280,7 +280,7 @@ Wire Wire Line
 Wire Wire Line
 	2800 6250 2800 5950
 Text GLabel 2800 5950 1    50   BiDi ~ 0
-D40
+D36
 Text Notes 1100 5500 0    50   ~ 0
 Spare connectors
 Wire Notes Line
@@ -359,11 +359,11 @@ F 3 "~" H 7150 1900 50  0001 C CNN
 	1    0    0    1   
 $EndComp
 Text GLabel 5500 1900 0    50   Output ~ 0
-D43
+D39
 Text GLabel 5500 1800 0    50   Output ~ 0
 D41
 Text GLabel 5500 1700 0    50   Output ~ 0
-D39
+D43
 Connection ~ 6400 1700
 Wire Wire Line
 	6400 1700 6950 1700

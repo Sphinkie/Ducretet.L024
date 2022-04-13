@@ -52,7 +52,7 @@ U 1 1 6250F916
 P 4400 2950
 F 0 "C7" V 4652 2950 50  0000 C CNN
 F 1 "4.7uF" V 4561 2950 50  0000 C CNN
-F 2 "Capacitor_THT:C_Axial_L12.0mm_D7.5mm_P20.00mm_Horizontal" H 4438 2800 50  0001 C CNN
+F 2 "Capacitor_THT:C_Axial_L17.0mm_D7.0mm_P25.00mm_Horizontal" H 4438 2800 50  0001 C CNN
 F 3 "~" H 4400 2950 50  0001 C CNN
 	1    4400 2950
 	0    -1   -1   0   

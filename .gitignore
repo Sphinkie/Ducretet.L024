@@ -1,0 +1,9 @@
+# IGNORE LIST
+
+# KiCad backup files
+*.sch-bak
+*.pcb-bak
+
+# Fichier Gerber
+*.gbr
+*.drl

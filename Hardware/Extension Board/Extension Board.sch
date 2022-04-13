@@ -104,17 +104,6 @@ D41
 Text GLabel 2800 3800 2    50   Input ~ 0
 D39
 $Comp
-L Connector_Generic:Conn_01x06 J2
-U 1 1 5EEEB64E
-P 3800 5550
-F 0 "J2" V 3800 5850 50  0000 L CNN
-F 1 "ARDUINO_COMMS" V 3900 5200 50  0000 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 3800 5550 50  0001 C CNN
-F 3 "~" H 3800 5550 50  0001 C CNN
-	1    3800 5550
-	0    1    -1   0   
-$EndComp
-$Comp
 L Mechanical:MountingHole H1
 U 1 1 5EF76CE6
 P 750 7450
@@ -136,7 +125,6 @@ F 3 "~" H 1500 7450 50  0001 C CNN
 	1    1500 7450
 	1    0    0    -1  
 $EndComp
-NoConn ~ 1700 3700
 Wire Wire Line
 	1450 4100 1700 4100
 Wire Wire Line
@@ -154,10 +142,8 @@ NoConn ~ 1700 3600
 NoConn ~ 2200 3400
 Text Notes 3300 2100 0    50   ~ 0
 A15 ...  ... A10
-Text Notes 3500 5400 0    50   ~ 0
-D21 ... ... D16
-NoConn ~ 4000 5750
-NoConn ~ 3900 5750
+Text Notes 3450 5450 0    50   ~ 0
+D21 ... ... D18
 $Comp
 L power:GND #PWR0106
 U 1 1 6247305B
@@ -196,8 +182,8 @@ Wire Wire Line
 	3700 5750 3700 6200
 Wire Wire Line
 	3800 5750 3800 6200
-Text GLabel 1450 3800 0    50   BiDi ~ 0
-D40
+Text GLabel 1450 3700 0    50   BiDi ~ 0
+D36
 $Sheet
 S 5850 950  3650 800 
 U 624BFCA3
@@ -277,8 +263,6 @@ Wire Wire Line
 	2200 3900 2800 3900
 Wire Wire Line
 	2200 4000 2800 4000
-Wire Wire Line
-	1450 3800 1700 3800
 NoConn ~ 2200 3700
 NoConn ~ 2200 3500
 $Comp
@@ -295,4 +279,18 @@ $EndComp
 Wire Wire Line
 	1700 4300 1450 4300
 NoConn ~ 1700 3900
+Wire Wire Line
+	1700 3700 1450 3700
+NoConn ~ 1700 3800
+$Comp
+L Connector_Generic:Conn_01x04 J2
+U 1 1 62574669
+P 3700 5550
+F 0 "J2" V 3664 5730 50  0000 L CNN
+F 1 "ARDUINO_COMMS" V 3573 5730 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" H 3700 5550 50  0001 C CNN
+F 3 "~" H 3700 5550 50  0001 C CNN
+	1    3700 5550
+	0    1    -1   0   
+$EndComp
 $EndSCHEMATC
