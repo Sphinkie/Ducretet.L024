@@ -8,7 +8,7 @@ Cette carte réalise l'adaptation des différents controles avec les Entrées/So
 
 ![Extension Board](Extension%20Board.png)
 
-## Fonctionnalités
+### Fonctionnalités
 
 * Adaptation pour les LEDs
 * Adaptation pour les lampes
@@ -17,7 +17,7 @@ Cette carte réalise l'adaptation des différents controles avec les Entrées/So
 * Adaptation pour lecture du commutateur Next/Again
 * Etage alimentation : 6V / 12V
 
-## Connexions
+### Connexions
 
 * **CNX MODE** = 4 pins : GND + Mode1 + Mode2 + Mode3
 * **CNX OLED** = 4 pins = VCC + GND + SDA + SCL (bus I2C)
@@ -35,3 +35,8 @@ Cette carte réalise l'adaptation des différents controles avec les Entrées/So
 * **CNX POWER_IN** = 2 pins = VIN + GND  = Wire2board
 * **CNX ON_OFF** = 2 pins
 
+## Schemas
+
+Le schema électronique est accessible ici: [Extension board schematic](Extension%20Board.pdf).
+
+Ainsi que que le schéma d'implantation [Extension Board PCB](Extension%20Board%20PCB.pdf).
