@@ -1,4 +1,4 @@
-(module HeatSink_TO-220 (layer F.Cu) (tedit 625290F5)
+(module HeatSink_TO-220 (layer F.Cu) (tedit 62588BCF)
   (descr "Radiateur pour régulateur TO-220. Vertical.")
   (fp_text reference REF** (at 0 -4) (layer F.Fab)
     (effects (font (size 1 1) (thickness 0.15)))
@@ -32,8 +32,8 @@
   (fp_line (start -8.89 -10.922) (end -8.636 -10.922) (layer F.SilkS) (width 0.12))
   (fp_line (start -8.89 -11) (end -6 -11) (layer F.Fab) (width 0.12))
   (model ${KIPRJMOD}/../Kicad-Library/packages3d/MesModules.3dshapes/Heatsink-TO220-17x25x8.step
-    (offset (xyz 17 -17 15.5))
+    (offset (xyz -17.5 -17 10))
     (scale (xyz 1 1 1))
-    (rotate (xyz 90 180 0))
+    (rotate (xyz 90 0 0))
   )
 )

@@ -40,3 +40,5 @@ Cette carte réalise l'adaptation des différents controles avec les Entrées/So
 Le schema électronique est accessible ici: [Extension board schematic](Extension%20Board.pdf).
 
 Ainsi que que le schéma d'implantation [Extension Board PCB](Extension%20Board%20PCB.pdf).
+
+![Extension Board Bottom view](Extension%20Board%20Bottom.png)
