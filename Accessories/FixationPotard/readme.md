@@ -6,7 +6,7 @@
 
 [Fichier STL](FixationPotard-Socle.stl)
 
-<img src="FixationPotard-Socle.PNG" alt="FixationPotard-Socle" style="zoom:50%;" />
+<img src="FixationPotard-Socle.png" alt="FixationPotard-Socle" style="zoom:50%;" />
 
 
 

@@ -1,4 +1,4 @@
-# Ducretet.L024
+# Ducretet L.024
 
 ## Amplifier Board : Schematics
 
