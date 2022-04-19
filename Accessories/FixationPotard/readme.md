@@ -1,6 +1,6 @@
 # Ducretet L.024
 
-## Pièces de fixation potar
+## Pièces de fixation du potentiomètre de volume
 
 ### Socle
 
@@ -9,9 +9,8 @@
 <img src="FixationPotard-Socle.png" alt="FixationPotard-Socle" style="zoom:50%;" />
 
 
+### Mainteneur Axial
 
-### Cabochon
+[Fichier STL](FixationPotard-MainteneurAxial.stl)
 
-[Fichier STL](FixationPotard-Cabochon.stl)
-
-<img src="FixationPotard-Cabochon.png" alt="FixationPotard-Cabochon" style="zoom:50%;" />
+<img src="FixationPotard-MainteneurAxial.png" alt="FixationPotard-Mainteneur Axial" style="zoom:50%;" />
