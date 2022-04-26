@@ -14,3 +14,7 @@
 [Fichier STL](FixationPotard-MainteneurAxial.stl)
 
 <img src="FixationPotard-MainteneurAxial.png" alt="FixationPotard-Mainteneur Axial" style="zoom:50%;" />
+
+
+
+Réalisé sous FreeCad.
