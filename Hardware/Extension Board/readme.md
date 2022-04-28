@@ -6,7 +6,7 @@
 
 Cette carte réalise l'adaptation des différents controles avec les Entrées/Sorties de l'Arduino.
 
-![Extension Board](Extension%20Board.png)
+![Extension Board](Extension%20Board%20Face1.png)
 
 ### Fonctionnalités
 
@@ -37,8 +37,13 @@ Cette carte réalise l'adaptation des différents controles avec les Entrées/So
 
 ## Schemas
 
-Le schema électronique est accessible ici: [Extension board schematic](Extension%20Board.pdf).
+Le **schema électronique** est accessible ici: [Extension board schematic](Extension%20Board.pdf).
 
-Ainsi que que le schéma d'implantation [Extension Board PCB](Extension%20Board%20PCB.pdf).
+ainsi que  le schéma d'implantation (couche de fabrication) [Extension Board PCB](Gerbers/Extension%20Board-F_Fab.pdf).
 
-![Extension Board Bottom view](Extension%20Board%20Bottom.png)
+et le schéma du PCB [Extension Board PCB](Extension%20Board%20PCB.pdf).
+
+![Extension Board Bottom view](Extension%20Board%20Face2.png)
+
+Accès à la [Bill Of Material](Extension%20Board.html)
+
