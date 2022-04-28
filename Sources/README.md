@@ -10,5 +10,5 @@
 
 
 
-Accès à la [documentation doxygen]((https://sphinkie.github.io/Ducretet.L024/doxygen/html/index.html).)
+Accès à la [documentation doxygen](https://sphinkie.github.io/Ducretet.L024/doxygen/html/index.html).
 
