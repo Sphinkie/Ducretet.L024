@@ -45,5 +45,7 @@ et le schéma du PCB [Extension Board PCB](Extension%20Board%20PCB.pdf).
 
 ![Extension Board Bottom view](Extension%20Board%20Face2.png)
 
-Accès à la [Bill Of Material](Extension%20Board.html)
+Accès à la [Bill Of Material](https://sphinkie.github.io/Ducretet.L024/Extension%20Board.html).
+
+
 
