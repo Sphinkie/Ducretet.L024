@@ -2,5 +2,5 @@
 
 Modèles 3D de la carte à différents formats.
 
-![Vue 3D](Capture.JPG)
+![Vue 3D](Extension%20Board.png)
 
