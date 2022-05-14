@@ -7,7 +7,7 @@ Réalisé sous FreeCad.
 
 ## Bouton volume
 
-[Fichier STL](Bouton-Volume.stl)
+[Fichier STL](Boutons-Volume.stl)
 
 Bouton "volume" pour remplacer celui qui est manquant.
 
