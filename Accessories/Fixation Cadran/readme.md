@@ -5,7 +5,7 @@
 Système de fixation de la partie transparente arondie en face avant.  
 Cette partie est assez flexible et a besoin d'être maintenue.
 
-<img src="FixationCadran.png" alt="Fixation Cadran" style="zoom:50%;" />
-[Fichier STL](FixationCadran.stl)
+<img src="FixationCadran.png" alt="Fixation Cadran" style="zoom:50%;" />  
+[Fichier STL](FixationCadran.stl)  
 Réalisé sous FreeCad.
 
