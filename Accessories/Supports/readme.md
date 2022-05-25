@@ -4,10 +4,8 @@
 
 <img src="SupportAmpli.png" alt="Support Ampli" style="zoom:30%;" />
 
-Support pour la carte Amplificateur Audio.
-
-Réalisé sous FreeCad.
-
+Support pour la carte Amplificateur Audio.  
+Réalisé sous FreeCad.  
 [Fichier STL](SupportAmpli-Base.stl)
 
 [Plans au format PDF](SupportAmpli.pdf)
