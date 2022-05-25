@@ -9,5 +9,3 @@ Cette partie est assez flexible et a besoin d'être maintenue.
 Réalisé sous FreeCad.
 
 [Fichier STL](FixationCadran.stl)
-
-
