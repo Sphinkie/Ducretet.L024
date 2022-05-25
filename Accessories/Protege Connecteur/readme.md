@@ -2,8 +2,6 @@
 
 ## Protèges-connecteurs
 
-### 
-
 [Fichier STL](ProtegeConnecteur.stl)
 
 <img src="ProtegeConnecteur.png" alt="Protege Connecteur" style="zoom:50%;" />
