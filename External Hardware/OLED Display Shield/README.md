@@ -48,9 +48,7 @@ A typical pine-lining with an Arduino looks like this:
 Plusieurs librairies Arduino peuvent être utilisées pour piloter ce module:
 
 * **AdaFruit** : Librairie graphique générale **Adafruit_GFX** et la librairie couche-basse **Adafruit_11366**.
-
 * **Sparkfun** : Librairie **Micro_OLED**.
-
 * **Oliver Kraus** : Librairie **u8g2lib** (texte+graphiques) ou librairie **u8x8** (polices 8x8 seulement). 
 
 * U8g2
@@ -62,9 +60,7 @@ Plusieurs librairies Arduino peuvent être utilisées pour piloter ce module:
 * U8x8
 
   - Text output only (character) device.
-
   - Only fonts allowed with fixed size per character (8x8 pixel).
-
   - Writes directly to the display. No buffer in the microcontroller required.
 
 *J'ai retenu **U8g2** qui comporte davantages de capacités en ce qui concerne les polices de caractères.*

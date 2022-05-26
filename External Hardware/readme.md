@@ -2,4 +2,8 @@
 
 ## Hardware
 
-Cartes et composants électroniques externes.
+Cartes et composants électroniques externes:
+
+* Amplificateur Audio
+* Écran OLED
+* Player MP3

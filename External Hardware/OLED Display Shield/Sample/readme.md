@@ -1,14 +1,6 @@
-# U8g2 : Sample Arduino program
+# U8g² Library
 
+## Sample Arduino program
 
-
-Programme d'exemple pour démontrer les différentes possibilités graphiques de l'afficheur OLED.
-
-
-
-*Sample program demonstrating the use of the **U8g2 library** on the OLED Screen, with various functionalities*.
-
-
-
-
+Programme d'exemple pour démontrer les différentes possibilités graphiques de la librarie **U8g²** avec l'afficheur OLED.
 
